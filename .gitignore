@@ -1,0 +1,11 @@
+# macOS dust
+.DS_Store
+
+# jetbrains stuff
+.idea
+
+# python stuff
+__pycache__
+
+# fixtures
+fixtures
