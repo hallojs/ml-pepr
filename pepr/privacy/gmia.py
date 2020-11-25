@@ -1,12 +1,11 @@
-"""Script module for direct mia on a single target cnn.
+"""Direct mia on a single target cnn.
 
-Implementation of the direct mia from
--------------------------------------
-Long, Yunhui and Bindschaedler, Vincent and Wang, Lei and Bu, Diyue and Wang,
-Xiaofeng and Tang, Haixu and Gunter, Carl A and Chen, Kai (2018).
-Understanding membership inferences on well-generalized learning models.
-arXiv preprint arXiv:1802.04889.
+Implementation of the direct mia from Long, Yunhui and Bindschaedler, Vincent and Wang,
+Lei and Bu, Diyue and Wang, Xiaofeng and Tang, Haixu and Gunter, Carl A and Chen, Kai
+(2018). Understanding membership inferences on well-generalized learning models. arXiv
+preprint arXiv:1802.04889.
 """
+import logging
 import math
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,6 +18,9 @@ from statsmodels.distributions.empirical_distribution import ECDF
 from scipy.interpolate import pchip
 from tensorflow.keras.models import Model
 from tensorflow.keras import models
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class DirectMia:
@@ -74,7 +76,6 @@ class DirectMia:
         epochs,
         batch_size,
         save_path,
-        print_progress=True,
     ):
         """Train reference models based on a compiled TensorFlow Keras model.
 
@@ -95,8 +96,6 @@ class DirectMia:
             Size of mini batches used during the training.
         save_path : str
             Path to save the reference models.
-        print_progress : bool, optional
-            Description
 
         Returns
         -------
@@ -105,8 +104,10 @@ class DirectMia:
         """
         reference_models = []
         for i, records in enumerate(records_per_reference_model):
-            if print_progress:
-                print("Progress: Train reference model", i)
+            logger.info(
+                f"Progress: Train reference model {i}/"
+                f"{records_per_reference_model}."
+            )
             tmp_model = create_compile_model()
             tmp_model.fit(
                 train_data[records],
@@ -138,7 +139,7 @@ class DirectMia:
         """
         all_models = np.array([])
         for i in range(number_models):
-            print("Progress: Load reference model " + str(i))
+            logger.info(f"Progress: Load reference model {i+1}/{number_models}.")
             model = models.load_model(path + str(i))
             all_models = np.append(all_models, model)
 
@@ -181,8 +182,10 @@ class DirectMia:
             intermediate_models = np.append(
                 intermediate_models, Model(inputs=model.input, outputs=layer_output)
             )
-
+        logger.info(f"Generated {len(models)} intermediate models.")
         return intermediate_models
+
+    # TODO: Add more precise description about the extraction process.
 
     @staticmethod
     def extract_high_level_features(intermediate_models, data, path):
@@ -213,7 +216,10 @@ class DirectMia:
             predictions = model.predict(data)
             feature_vecs = np.append(feature_vecs, predictions, axis=1)
         np.save(path, feature_vecs)
-
+        logger.info(
+            f"Extracted high-level-features from {len(intermediate_models)} "
+            f"intermediate models."
+        )
         return feature_vecs
 
     @staticmethod
@@ -257,7 +263,6 @@ class DirectMia:
         background_knowledge_size,
         training_set_size,
         distances,
-        print_target_statistics,
     ):
         """Select vulnerable target records.
 
@@ -279,16 +284,15 @@ class DirectMia:
             Number of samples used to train target model.
         distances : numpy.ndarray
             Distance array used for target selection.
-        print_target_statistics : boolean
-            If true print statistics of the selected target records.
 
         Returns
         -------
         numpy.ndarray
             Selected target records
         """
+        logger.info("Start target record selection.")
         if np.min(distances) >= neighbor_threshold:
-            print("neighbor_threshold is smaller then all distances!")
+            logger.warning("neighbor_threshold is smaller then all distances!")
 
         n_neighbors = np.count_nonzero(distances < neighbor_threshold, axis=1)
 
@@ -296,13 +300,12 @@ class DirectMia:
 
         target_records = np.where(est_n_neighbors < probability_threshold)[0]
 
-        if print_target_statistics:
-            print("min_distance: ", np.min(distances))
-            print("mean n_neighbors: ", np.mean(n_neighbors))
-            print("mean est_n_neighbors: ", np.mean(est_n_neighbors))
-            print("number of target_records: ", len(target_records))
-            print("target_records: ", target_records)
-            print("number of neighbors: ", n_neighbors[target_records])
+        logger.info(f"min_distance: {np.min(distances)}")
+        logger.info(f"mean n_neighbors: {np.mean(n_neighbors)}")
+        logger.info(f"mean est_n_neighbors: {np.mean(est_n_neighbors)}")
+        logger.info(f"number of target_records: {len(target_records)}")
+        logger.info(f"target_records: {target_records}")
+        logger.info(f"number of neighbors: {n_neighbors[target_records]}")
 
         return target_records
 
@@ -332,7 +335,7 @@ class DirectMia:
 
         inferences = []
         for i, model in enumerate(models):
-            print("Inference on model ", i)
+            logger.info(f"Do inference on model {i+1}/{len(models)}.")
             predictions = model.predict(records[idx_records])
             filter_predictions = np.max(predictions * labels_cat[idx_records], axis=1)
             inferences.append(-np.log(filter_predictions))
@@ -347,7 +350,7 @@ class DirectMia:
 
         Sample the log losses of a record regarding its label. Estimate the CDF of
         this samples and smooth the estimated CDF with the shape-preserving
-        piecewise cubic interpolation. For details see section 4.4 from the paper.
+        piecewise cubic interpolation.
 
         Parameters
         ----------
@@ -385,8 +388,8 @@ class DirectMia:
         used_target_records = np.asarray(used_target_records)
 
         if print_target_information:
-            print("number of used target records: " + str(len(used_target_records)))
-            print(used_target_records)
+            logging.info(f"Number of used target records: {len(used_target_records)}")
+            logging.info(f"Used target records (indexes): {used_target_records}")
 
         return used_target_records, pchip_references, ecdf_references
 
@@ -587,7 +590,6 @@ class OotbDirectMia:
             epochs,
             batch_size,
             tmp_path,
-            True,
         )
         return reference_models
 
@@ -693,7 +695,6 @@ class OotbDirectMia:
             background_knowledge_size,
             training_set_size,
             distances,
-            True,
         )
         return target_records
 
