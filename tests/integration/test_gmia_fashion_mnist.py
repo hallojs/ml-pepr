@@ -125,7 +125,8 @@ def test_gmia_fashion_loaded():
     data, labels = load_fashion_mnist()
 
     target_model = models.load_model(
-        "/Users/jonassander/Documents/Repositories/ml-pepr/tests/integration/fixtures/data_fashion_mnist/target_model"
+        "/Users/jonassander/Documents/Repositories/ml-pepr/tests/integration/fixtures/"
+        "data_fashion_mnist/target_model"
     )
     target_models = [target_model]
 
@@ -149,20 +150,27 @@ def test_gmia_fashion_loaded():
         "evaluation_indices": list(range(40000, 60000)),
     }
 
-    reference_models_path = "/Users/jonassander/Documents/Repositories/ml-pepr/tests/integration/fixtures/data_fashion_mnist/reference_model"
+    reference_models_path = (
+        "/Users/jonassander/Documents/Repositories/ml-pepr/tests/"
+        "integration/fixtures/data_fashion_mnist/reference_model"
+    )
 
     load_pars = {
-        "records_per_reference_model": "/Users/jonassander/Documents/Repositories/ml-pepr/tests/integration/fixtures/data_fashion_mnist/records_per_reference_model.npy",
+        "records_per_reference_model": "/Users/jonassander/Documents/Repositories/"
+        "ml-pepr/tests/integration/fixtures/data_fashion_mnist/"
+        "records_per_reference_model.npy",
         "reference_models": [reference_models_path + str(i) for i in range(100)],
-        "pairwise_distances_hlf_cosine": "/Users/jonassander/Documents/Repositories/ml-pepr/tests/integration/fixtures/data_fashion_mnist/pairwise_distances_hlf_cosine.npy",
+        "pairwise_distances_hlf_cosine": "/Users/jonassander/Documents/Repositories/"
+        "ml-pepr/tests/integration/fixtures/data_fashion_mnist/"
+        "pairwise_distances_hlf_cosine.npy",
     }
 
     gmia_attack = gmia.DirectGmia(attack_pars, data, labels, data_conf, target_models)
 
-    members, non_members, p_values = gmia_attack.run(load_pars=load_pars)
+    gmia_attack.run(load_pars=load_pars)
 
+    members = gmia_attack.end_results["members"]
     ground_truth = list(range(10000))
-
     true_positives = np.count_nonzero(np.less(members, len(ground_truth)))
     false_positives = len(members) - true_positives
     assert true_positives > false_positives
