@@ -5,6 +5,7 @@ Welcome to ML-PePR's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   changelog
    privacy_attacks
    robustness_attacks
-   changelog
+   utilities
