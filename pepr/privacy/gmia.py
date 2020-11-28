@@ -1,6 +1,6 @@
-"""Direct mia on a single target cnn.
+"""Direct generalized membership inference attack.
 
-Implementation of the direct mia from Long, Yunhui and Bindschaedler, Vincent and Wang,
+Implementation of the direct gmia from Long, Yunhui and Bindschaedler, Vincent and Wang,
 Lei and Bu, Diyue and Wang, Xiaofeng and Tang, Haixu and Gunter, Carl A and Chen, Kai
 (2018). Understanding membership inferences on well-generalized learning models. arXiv
 preprint arXiv:1802.04889.
@@ -11,24 +11,248 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import pairwise_distances
 
-# for the empirical cdf
 from statsmodels.distributions.empirical_distribution import ECDF
 
-# for the interpolation
 from scipy.interpolate import pchip
+import tensorflow as tf
 from tensorflow.keras.models import Model
 from tensorflow.keras import models
+
+from pepr.report.report_section import ReportSection
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-class DirectMia:
-    """Whole functionality needed for the direct mia."""
+class DirectGmia:
+    """Whole functionality needed for the direct gmia."""
+
+    attack_pars: dict
+    data: np.ndarray
+    labels: np.ndarray
+    data_conf: dict
+    target_models: list
+    report_section: ReportSection
+    save_path: str  # TODO: Change this to pythons path object
+    load_pars: dict
+
+    def __init__(self, attack_pars, data, labels, data_conf, target_models):
+        self.attack_pars = attack_pars
+        self.data = data
+        self.labels = labels
+        self.labels_cat = tf.keras.utils.to_categorical(
+            labels, num_classes=attack_pars["number_classes"]
+        )
+        self.data_conf = data_conf
+        self.target_models = target_models
+
+    def run(self, save_path=None, load_pars=None):
+        """Run the direct generalized membership inference attack.
+
+        Steps:
+        1. Create mapping of records to reference models.
+        2. Train the reference models.
+        3. Generate intermediate models.
+        4. Extract reference high-level features.
+        5. Extract target high-level features.
+        6. Compute pairwise distances between reference and target high-level
+           features.
+        7. Determine potential vulnerable target records.
+        8. Infer log losses of reference models.
+        9. Infer log losses of target model.
+        10. Sample reference losses, approximate empirical cumulative distribution
+            function, smooth ecdf with piecewise cubic interpolation.
+        11. Determine members and non-members with left-tailed hypothesis test.
+        """
+
+        # Slice data set
+        # -- Used to train the reference models
+        reference_train_data = self.data[self.data_conf["reference_indices"]]
+        reference_train_labels = self.labels[self.data_conf["reference_indices"]]
+        reference_train_labels_cat = self.labels_cat[
+            self.data_conf["reference_indices"]
+        ]
+
+        # -- Used to train the target models
+        target_train_data = self.data[self.data_conf["target_indices"]]
+        target_train_labels = self.labels[self.data_conf["target_indices"]]
+        target_train_labels_cat = self.labels_cat[self.data_conf["target_indices"]]
+
+        # -- Used for the evaluation of the attack
+        attack_eval_data = self.data[self.data_conf["evaluation_indices"]]
+        attack_eval_labels = self.labels[self.data_conf["evaluation_indices"]]
+        attack_eval_labels_cat = self.labels_cat[self.data_conf["evaluation_indices"]]
+
+        load = load_pars is None
+
+        # Step 1
+        if load or "records_per_reference_model" not in load_pars.keys():
+            # -- Compute Step 1
+            logger.info("Create mapping of records to reference models.")
+            records_per_reference_model = (
+                DirectGmia._assign_records_to_reference_models(
+                    self.attack_pars["number_reference_models"],
+                    len(reference_train_data),
+                    self.attack_pars["reference_training_set_size"],
+                )
+            )
+            # -- Save Step 1
+            if save_path is not None:
+                path = save_path + "/records_per_reference_model.npy"
+                logger.info(f"Save mapping of records to reference models: {path}.")
+                np.save(path, records_per_reference_model)
+        else:
+            # -- Or Load Step 1
+            path = load_pars["records_per_reference_model"]
+            logger.info(f"Load mapping of records to reference models: {path}.")
+            records_per_reference_model = np.load(path)
+
+        # Step 2
+        if load or "reference_models" not in load_pars.keys():
+            # -- Compute Step 2
+            logger.info("Start training of the reference models.")
+            reference_models = DirectGmia._train_reference_models(
+                self.attack_pars["create_compile_model"],
+                records_per_reference_model,
+                reference_train_data,
+                reference_train_labels_cat,
+                self.attack_pars["reference_epochs"],
+                self.attack_pars["reference_batch_size"],
+            )
+            # -- Save Step 2
+            if save_path is not None:
+                for i, model in enumerate(reference_models):
+                    path = save_path + "/reference_model" + str(i)
+                    logger.info(f"Save reference model: {path}.")
+                    model.save(path)
+        else:
+            # -- Or Load Step 2
+            paths = load_pars["reference_models"]
+            reference_models = []
+            for path in paths:
+                logger.info(f"Load reference model: {path}.")
+                reference_models.append(models.load_model(path))
+            reference_models = np.asarray(reference_models)
+
+        # Steps 3-6
+        if load or (
+            "pairwise_distances_hlf_" + self.attack_pars["hlf_metric"]
+            not in load_pars.keys()
+        ):
+            # -- Compute Step 3
+            logger.info("Generate intermediate models")
+            reference_intermediate_models = DirectGmia._gen_intermediate_models(
+                reference_models, self.attack_pars["hlf_layer_number"]
+            )
+
+            # -- Compute Step 4
+            logger.info("Extract reference high-level features.")
+            reference_hlf = DirectGmia._extract_hlf(
+                reference_intermediate_models, reference_train_data
+            )
+            # -- Save Step 4
+            if save_path is not None:
+                path = save_path + "/reference_hlf.npy"
+                logger.info(f"Save reference high-level features: {path}.")
+                np.save(path, reference_hlf)
+
+            # -- Compute Step 5
+            logger.info("Extract target high-level features.")
+            target_hlf = DirectGmia._extract_hlf(
+                reference_intermediate_models, attack_eval_data
+            )
+            # -- Save Step 5
+            if save_path is not None:
+                path = save_path + "/target_hlf.npy"
+                logger.info(f"Save target high-level features: {path}.")
+                np.save(path, reference_hlf)
+
+            # -- Compute Step 6
+            logger.info(
+                "Compute pairwise distances between reference and target high-level "
+                "features."
+            )
+            hlf_distances = DirectGmia._calc_pairwise_distances(
+                target_hlf,
+                reference_hlf,
+                self.attack_pars["hlf_metric"],
+            )
+            # -- Save Step 6 (Results from step 3-6)
+            if save_path is not None:
+                path = (
+                    save_path
+                    + "/pairwise_distances_hlf_"
+                    + self.attack_pars["hlf_metric"]
+                    + ".npy"
+                )
+                logger.info(
+                    f"Save pairwise distances between reference and target high-level "
+                    "features: {path}."
+                )
+                np.save(path, hlf_distances)
+
+        else:
+            # -- Or Load results from Steps 3-6
+            path = load_pars["pairwise_distances_hlf_" + self.attack_pars["hlf_metric"]]
+            logger.info(f"Load distance matrix : {path}.")
+            hlf_distances = np.load(path)
+
+        # -- Compute Step 7
+        logger.info("Determine potential vulnerable target records.")
+        target_records = DirectGmia._select_target_records(
+            self.attack_pars["neighbor_threshold"],
+            self.attack_pars["probability_threshold"],
+            len(reference_train_data),
+            len(target_train_data),
+            hlf_distances,
+        )
+
+        # -- Compute Step 8
+        logger.info("Infer log losses of reference models.")
+        reference_inferences = DirectGmia._get_model_inference(
+            target_records, attack_eval_data, attack_eval_labels_cat, reference_models
+        )
+
+        # -- Compute Step 9
+        # TODO: Extend evaluation to multiple targets
+        logger.info("Infer log losses of target model.")
+        target_inferences = DirectGmia._get_model_inference(
+            target_records,
+            attack_eval_data,
+            attack_eval_labels_cat,
+            self.target_models[0],
+        )
+
+        # -- Compute Step 10
+        logger.info(
+            "Sample reference losses, approximate empirical cumulative distribution "
+            "function, smooth ecdf with piecewise cubic interpolation."
+        )
+
+        (
+            used_target_records,
+            pchip_references,
+            ecdf_references,
+        ) = DirectGmia._sample_reference_losses(target_records, reference_inferences)
+
+        logger.info(f"Used target records: {used_target_records}.")
+
+        # -- Compute Step 11
+        logger.info(
+            "Determine members and non-members with left-tailed hypothesis test."
+        )
+        members, non_members, p_values = DirectGmia._hypothesis_test(
+            self.attack_pars["cut_off_p_value"],
+            pchip_references,
+            target_inferences,
+            used_target_records,
+        )
+
+        return members, non_members, p_values
 
     @staticmethod
-    def assign_records_to_reference_models(
-        number_reference_models, background_knowledge_size, training_set_size, path
+    def _assign_records_to_reference_models(
+        number_reference_models, background_knowledge_size, training_set_size
     ):
         """Create training datasets for the reference models.
 
@@ -40,8 +264,6 @@ class DirectMia:
             Size of the background knowledge of the attacker.
         training_set_size : int
             Number of samples used to train each reference model.
-        path : str
-            Path for saving the reference models.
 
         Returns
         -------
@@ -63,19 +285,16 @@ class DirectMia:
             else:
                 records_per_reference_model = [idx]
 
-        np.save(path, records_per_reference_model)
-
         return records_per_reference_model
 
     @staticmethod
-    def train_reference_models(
+    def _train_reference_models(
         create_compile_model,
         records_per_reference_model,
         train_data,
         train_labels,
         epochs,
         batch_size,
-        save_path,
     ):
         """Train reference models based on a compiled TensorFlow Keras model.
 
@@ -85,7 +304,7 @@ class DirectMia:
             Return compiled TensorFlow Keras model, used to train the reference
             models.
         records_per_reference_model : np.ndarray
-            Describes which record is used to train which model.
+            Describes which record is to use to train which model.
         train_data : numpy.ndarray
             Training data for the reference models.
         train_labels : numpy.ndarray
@@ -94,8 +313,6 @@ class DirectMia:
             Number of training epochs for each reference model.
         batch_size : int
             Size of mini batches used during the training.
-        save_path : str
-            Path to save the reference models.
 
         Returns
         -------
@@ -116,13 +333,12 @@ class DirectMia:
                 batch_size=batch_size,
                 verbose=0,
             )
-            tmp_model.save(save_path + str(i))
             reference_models.append(tmp_model)
 
         return np.asarray(reference_models)
 
     @staticmethod
-    def load_models(path, number_models):
+    def _load_models(path, number_models):
         """Load trained and saved models.
 
         Parameters
@@ -149,7 +365,7 @@ class DirectMia:
     #  intermediate layers directly from the reference models.
 
     @staticmethod
-    def gen_intermediate_models(models, layer_number):
+    def _gen_intermediate_models(models, layer_number):
         """Generate intermediate models.
 
         This intermediate models are used later to extract the high level features
@@ -185,10 +401,10 @@ class DirectMia:
         logger.info(f"Generated {len(models)} intermediate models.")
         return intermediate_models
 
-    # TODO: Add more precise description about the extraction process.
+    # TODO: Add more precise description about the extraction process to the docstring.
 
     @staticmethod
-    def extract_high_level_features(intermediate_models, data, path):
+    def _extract_hlf(intermediate_models, data):
         """Extract the high level features from the intermediate models.
 
         For details see paper section 4.3.
@@ -200,8 +416,6 @@ class DirectMia:
             model.
         data : numpy.ndarray
             Data from which the high-level features should be extracted.
-        path : str
-            Path to save the high-level-features.
 
         Returns
         -------
@@ -215,7 +429,6 @@ class DirectMia:
         for i, model in enumerate(intermediate_models):
             predictions = model.predict(data)
             feature_vecs = np.append(feature_vecs, predictions, axis=1)
-        np.save(path, feature_vecs)
         logger.info(
             f"Extracted high-level-features from {len(intermediate_models)} "
             f"intermediate models."
@@ -223,9 +436,7 @@ class DirectMia:
         return feature_vecs
 
     @staticmethod
-    def calc_pairwise_distances(
-        features_target, features_reference, path, metric, n_jobs=1
-    ):
+    def _calc_pairwise_distances(features_target, features_reference, metric, n_jobs=1):
         """Calculate pairwise distances between given features.
 
         Parameters
@@ -234,8 +445,6 @@ class DirectMia:
             First array for pairwise distances.
         features_reference : numpy.ndarray
             Second array for pairwise distances.
-        path : str
-            Path to save array of distances.
         metric : str
             Metric used for the distance calculations. For valid metrics see
             documentation of sklearn.metrics.pairwise_distances.
@@ -252,12 +461,11 @@ class DirectMia:
         distances = pairwise_distances(
             features_target, features_reference, metric=metric, n_jobs=n_jobs
         )
-        np.save(path, distances)
 
         return distances
 
     @staticmethod
-    def select_target_records(
+    def _select_target_records(
         neighbor_threshold,
         probability_threshold,
         background_knowledge_size,
@@ -269,7 +477,7 @@ class DirectMia:
         A record is selected as target record if it has few neighbours regarding
         its high level features. We estimate the number of neighbours of a record
         in the target training set over the number of neighbours in the reference
-        training sets. For details see section 4.3 from the paper.
+        training sets.
 
         Parameters
         ----------
@@ -310,7 +518,7 @@ class DirectMia:
         return target_records
 
     @staticmethod
-    def get_model_inference(idx_records, records, labels_cat, models):
+    def _get_model_inference(idx_records, records, labels_cat, models):
         """Predict on trained models and calculate the log loss.
 
         Parameters
@@ -343,9 +551,7 @@ class DirectMia:
         return np.asarray(inferences).T
 
     @staticmethod
-    def sample_reference_losses(
-        target_records, reference_inferences, print_target_information
-    ):
+    def _sample_reference_losses(target_records, reference_inferences):
         """Sample reference log losses.
 
         Sample the log losses of a record regarding its label. Estimate the CDF of
@@ -358,8 +564,6 @@ class DirectMia:
             Array of target records for sampling the reference log losses.
         reference_inferences : numpy.ndarray
             Array of log losses of the predictions on the reference models.
-        print_target_information : boolean
-            If true print target information.
 
         Returns
         -------
@@ -387,14 +591,13 @@ class DirectMia:
 
         used_target_records = np.asarray(used_target_records)
 
-        if print_target_information:
-            logging.info(f"Number of used target records: {len(used_target_records)}")
-            logging.info(f"Used target records (indexes): {used_target_records}")
+        logging.info(f"Number of used target records: {len(used_target_records)}")
+        logging.info(f"Used target records (indexes): {used_target_records}")
 
         return used_target_records, pchip_references, ecdf_references
 
     @staticmethod
-    def hypothesis_test(
+    def _hypothesis_test(
         cut_off_p_value, pchip_references, target_inferences, used_target_records
     ):
         """Left-tailed hypothesis test.
@@ -462,7 +665,6 @@ class AttackVisualisations:
             )
 
             ax = plt.subplot(rows, 3, idx + 1)
-            # ax = plt.subplot(rows, 6, idx + 1)
             ax.set_title(title, size=25)
 
             if input_shape[2] <= 1:
@@ -523,245 +725,246 @@ class AttackVisualisations:
             cnt += 1
 
 
-class OotbDirectMia:
-    """A class that allows to run the direct mia with just 3 function calls."""
-
-    @staticmethod
-    def prepare_attack(
-        train_data,
-        train_labels_cat,
-        epochs,
-        batch_size,
-        number_reference_models,
-        background_knowledge_size,
-        training_set_size,
-        save_path,
-        create_compile_model,
-    ):
-        """Prepare reference models for the direct membership inference attack.
-
-        1. Create mapping of records to reference models.
-        2. Train the reference models.
-
-        Parameters
-        ----------
-        train_data : numpy.ndarray
-            Training data for the reference models.
-        train_labels_cat : numpy.ndarray
-            Training labels (one-hot encoding) for the reference models.
-        epochs : int
-            Number of training epochs for each reference model.
-        batch_size : int
-            Size of mini batches used during the training.
-        number_reference_models : int
-            Number of reference models to be trained.
-        background_knowledge_size : int
-            Size of the background knowledge of the attacker.
-        training_set_size : int
-            Size of training set of the reference models
-        save_path : str
-            Path to save the records to reference model mapping and the trained
-            reference models.
-        create_compile_model : function
-            Return compiled TensorFlow Keras model, used to train the reference
-            models.
-
-        Returns
-        -------
-        numpy.ndarray
-            Array of trained reference models
-        """
-        tmp_path = save_path + "/records_per_reference_model.npy"
-        print("Create mapping of records to reference models: ", tmp_path)
-        records_per_reference_model = DirectMia.assign_records_to_reference_models(
-            number_reference_models,
-            background_knowledge_size,
-            training_set_size,
-            tmp_path,
-        )
-
-        tmp_path = save_path + "/reference_model"
-        print("Start training of the reference models: ", tmp_path)
-        reference_models = DirectMia.train_reference_models(
-            create_compile_model,
-            records_per_reference_model,
-            train_data,
-            train_labels_cat,
-            epochs,
-            batch_size,
-            tmp_path,
-        )
-        return reference_models
-
-    @staticmethod
-    def select_target_records(
-        reference_models,
-        layer_number,
-        reference_train_data,
-        save_path,
-        attack_data,
-        metric,
-        training_set_size,
-        background_knowledge_size,
-        probability_threshold,
-        neighbor_threshold,
-        load_distances=False,
-    ):
-        """Select potential vulnerable target records.
-
-        1. Generate intermediate models.
-        2. Extract reference high-level features.
-        3. Extract target high-level features.
-        4. Compute pairwise distances between reference and target high-level
-           features.
-        5. Determine potential vulnerable target records.
-
-        Parameters
-        ----------
-        reference_models : numpy.ndarray
-            Array of the trained reference models.
-        layer_number : int
-            Number of the intermediate layer used as the new output layer in the
-            intermediate models.
-        reference_train_data : numpy.ndarray
-            Training data for the reference models.
-        save_path : str
-            Path to save high-level features and the pairwise distance matrix.
-        attack_data : numpy.ndarray
-            Array of target samples.
-        metric : str
-            Metric used for the distance computations in the high-level feature
-            space.
-        training_set_size : int
-            Number of samples used to train target model.
-        background_knowledge_size : int
-            Size of the background knowledge of the attacker.
-        probability_threshold : float
-            For details see section 4.3 from the paper.
-        neighbor_threshold : float
-            If distance is smaller then the neighbor threshold the record is
-            selected as target record.
-        load_distances : bool, optional
-            If true function loads distance matrix from save_path.
-
-        Returns
-        -------
-        numpy.ndarray
-            Array of potential vulnerable target records.
-        """
-        if load_distances:
-            tmp_path = (
-                save_path + "/pairwise_distances_high_level_features_" + metric + ".npy"
-            )
-            print("Load distance matrix :", tmp_path)
-            distances = np.load(tmp_path)
-        else:
-            print("Generate intermediate models")
-            reference_intermediate_models = DirectMia.gen_intermediate_models(
-                reference_models, layer_number
-            )
-
-            tmp_path = save_path + "/reference_high_level_features.npy"
-            print("Extract reference high-level features: ", tmp_path)
-            reference_high_level_features = DirectMia.extract_high_level_features(
-                reference_intermediate_models, reference_train_data, tmp_path
-            )
-
-            tmp_path = save_path + "/target_high_level_features.npy"
-            print("Extract target high-level features: ", tmp_path)
-            target_high_level_features = DirectMia.extract_high_level_features(
-                reference_intermediate_models, attack_data, tmp_path
-            )
-
-            tmp_path = (
-                save_path + "/pairwise_distances_high_level_features_" + metric + ".npy"
-            )
-            print(
-                "Compute pairwise distances between reference and target "
-                + "high-level features: ",
-                tmp_path,
-            )
-            distances = DirectMia.calc_pairwise_distances(
-                target_high_level_features,
-                reference_high_level_features,
-                tmp_path,
-                metric,
-            )
-
-        print("Determine potential vulnerable target records")
-        target_records = DirectMia.select_target_records(
-            neighbor_threshold,
-            probability_threshold,
-            background_knowledge_size,
-            training_set_size,
-            distances,
-        )
-        return target_records
-
-    @staticmethod
-    def attack(
-        target_records,
-        attack_data,
-        attack_labels_cat,
-        reference_models,
-        target_model,
-        cut_off_p_value,
-    ):
-        """Attack the target records by exploiting the target model.
-
-        1. Infer log losses of reference models.
-        2. Infer log losses of target model.
-        3. Sample reference losses, approximate empirical cumulative distribution
-           function, smooth ecdf with piecewise cubic interpolation.
-        4. Determine members and non-members with left-tailed hypothesis test.
-
-        Parameters
-        ----------
-        target_records : numpy.ndarray
-            Array of target records.
-        attack_data : numpy.ndarray
-            Array of target samples.
-        attack_labels_cat : numpy.ndarray
-            Array of labels (one-hot encoding) to the target samples.
-        reference_models : numpy.ndarray
-            Array of reference models.
-        target_model : tensorflow.keras.model
-            The target model.
-        cut_off_p_value : float
-            Cut-off-p-value used for the hypothesis test.
-
-        Returns
-        -------
-        tuple
-            Member and non-member of the training set of the target model and the
-            p-values of the hypothesis test.
-        """
-        print("Infer log losses of reference models")
-        reference_inferences = DirectMia.get_model_inference(
-            target_records, attack_data, attack_labels_cat, reference_models
-        )
-
-        print("Infer log losses of target model")
-        target_inferences = DirectMia.get_model_inference(
-            target_records, attack_data, attack_labels_cat, target_model
-        )
-
-        print(
-            "Sample reference losses, approximate empirical cumulative "
-            + "distribution function, smooth ecdf with piecewise cubic"
-            + "interpolation"
-        )
-        (
-            used_target_records,
-            pchip_references,
-            ecdf_references,
-        ) = DirectMia.sample_reference_losses(
-            target_records, reference_inferences, True
-        )
-
-        print("Determine members and non-members with left-tailed hypothesis test")
-        members, non_members, p_values = DirectMia.hypothesis_test(
-            cut_off_p_value, pchip_references, target_inferences, used_target_records
-        )
-
-        return members, non_members, p_values
+# class OotbDirectMia:
+#     """A class that allows to run the direct mia with just 3 function calls."""
+#
+#     @staticmethod
+#     def prepare_attack(
+#         train_data,
+#         train_labels_cat,
+#         epochs,
+#         batch_size,
+#         number_reference_models,
+#         background_knowledge_size,
+#         training_set_size,
+#         save_path,
+#         create_compile_model,
+#     ):
+#         """Prepare reference models for the direct membership inference attack.
+#
+#         1. Create mapping of records to reference models.
+#         2. Train the reference models.
+#
+#         Parameters
+#         ----------
+#         train_data : numpy.ndarray
+#             Training data for the reference models.
+#         train_labels_cat : numpy.ndarray
+#             Training labels (one-hot encoding) for the reference models.
+#         epochs : int
+#             Number of training epochs for each reference model.
+#         batch_size : int
+#             Size of mini batches used during the training.
+#         number_reference_models : int
+#             Number of reference models to be trained.
+#         background_knowledge_size : int
+#             Size of the background knowledge of the attacker.
+#         training_set_size : int
+#             Size of training set of the reference models
+#         save_path : str
+#             Path to save the records to reference model mapping and the trained
+#             reference models.
+#         create_compile_model : function
+#             Return compiled TensorFlow Keras model, used to train the reference
+#             models.
+#
+#         Returns
+#         -------
+#         numpy.ndarray
+#             Array of trained reference models
+#         """
+#         tmp_path = save_path + "/records_per_reference_model.npy"
+#         print("Create mapping of records to reference models: ", tmp_path)
+#         records_per_reference_model = DirectGmia._assign_records_to_reference_models(
+#             number_reference_models,
+#             background_knowledge_size,
+#             training_set_size,
+#             tmp_path,
+#         )
+#
+#         tmp_path = save_path + "/reference_model"
+#         print("Start training of the reference models: ", tmp_path)
+#         reference_models = DirectGmia._train_reference_models(
+#             create_compile_model,
+#             records_per_reference_model,
+#             train_data,
+#             train_labels_cat,
+#             epochs,
+#             batch_size,
+#             tmp_path,
+#         )
+#         return reference_models
+#
+#     @staticmethod
+#     def select_target_records(
+#         reference_models,
+#         layer_number,
+#         reference_train_data,
+#         save_path,
+#         attack_data,
+#         metric,
+#         training_set_size,
+#         background_knowledge_size,
+#         probability_threshold,
+#         neighbor_threshold,
+#         load_distances=False,
+#     ):
+#         """Select potential vulnerable target records.
+#
+#         1. Generate intermediate models.
+#         2. Extract reference high-level features.
+#         3. Extract target high-level features.
+#         4. Compute pairwise distances between reference and target high-level
+#            features.
+#         5. Determine potential vulnerable target records.
+#
+#         Parameters
+#         ----------
+#         reference_models : numpy.ndarray
+#             Array of the trained reference models.
+#         layer_number : int
+#             Number of the intermediate layer used as the new output layer in the
+#             intermediate models.
+#         reference_train_data : numpy.ndarray
+#             Training data for the reference models.
+#         save_path : str
+#             Path to save high-level features and the pairwise distance matrix.
+#         attack_data : numpy.ndarray
+#             Array of target samples.
+#         metric : str
+#             Metric used for the distance computations in the high-level feature
+#             space.
+#         training_set_size : int
+#             Number of samples used to train target model.
+#         background_knowledge_size : int
+#             Size of the background knowledge of the attacker.
+#         probability_threshold : float
+#             For details see section 4.3 from the paper.
+#         neighbor_threshold : float
+#             If distance is smaller then the neighbor threshold the record is
+#             selected as target record.
+#         load_distances : bool, optional
+#             If true function loads distance matrix from save_path.
+#
+#         Returns
+#         -------
+#         numpy.ndarray
+#             Array of potential vulnerable target records.
+#         """
+#         if load_distances:
+#             tmp_path = (
+#                 save_path + "/pairwise_distances_high_level_features_" + metric + ".npy"
+#             )
+#             print("Load distance matrix :", tmp_path)
+#             distances = np.load(tmp_path)
+#         else:
+#             print("Generate intermediate models")
+#             reference_intermediate_models = DirectGmia._gen_intermediate_models(
+#                 reference_models, layer_number
+#             )
+#
+#             tmp_path = save_path + "/reference_high_level_features.npy"
+#             print("Extract reference high-level features: ", tmp_path)
+#             reference_high_level_features = DirectGmia._extract_hlf(
+#                 reference_intermediate_models, reference_train_data, tmp_path
+#             )
+#
+#             tmp_path = save_path + "/target_high_level_features.npy"
+#             print("Extract target high-level features: ", tmp_path)
+#             target_high_level_features = DirectGmia._extract_hlf(
+#                 reference_intermediate_models, attack_data, tmp_path
+#             )
+#
+#             tmp_path = (
+#                 save_path + "/pairwise_distances_high_level_features_" + metric + ".npy"
+#             )
+#             print(
+#                 "Compute pairwise distances between reference and target "
+#                 + "high-level features: ",
+#                 tmp_path,
+#             )
+#             distances = DirectGmia._calc_pairwise_distances(
+#                 target_high_level_features,
+#                 reference_high_level_features,
+#                 tmp_path,
+#                 metric,
+#             )
+#
+#         print("Determine potential vulnerable target records")
+#         target_records = DirectGmia._select_target_records(
+#             neighbor_threshold,
+#             probability_threshold,
+#             background_knowledge_size,
+#             training_set_size,
+#             distances,
+#         )
+#         return target_records
+#
+#     @staticmethod
+#     def attack(
+#         target_records,
+#         attack_data,
+#         attack_labels_cat,
+#         reference_models,
+#         target_model,
+#         cut_off_p_value,
+#     ):
+#         """Attack the target records by exploiting the target model.
+#
+#         1. Infer log losses of reference models.
+#         2. Infer log losses of target model.
+#         3. Sample reference losses, approximate empirical cumulative distribution
+#            function, smooth ecdf with piecewise cubic interpolation.
+#         4. Determine members and non-members with left-tailed hypothesis test.
+#
+#         Parameters
+#         ----------
+#         target_records : numpy.ndarray
+#             Array of target records.
+#         attack_data : numpy.ndarray
+#             Array of target samples.
+#         attack_labels_cat : numpy.ndarray
+#             Array of labels (one-hot encoding) to the target samples.
+#         reference_models : numpy.ndarray
+#             Array of reference models.
+#         target_model : tensorflow.keras.model
+#             The target model.
+#         cut_off_p_value : float
+#             Cut-off-p-value used for the hypothesis test.
+#
+#         Returns
+#         -------
+#         tuple
+#             Member and non-member of the training set of the target model and the
+#             p-values of the hypothesis test.
+#         """
+#         print("Infer log losses of reference models")
+#         reference_inferences = DirectGmia._get_model_inference(
+#             target_records, attack_data, attack_labels_cat, reference_models
+#         )
+#
+#         print("Infer log losses of target model")
+#         target_inferences = DirectGmia._get_model_inference(
+#             target_records, attack_data, attack_labels_cat, target_model
+#         )
+#
+#         print(
+#             "Sample reference losses, approximate empirical cumulative "
+#             + "distribution function, smooth ecdf with piecewise cubic"
+#             + "interpolation"
+#         )
+#         (
+#             used_target_records,
+#             pchip_references,
+#             ecdf_references,
+#         ) = DirectGmia._sample_reference_losses(
+#             target_records,
+#             reference_inferences,
+#         )
+#
+#         print("Determine members and non-members with left-tailed hypothesis test")
+#         members, non_members, p_values = DirectGmia._hypothesis_test(
+#             cut_off_p_value, pchip_references, target_inferences, used_target_records
+#         )
+#
+#         return members, non_members, p_values
