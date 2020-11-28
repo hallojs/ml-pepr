@@ -12,3 +12,6 @@ fixtures
 
 # docs
 docs/build
+
+# logs
+*.log
