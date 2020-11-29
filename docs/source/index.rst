@@ -5,7 +5,11 @@ Welcome to ML-PePR's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   changelog
+   installation
+   quick_start_guide
    privacy_attacks
    robustness_attacks
    utilities
+   changelog
+
+

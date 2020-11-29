@@ -19,7 +19,7 @@ def assign_records_to_target_models(
         Number of records each target training set should be contain.
     offset : int
         If offset is zero, the lowest index in the resulting datasets is zero. If the
-        index is x, all indices i are shifted by x: i + x.
+        offset is o, all indices i are shifted by o: i + o.
     Returns
     -------
     numpy.ndarray

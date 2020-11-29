@@ -18,8 +18,8 @@ print('######PATH: ', sys.path)
 # -- Project information -----------------------------------------------------
 
 project = 'ML-PePR'
-copyright = '2020, Jonas Sander'
-author = 'University of Luebeck: ITS KI-Lab Team'
+copyright = '2020, Institute for IT-Security (University of Luebeck)'
+author = 'University of Luebeck: ITS KI-Lab Group'
 
 # The full version, including alpha/beta/rc tags
 release = 'preAlpha'
@@ -53,7 +53,10 @@ html_theme = 'alabaster'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-# Napoleon settings
+# -- Options for PDF output ------------------------------------------------------------
+latex_elements = {'extraclassoptions': ',openany,oneside'}  # Remove blank pages.
+
+# -- Napoleon settings -----------------------------------------------------------------
 napoleon_google_docstring = False
 napoleon_numpy_docstring = True
 napoleon_include_init_with_doc = True

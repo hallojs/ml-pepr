@@ -5,4 +5,5 @@ Privacy Attacks
    :maxdepth: 2
    :caption: Contents:
 
+   mia
    gmia

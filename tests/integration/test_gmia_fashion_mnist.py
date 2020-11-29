@@ -128,7 +128,7 @@ def test_gmia_fashion_loaded():
         "/Users/jonassander/Documents/Repositories/ml-pepr/tests/integration/fixtures/"
         "data_fashion_mnist/target_model"
     )
-    target_models = [target_model]
+    target_models = target_model
 
     attack_pars = {
         "number_classes": 10,
@@ -164,7 +164,7 @@ def test_gmia_fashion_loaded():
         "ml-pepr/tests/integration/fixtures/data_fashion_mnist/"
         "pairwise_distances_hlf_cosine.npy",
     }
-
+    print('TYPE0: ', target_models)
     gmia_attack = gmia.DirectGmia(attack_pars, data, labels, data_conf, target_models)
 
     gmia_attack.run(load_pars=load_pars)

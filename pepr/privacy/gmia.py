@@ -4,6 +4,22 @@ Implementation of the direct gmia from Long, Yunhui and Bindschaedler, Vincent a
 Lei and Bu, Diyue and Wang, Xiaofeng and Tang, Haixu and Gunter, Carl A and Chen, Kai
 (2018). Understanding membership inferences on well-generalized learning models. arXiv
 preprint arXiv:1802.04889.
+
+Attack-Steps:
+
+1. Create mapping of records to reference models.
+2. Train the reference models.
+3. Generate intermediate models.
+4. Extract reference high-level features.
+5. Extract target high-level features.
+6. Compute pairwise distances between reference and target high-level
+   features.
+7. Determine potential vulnerable target records.
+8. Infer log losses of reference models.
+9. Infer log losses of target model.
+10. Sample reference losses, approximate empirical cumulative distribution
+    function, smooth ecdf with piecewise cubic interpolation.
+11. Determine members and non-members with left-tailed hypothesis test.
 """
 import logging
 import numpy as np
@@ -19,7 +35,7 @@ from tensorflow.keras import models
 from pepr.report.report_section import ReportSection
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 
 class DirectGmia:
@@ -99,22 +115,6 @@ class DirectGmia:
 
     def run(self, save_path=None, load_pars=None):
         """Run the direct generalized membership inference attack.
-
-        Attack-Steps:
-
-        1. Create mapping of records to reference models.
-        2. Train the reference models.
-        3. Generate intermediate models.
-        4. Extract reference high-level features.
-        5. Extract target high-level features.
-        6. Compute pairwise distances between reference and target high-level
-           features.
-        7. Determine potential vulnerable target records.
-        8. Infer log losses of reference models.
-        9. Infer log losses of target model.
-        10. Sample reference losses, approximate empirical cumulative distribution
-            function, smooth ecdf with piecewise cubic interpolation.
-        11. Determine members and non-members with left-tailed hypothesis test.
 
         Parameters
         ----------
@@ -205,7 +205,6 @@ class DirectGmia:
             for path in paths:
                 logger.info(f"Load reference model: {path}.")
                 reference_models.append(models.load_model(path))
-            reference_models = np.asarray(reference_models)
 
         # Steps 3-6
         if load or (
@@ -285,46 +284,58 @@ class DirectGmia:
         reference_inferences = DirectGmia._get_model_inference(
             target_records, attack_eval_data, attack_eval_labels_cat, reference_models
         )
+        logger.debug(f"Reference inferences shape: {reference_inferences.shape}")
 
         # -- Compute Step 9
-        # TODO: Extend evaluation to multiple targets
         logger.info("Infer log losses of target model.")
         target_inferences = DirectGmia._get_model_inference(
-            target_records,
-            attack_eval_data,
-            attack_eval_labels_cat,
-            self.target_models[0],
+            target_records, attack_eval_data, attack_eval_labels_cat, self.target_models
         )
+        logger.debug(f"Target inferences shape: {target_inferences.shape}")
 
         # -- Compute Step 10
         logger.info(
             "Sample reference losses, approximate empirical cumulative distribution "
             "function, smooth ecdf with piecewise cubic interpolation."
         )
-
         (
             used_target_records,
             pchip_references,
             ecdf_references,
         ) = DirectGmia._sample_reference_losses(target_records, reference_inferences)
+        logger.debug(f"PCHIP references shape: {len(pchip_references)}")
+        logger.debug(f"ECDF references shape: {len(ecdf_references)}")
 
         # -- Compute Step 11
         logger.info(
             "Determine members and non-members with left-tailed hypothesis test."
         )
-        members, non_members, p_values = DirectGmia._hypothesis_test(
+        # TODO: Extend evaluation to multiple targets
+        DirectGmia._hypothesis_test_runner(
             self.attack_pars["cut_off_p_value"],
             pchip_references,
             target_inferences,
             used_target_records,
         )
-
-        # Save end results
-        self.end_results = {
-            "members": members,
-            "non_members": non_members,
-            "p_values": p_values,
-        }
+        # members, non_members, p_values = DirectGmia._hypothesis_test(
+        #     self.attack_pars["cut_off_p_value"],
+        #     pchip_references,
+        #     target_inferences,
+        #     used_target_records,
+        # )
+        #
+        # # -- Save end results
+        # self.end_results = {
+        #     "members": members,
+        #     "non_members": non_members,
+        #     "p_values": p_values,
+        # }
+        # logger.info(f"Determined training set members of the target model: {members}.")
+        # logger.info(
+        #     f"Determined training set non-members of the target model: "
+        #     f"{non_members}."
+        # )
+        # logger.info(f"P-values of the final hypothesis-test: {p_values}.")
 
     @staticmethod
     def _assign_records_to_reference_models(
@@ -411,7 +422,7 @@ class DirectGmia:
             )
             reference_models.append(tmp_model)
 
-        return np.asarray(reference_models)
+        return reference_models
 
     @staticmethod
     def _load_models(path, number_models):
@@ -460,7 +471,7 @@ class DirectGmia:
         numpy.ndarray
             Array of intermediate models.
         """
-        if type(models) != np.ndarray:
+        if not isinstance(models, list):
             # noinspection PyProtectedMember
             layer = models.layers[layer_number]._name
             layer_output = models.get_layer(layer).output
@@ -611,7 +622,7 @@ class DirectGmia:
             Array of records used for prediction.
         labels_cat : numpy.ndarray
             Array of labels used to predict on (one-hot encoded).
-        models : numpy.ndarray
+        models : list
             Array of models used for prediction. It is also possible to pass only
             one model (not in an numpy.ndarray).
 
@@ -620,9 +631,8 @@ class DirectGmia:
         numpy.array
             Array of log losses of predictions.
         """
-        if type(models) != np.ndarray:
-            models = np.array([models])
-
+        if not isinstance(models, list):
+            models = [models]
         inferences = []
         for i, model in enumerate(models):
             logger.info(f"Do inference on model {i+1}/{len(models)}.")
@@ -682,7 +692,7 @@ class DirectGmia:
     def _hypothesis_test(
         cut_off_p_value, pchip_references, target_inferences, used_target_records
     ):
-        """Left-tailed hypothesis test.
+        """Left-tailed hypothesis test for target inferences of a single target model.
 
         Parameters
         ----------
@@ -716,3 +726,35 @@ class DirectGmia:
                 members.append(target_record)
 
         return np.asarray(members), np.asarray(non_members), np.asarray(p_values)
+
+    @staticmethod
+    def _hypothesis_test_runner(
+        cut_off_p_value, pchip_references, target_inferences, used_target_records
+    ):
+        """Run hypothesis test on target inferences of multiple targets.
+
+        Parameters
+        ----------
+        cut_off_p_value : float
+            Cut-off-p-value used for the hypothesis test.
+        pchip_references : list
+            Interpolated ecdfs of sampled log losses.
+        target_inferences : numpy.ndarray
+            Array of log losses of the predictions on the target models.
+        used_target_records : numpy.ndarray
+            Target records finally used for the attack.
+
+        Returns
+        -------
+        tuple
+            Array of members, array of non-members, array of calculated p-values.
+        """
+        for one_target_inferences in target_inferences.T:
+            logger.debug(f'One target inferences shape: {one_target_inferences.shape}')
+            members, non_members, p_values = DirectGmia._hypothesis_test(
+                cut_off_p_value,
+                pchip_references,
+                np.array([one_target_inferences]).T,
+                used_target_records,
+            )
+            logger.info(f"Members: {members}")
