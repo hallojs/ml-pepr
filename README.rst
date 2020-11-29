@@ -10,7 +10,7 @@ learning models.
 Installation
 ------------
 
-.. warning:: Caution, this is a preAlpha version. Always do plausibility to your results!
+**Caution, this is a preAlpha version. Always do plausibility to your results!**
 
 We offer various installation options. Follow the instructions below to perform the desired installation. If you want to
 install the latest developer version please use the code-repository of this library. The current release is only tested
@@ -31,7 +31,7 @@ As Docker
 ~~~~~~~~
 Coming soon!
 
-.. note:: The current version is not tested under Windows!
+*The current version is not tested under Windows!*
 
 Basic Usage
 -----------
