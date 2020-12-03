@@ -20,6 +20,7 @@ Attack-Steps:
 10. Sample reference losses, approximate empirical cumulative distribution
     function, smooth ecdf with piecewise cubic interpolation.
 11. Determine members and non-members with left-tailed hypothesis test.
+12. Evaluate the attack results.
 """
 import logging
 import numpy as np
@@ -181,6 +182,11 @@ class DirectGmia:
             logger.info(f"Load mapping of records to reference models: {path}.")
             records_per_reference_model = np.load(path)
 
+        logger.debug(
+            f"records_per_reference_model shape: "
+            f"{records_per_reference_model.shape}"
+        )
+
         # Step 2
         if load or "reference_models" not in load_pars.keys():
             # -- Compute Step 2
@@ -311,12 +317,25 @@ class DirectGmia:
             "Determine members and non-members with left-tailed hypothesis test."
         )
         # TODO: Extend evaluation to multiple targets
-        DirectGmia._hypothesis_test_runner(
+        members, non_members, p_values = DirectGmia._hypothesis_test_runner(
             self.attack_pars["cut_off_p_value"],
             pchip_references,
             target_inferences,
             used_target_records,
         )
+
+        # -- Compute Step 12
+        records_per_target_model = self.data_conf["record_indices_per_target"]
+
+        attack_results = DirectGmia._attack_evaluation(
+            members, non_members, records_per_target_model
+        )
+
+        logger.info(
+            f'Attack accuracy over all target models: {attack_results["overall_accuracy"]}'
+        )
+        print("Attack accuracy per target model: ", attack_results["accuracy_list"])
+
         # members, non_members, p_values = DirectGmia._hypothesis_test(
         #     self.attack_pars["cut_off_p_value"],
         #     pchip_references,
@@ -747,14 +766,87 @@ class DirectGmia:
         Returns
         -------
         tuple
-            Array of members, array of non-members, array of calculated p-values.
+            Three lists of arrays, for each target model one array with the infered
+            members, one array with the infered non-members and one array with the
+            p-values of the corresponding hypothesis test.
         """
-        for one_target_inferences in target_inferences.T:
-            logger.debug(f'One target inferences shape: {one_target_inferences.shape}')
+        members_list = []
+        non_members_list = []
+        p_values_list = []
+
+        for i, one_target_inferences in enumerate(target_inferences.T):
+            logger.debug(f"One target inferences shape: {one_target_inferences.shape}")
             members, non_members, p_values = DirectGmia._hypothesis_test(
                 cut_off_p_value,
                 pchip_references,
                 np.array([one_target_inferences]).T,
                 used_target_records,
             )
-            logger.info(f"Members: {members}")
+
+            logger.debug(f"Members determined for the {i}-th target model: {members}")
+
+            members_list.append(members)
+            non_members_list.append(non_members)
+            p_values_list.append(p_values)
+
+        return members_list, non_members_list, p_values_list
+
+    @staticmethod
+    def _attack_evaluation(
+        infered_members, infered_non_members, records_per_target_model
+    ):
+        """Evaluate attack results.
+
+        Parameters
+        ----------
+        infered_members : list
+            List, that contains for each target a numpy.ndarray of the infered members
+            of the training data set.
+        infered_non_members : list
+            List, that contains for each target a numpy.ndarray of the infered
+            non-members of the training dataset.
+        records_per_target_model : numpy.ndarray
+            Array describing which target model is trained with which data records. The
+            array has the shape: number-of-targets x number_of_attacked_target_records.
+
+        Returns
+        -------
+        dict
+            Dictionary containing the attack results.
+        """
+        tp_list = []  # true positives per attacked target model
+        fp_list = []
+        fn_list = []
+        tn_list = []
+        accuracy_list = []
+        for i, members in enumerate(records_per_target_model):
+            # count tps, etc.
+            valid_infered_members = np.isin(infered_members[i], members)
+            tp = np.count_nonzero(valid_infered_members)
+            fp = len(valid_infered_members) - tp
+
+            invalid_infered_non_members = np.isin(infered_non_members[i], members)
+            fn = np.count_nonzero(invalid_infered_non_members)
+            tn = len(invalid_infered_non_members) - fn
+
+            tp_list.append(tp)
+            fp_list.append(fp)
+            fn_list.append(fn)
+            tn_list.append(tn)
+
+            accuracy = tp / (tp + fp)
+            accuracy_list.append(accuracy)
+
+        # compute overall accuracy
+        overall_accuracy = sum(tp_list) / (sum(tp_list) + sum(fp_list))
+
+        attack_results = {
+            "tp_list": tp_list,
+            "fp_list": fp_list,
+            "fn_list": fn_list,
+            "tn_list": tn_list,
+            "accuracy_list": accuracy_list,
+            "overall_accuracy": overall_accuracy,
+        }
+
+        return attack_results

@@ -1,8 +1,8 @@
 import numpy as np
 
 
-def assign_records_to_target_models(
-    background_knowledge_size, number_target_models, target_training_set_size, offset=0
+def assign_record_ids_to_target_models(
+    target_knowledge_size, number_target_models, target_training_set_size, offset=0
 ):
     """Create training datasets (index sets) for the target models.
 
@@ -11,7 +11,7 @@ def assign_records_to_target_models(
 
     Parameters
     ----------
-    background_knowledge_size : int
+    target_knowledge_size : int
         Number of data samples to be distributed to the target data sets.
     number_target_models : int
         Number of target models for which datasets should be created.
@@ -29,8 +29,8 @@ def assign_records_to_target_models(
     for i in range(0, int(number_target_models / 2)):
         np.random.seed(i)
         selection = np.random.choice(
-            np.arange(background_knowledge_size),
-            background_knowledge_size,
+            np.arange(target_knowledge_size),
+            target_knowledge_size,
             replace=False,
         )
         if i > 0:
