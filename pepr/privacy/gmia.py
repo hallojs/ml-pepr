@@ -24,6 +24,9 @@ Attack-Steps:
 """
 import logging
 import numpy as np
+from pylatex import Command, NoEscape, Tabular, Table
+from pylatex.section import Subsubsection
+from pylatex.base_classes import Environment
 from sklearn.metrics import pairwise_distances
 
 from statsmodels.distributions.empirical_distribution import ECDF
@@ -33,7 +36,7 @@ import tensorflow as tf
 from tensorflow.keras.models import Model
 from tensorflow.keras import models
 
-from pepr.report.report_section import ReportSection
+from pepr import report
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -42,23 +45,29 @@ logger.setLevel(logging.DEBUG)
 class DirectGmia:
     """Whole functionality needed for the direct gmia."""
 
+    attack_alias: str
     attack_pars: dict
     data: np.ndarray
     labels: np.ndarray
     data_conf: dict
     target_models: list
-    report_section: ReportSection
+    report_section: report.ReportSection
     save_path: str  # TODO: Change this to pythons path object
     load_pars: dict
     end_results: dict
+    attack_results: dict
 
     # TODO: Precise neighbor_threshold, probability_threshold
 
-    def __init__(self, attack_pars, data, labels, data_conf, target_models):
+    def __init__(
+        self, attack_alias, attack_pars, data, labels, data_conf, target_models
+    ):
         """Initialize direct generalized membership inference attack.
 
         Parameters
         ----------
+        attack_alias : str
+            Alias for a specific instantiation of the gmia.
         attack_pars : dict
             Dictionary containing all needed attack parameters:
 
@@ -101,10 +110,13 @@ class DirectGmia:
               from data are used to evaluate the attack. Typically these are to one half
               records used to train the target models and one half neither used to train
               the target model(s) or the reference models.
+            * record_indices_per_target (numpy.ndarray): n*m array describing for all n
+              target models which m indices where used in the training.
 
-        target_models: list
+        target_models: iterable
             List of target models which should be tested.
         """
+        self.attack_alias = attack_alias
         self.attack_pars = attack_pars
         self.data = data
         self.labels = labels
@@ -327,34 +339,17 @@ class DirectGmia:
         # -- Compute Step 12
         records_per_target_model = self.data_conf["record_indices_per_target"]
 
-        attack_results = DirectGmia._attack_evaluation(
+        self.attack_results = DirectGmia._attack_evaluation(
             members, non_members, records_per_target_model
         )
 
         logger.info(
-            f'Attack accuracy over all target models: {attack_results["overall_accuracy"]}'
+            f"Attack accuracy over all target models: "
+            f'{self.attack_results["overall_accuracy"]}'
         )
-        print("Attack accuracy per target model: ", attack_results["accuracy_list"])
-
-        # members, non_members, p_values = DirectGmia._hypothesis_test(
-        #     self.attack_pars["cut_off_p_value"],
-        #     pchip_references,
-        #     target_inferences,
-        #     used_target_records,
-        # )
-        #
-        # # -- Save end results
-        # self.end_results = {
-        #     "members": members,
-        #     "non_members": non_members,
-        #     "p_values": p_values,
-        # }
-        # logger.info(f"Determined training set members of the target model: {members}.")
-        # logger.info(
-        #     f"Determined training set non-members of the target model: "
-        #     f"{non_members}."
-        # )
-        # logger.info(f"P-values of the final hypothesis-test: {p_values}.")
+        print(
+            "Attack accuracy per target model: ", self.attack_results["accuracy_list"]
+        )
 
     @staticmethod
     def _assign_records_to_reference_models(
@@ -471,7 +466,7 @@ class DirectGmia:
     #  intermediate layers directly from the reference models.
 
     @staticmethod
-    def _gen_intermediate_models(models, layer_number):
+    def _gen_intermediate_models(source_models, layer_number):
         """Generate intermediate models.
 
         This intermediate models are used later to extract the high level features
@@ -479,7 +474,7 @@ class DirectGmia:
 
         Parameters
         ----------
-        models : numpy.ndarray
+        source_models : numpy.ndarray
             Array of models from which the intermediate models should be extracted.
         layer_number : int
             Number of the intermediate layer used as the new output layer in the
@@ -490,15 +485,15 @@ class DirectGmia:
         numpy.ndarray
             Array of intermediate models.
         """
-        if not isinstance(models, list):
+        if not isinstance(source_models, list):
             # noinspection PyProtectedMember
-            layer = models.layers[layer_number]._name
-            layer_output = models.get_layer(layer).output
-            intermediate_model = Model(inputs=models.input, outputs=layer_output)
+            layer = source_models.layers[layer_number]._name
+            layer_output = source_models.get_layer(layer).output
+            intermediate_model = Model(inputs=source_models.input, outputs=layer_output)
             return intermediate_model
 
         intermediate_models = np.array([])
-        for i, model in enumerate(models):
+        for i, model in enumerate(source_models):
             # noinspection PyProtectedMember
             layer = model.layers[layer_number]._name
             layer_output = model.get_layer(layer).output
@@ -506,7 +501,7 @@ class DirectGmia:
             intermediate_models = np.append(
                 intermediate_models, Model(inputs=model.input, outputs=layer_output)
             )
-        logger.info(f"Generated {len(models)} intermediate models.")
+        logger.info(f"Generated {len(source_models)} intermediate models.")
         return intermediate_models
 
     # TODO: Add more precise description about the extraction process to the docstring.
@@ -630,7 +625,7 @@ class DirectGmia:
         return target_records
 
     @staticmethod
-    def _get_model_inference(idx_records, records, labels_cat, models):
+    def _get_model_inference(idx_records, records, labels_cat, prediction_models):
         """Predict on trained models and calculate the log loss.
 
         Parameters
@@ -641,7 +636,7 @@ class DirectGmia:
             Array of records used for prediction.
         labels_cat : numpy.ndarray
             Array of labels used to predict on (one-hot encoded).
-        models : list
+        prediction_models : list
             Array of models used for prediction. It is also possible to pass only
             one model (not in an numpy.ndarray).
 
@@ -650,11 +645,11 @@ class DirectGmia:
         numpy.array
             Array of log losses of predictions.
         """
-        if not isinstance(models, list):
-            models = [models]
+        if not isinstance(prediction_models, list):
+            prediction_models = [prediction_models]
         inferences = []
-        for i, model in enumerate(models):
-            logger.info(f"Do inference on model {i+1}/{len(models)}.")
+        for i, model in enumerate(prediction_models):
+            logger.info(f"Do inference on model {i+1}/{len(prediction_models)}.")
             predictions = model.predict(records[idx_records])
             filter_predictions = np.max(predictions * labels_cat[idx_records], axis=1)
             inferences.append(-np.log(filter_predictions))
@@ -834,11 +829,13 @@ class DirectGmia:
             fn_list.append(fn)
             tn_list.append(tn)
 
-            accuracy = tp / (tp + fp)
+            accuracy = tp / (tp + fp) if (tp + fp) else 1
             accuracy_list.append(accuracy)
 
         # compute overall accuracy
-        overall_accuracy = sum(tp_list) / (sum(tp_list) + sum(fp_list))
+        sum_tp = sum(tp_list)
+        sum_fp = sum(fp_list)
+        overall_accuracy = sum_tp / (sum_tp + sum_fp) if (sum_tp + sum_fp) else 1
 
         attack_results = {
             "tp_list": tp_list,
@@ -850,3 +847,136 @@ class DirectGmia:
         }
 
         return attack_results
+
+    def _create_attack_section(self):
+        """Create a report section for the gmia attack instantiation."""
+        self.report_section = report.ReportSection(
+            "Generalized Membership Inference Attack (Direct)",
+            self.attack_alias,
+            "gmia",
+        )
+        self._report_attack_configuration()
+
+    def _report_attack_configuration(self):
+        """Create subsubsection about the attack and data configuration."""
+        # Create tables for attack parameters and the data configuration.
+        ap = self.attack_pars
+        dc = self.data_conf
+        self.report_section.append(Subsubsection("Attack Details"))
+        with self.report_section.create(Table(position="!h")):
+            # -- Create subtables for the attack parameters.
+            with self.report_section.create(
+                SubTable(arguments=NoEscape(r"0.4\linewidth"))
+            ) as subtab_ap:
+                self.report_section.append(Command("centering"))
+                with self.report_section.create(Tabular("|l|c|")) as tab_ap:
+                    tab_ap.add_hline()
+                    tab_ap.add_row(["Number of classes", ap["number_classes"]])
+                    tab_ap.add_hline()
+                    tab_ap.add_row(
+                        ["Number of reference models", ap["number_reference_models"]]
+                    )
+                    tab_ap.add_hline()
+                    tab_ap.add_row(
+                        [
+                            "Reference training set size",
+                            ap["reference_training_set_size"],
+                        ]
+                    )
+                    tab_ap.add_hline()
+                    tab_ap.add_row(["Reference epochs", ap["reference_epochs"]])
+                    tab_ap.add_hline()
+                    tab_ap.add_row(["Reference batch size", ap["reference_batch_size"]])
+                    tab_ap.add_hline()
+                    tab_ap.add_row(["HLF-Metric", ap["hlf_metric"]])
+                    tab_ap.add_hline()
+                    tab_ap.add_row(["HLF-Layer-Number", ap["hlf_layer_number"]])
+                    tab_ap.add_hline()
+                    tab_ap.add_row(["Neighbor-Threshold", ap["neighbor_threshold"]])
+                    tab_ap.add_hline()
+                    tab_ap.add_row(
+                        ["Probability-Threshold", ap["probability_threshold"]]
+                    )
+                    tab_ap.add_hline()
+                    tab_ap.add_row(["Cut-off-p-value", ap["cut_off_p_value"]])
+                    tab_ap.add_hline()
+                subtab_ap.add_caption("Attack parameters")
+
+            # -- Create subtable for the data configuration
+            with self.report_section.create(
+                SubTable(arguments=NoEscape(r"0.6\linewidth"))
+            ) as subtab_dc:
+                self.report_section.append(Command("centering"))
+                nr_targets, target_training_set_size = dc[
+                    "record_indices_per_target"
+                ].shape
+                with self.report_section.create(Tabular("|l|c|")) as tab_dc:
+                    tab_dc.add_hline()
+                    tab_dc.add_row(
+                        [
+                            NoEscape("Attackers background-knowledge size ($A$)"),
+                            len(dc["reference_indices"]),
+                        ]
+                    )
+                    tab_dc.add_hline()
+                    tab_dc.add_row(
+                        [
+                            NoEscape("Samples used to train target models ($B$)"),
+                            len(dc["target_indices"]),
+                        ]
+                    )
+                    tab_dc.add_hline()
+                    tab_dc.add_row(
+                        [
+                            "Samples used to evaluate the attack",
+                            len(dc["target_indices"]),
+                        ]
+                    )
+                    tab_dc.add_hline()
+                    tab_dc.add_row(["Attacked target models", nr_targets])
+                    tab_dc.add_hline()
+                    tab_dc.add_row(
+                        ["Target model's training sets size", target_training_set_size]
+                    )
+                    tab_dc.add_hline()
+                    tab_dc.add_row(
+                        [
+                            NoEscape("Size of $A \cap B$"),
+                            len(
+                                set(dc["reference_indices"]) & set(dc["target_indices"])
+                            ),
+                        ]
+                    )
+                    tab_dc.add_hline()
+                subtab_dc.add_caption("Data and target configuration")
+
+    def create_attack_report(self):
+        """Create an attack report for just this attack instantiation."""
+        self._create_attack_section()
+        report.report_generator([self.report_section])
+
+
+class SubTable(Environment):
+    """Environment that allows to place tables next to each other."""
+
+    _latex_name = "subtable"
+
+    def __init__(self, arguments):
+        """Initialize subtable environment.
+
+        Parameters
+        ----------
+        arguments: str
+            Arguments for the subtable environment (e.g. the width of the subtable).
+        """
+        super().__init__(arguments=arguments)
+
+    def add_caption(self, caption):
+        """Add a caption to the subtable.
+
+        Parameters
+        ----------
+        caption: str
+            Caption-string.
+        """
+        self.append(Command("caption", caption))
