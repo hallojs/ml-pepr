@@ -1,5 +1,5 @@
 Generalized Membership Inference Attack (Direct)
 ================================================
 
-.. automodule:: pepr.privacy.gmia
+.. autoclass:: pepr.privacy.gmia.DirectGmia
    :members:
