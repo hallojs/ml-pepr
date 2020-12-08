@@ -1,32 +1,14 @@
-"""Direct generalized membership inference attack.
+"""Direct generalized membership inference attack."""
 
-Implementation of the direct gmia from Long, Yunhui and Bindschaedler, Vincent and Wang,
-Lei and Bu, Diyue and Wang, Xiaofeng and Tang, Haixu and Gunter, Carl A and Chen, Kai
-(2018). Understanding membership inferences on well-generalized learning models. arXiv
-preprint arXiv:1802.04889.
-
-Attack-Steps:
-
-1. Create mapping of records to reference models.
-2. Train the reference models.
-3. Generate intermediate models.
-4. Extract reference high-level features.
-5. Extract target high-level features.
-6. Compute pairwise distances between reference and target high-level
-   features.
-7. Determine potential vulnerable target records.
-8. Infer log losses of reference models.
-9. Infer log losses of target model.
-10. Sample reference losses, approximate empirical cumulative distribution
-    function, smooth ecdf with piecewise cubic interpolation.
-11. Determine members and non-members with left-tailed hypothesis test.
-12. Evaluate the attack results.
-"""
 import logging
+import os
+
+import matplotlib.pyplot as plt
 import numpy as np
-from pylatex import Command, NoEscape, Tabular, Table
-from pylatex.section import Subsubsection
+from pylatex import Command, NoEscape, Tabular, Table, Figure, MiniPage, MultiColumn
 from pylatex.base_classes import Environment
+from pylatex.section import Subsubsection
+from pylatex.utils import bold
 from sklearn.metrics import pairwise_distances
 
 from statsmodels.distributions.empirical_distribution import ECDF
@@ -41,9 +23,87 @@ from pepr import report
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+plt.style.use("seaborn-white")
+
 
 class DirectGmia:
-    """Whole functionality needed for the direct gmia."""
+    """Direct Generalized Membership Inference Attack (d-GMIA)
+
+    Attack-Steps:
+
+    1. Create mapping of records to reference models.
+    2. Train the reference models.
+    3. Generate intermediate models.
+    4. Extract reference high-level features.
+    5. Extract target high-level features.
+    6. Compute pairwise distances between reference and target high-level
+       features.
+    7. Determine potential vulnerable target records.
+    8. Infer log losses of reference models.
+    9. Infer log losses of target model.
+    10. Sample reference losses, approximate empirical cumulative distribution
+        function, smooth ecdf with piecewise cubic interpolation.
+    11. Determine members and non-members with left-tailed hypothesis test.
+    12. Evaluate the attack results.
+
+    Parameters
+    ----------
+    attack_alias : str
+        Alias for a specific instantiation of the gmia.
+    attack_pars : dict
+        Dictionary containing all needed attack parameters:
+
+        * number_classes (int): Number of different classes the target model
+          predict.
+        * number_reference_models (int): Number of reference models to be trained.
+        * reference_training_set_size (int): Size of the trainings set for each
+          reference model.
+        * create_compile_model (function): Function that returns a compiled
+          TensorFlow model (typically identical to the target model) used in the
+          training of the reference models.
+        * reference_epochs (int): Number of training epochs of the reference models.
+        * reference_batch_size (int): Batch size used in the training of the
+          reference models.
+        * hlf_metric (str): Metric (typically 'cosine') used for the distance
+          calculations in the high-level feature space. For valid metrics see
+          documentation of sklearn.metrics.pairwise_distances.
+        * hlf_layer_number (int): If value is n, the n-th layer of the model
+          returned by create_compile_model is used to extract the high-level feature
+          vectors.
+        * neighbor_threshold (float): If distance is smaller then the neighbor
+          threshold the record is selected as target record.
+        * probability_threshold (float): For details see section 4.3 from the paper.
+
+    data : numpy.ndarray
+        Dataset with all training samples used in this pentesting setting.
+    labels : numpy.ndarray
+        Array of all labels used in this pentesting setting.
+    data_conf: dict
+        Dictionary describing which record-indices are used to train the reference
+        models, the target model(s) and which are used for the evaluation of the
+        attack.
+
+        * reference_indices (list): List of indices describing which of the records
+          from data are used to train the reference models.
+        * target_indices (list): List of indices describing which of the records
+          from data were used to train the target model(s).
+        * evaluation_indices (list): List of indices describing which of the records
+          from data are used to evaluate the attack. Typically these are to one half
+          records used to train the target models and one half neither used to train
+          the target model(s) or the reference models.
+        * record_indices_per_target (numpy.ndarray): n*m array describing for all n
+          target models which m indices where used in the training.
+
+    target_models: iterable
+        List of target models which should be tested.
+
+    References
+    ----------
+    Implementation of the direct gmia from Long, Yunhui and Bindschaedler, Vincent and Wang,
+    Lei and Bu, Diyue and Wang, Xiaofeng and Tang, Haixu and Gunter, Carl A and Chen, Kai
+    (2018). Understanding membership inferences on well-generalized learning models. arXiv
+    preprint arXiv:1802.04889.
+    """
 
     attack_alias: str
     attack_pars: dict
@@ -57,65 +117,10 @@ class DirectGmia:
     end_results: dict
     attack_results: dict
 
-    # TODO: Precise neighbor_threshold, probability_threshold
-
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        """Initialize direct generalized membership inference attack.
-
-        Parameters
-        ----------
-        attack_alias : str
-            Alias for a specific instantiation of the gmia.
-        attack_pars : dict
-            Dictionary containing all needed attack parameters:
-
-            * number_classes (int): Number of different classes the target model
-              predict.
-            * number_reference_models (int): Number of reference models to be trained.
-            * reference_training_set_size (int): Size of the trainings set for each
-              reference model.
-            * create_compile_model (function): Function that returns a compiled
-              TensorFlow model (typically identical to the target model) used in the
-              training of the reference models.
-            * reference_epochs (int): Number of training epochs of the reference models.
-            * reference_batch_size (int): Batch size used in the training of the
-              reference models.
-            * hlf_metric (str): Metric (typically 'cosine') used for the distance
-              calculations in the high-level feature space. For valid metrics see
-              documentation of sklearn.metrics.pairwise_distances.
-            * hlf_layer_number (int): If value is n, the n-th layer of the model
-              returned by create_compile_model is used to extract the high-level feature
-              vectors.
-            * neighbor_threshold (float): If distance is smaller then the neighbor
-              threshold the record is selected as target record.
-            * probability_threshold (float): For details see section 4.3 from the paper.
-            * cut_off_p_value (float): Cut-off-p-value used for the hypothesis test.
-
-        data : numpy.ndarray
-            Dataset with all training samples used in this pentesting setting.
-        labels : numpy.ndarray
-            Array of all labels used in this pentesting setting.
-        data_conf: dict
-            Dictionary describing which record-indices are used to train the reference
-            models, the target model(s) and which are used for the evaluation of the
-            attack.
-
-            * reference_indices (list): List of indices describing which of the records
-              from data are used to train the reference models.
-            * target_indices (list): List of indices describing which of the records
-              from data were used to train the target model(s).
-            * evaluation_indices (list): List of indices describing which of the records
-              from data are used to evaluate the attack. Typically these are to one half
-              records used to train the target models and one half neither used to train
-              the target model(s) or the reference models.
-            * record_indices_per_target (numpy.ndarray): n*m array describing for all n
-              target models which m indices where used in the training.
-
-        target_models: iterable
-            List of target models which should be tested.
-        """
+        """Initialize direct generalized membership inference attack."""
         self.attack_alias = attack_alias
         self.attack_pars = attack_pars
         self.data = data
@@ -125,6 +130,7 @@ class DirectGmia:
         )
         self.data_conf = data_conf
         self.target_models = target_models
+        self.attack_results = {}
 
     def run(self, save_path=None, load_pars=None):
         """Run the direct generalized membership inference attack.
@@ -297,6 +303,8 @@ class DirectGmia:
             hlf_distances,
         )
 
+        self.attack_results["selected_target_records"] = target_records
+
         # -- Compute Step 8
         logger.info("Infer log losses of reference models.")
         reference_inferences = DirectGmia._get_model_inference(
@@ -324,13 +332,14 @@ class DirectGmia:
         logger.debug(f"PCHIP references shape: {len(pchip_references)}")
         logger.debug(f"ECDF references shape: {len(ecdf_references)}")
 
+        self.attack_results["used_target_records"] = used_target_records
+
         # -- Compute Step 11
         logger.info(
             "Determine members and non-members with left-tailed hypothesis test."
         )
-        # TODO: Extend evaluation to multiple targets
-        members, non_members, p_values = DirectGmia._hypothesis_test_runner(
-            self.attack_pars["cut_off_p_value"],
+
+        members, non_members = DirectGmia._hypothesis_test_runner(
             pchip_references,
             target_inferences,
             used_target_records,
@@ -339,13 +348,20 @@ class DirectGmia:
         # -- Compute Step 12
         records_per_target_model = self.data_conf["record_indices_per_target"]
 
-        self.attack_results = DirectGmia._attack_evaluation(
+        results = DirectGmia._attack_evaluation(
             members, non_members, records_per_target_model
         )
 
+        # Union on dicts
+        self.attack_results = {**self.attack_results, **results}
+
         logger.info(
-            f"Attack accuracy over all target models: "
+            f"Attack accuracy over all target model per cut-off-p-value: "
             f'{self.attack_results["overall_accuracy"]}'
+        )
+        logger.info(
+            f"Attack recall over all target model per cut-off-p-value: "
+            f'{self.attack_results["overall_recall"]}'
         )
         print(
             "Attack accuracy per target model: ", self.attack_results["accuracy_list"]
@@ -743,14 +759,12 @@ class DirectGmia:
 
     @staticmethod
     def _hypothesis_test_runner(
-        cut_off_p_value, pchip_references, target_inferences, used_target_records
+        pchip_references, target_inferences, used_target_records
     ):
         """Run hypothesis test on target inferences of multiple targets.
 
         Parameters
         ----------
-        cut_off_p_value : float
-            Cut-off-p-value used for the hypothesis test.
         pchip_references : list
             Interpolated ecdfs of sampled log losses.
         target_inferences : numpy.ndarray
@@ -761,30 +775,38 @@ class DirectGmia:
         Returns
         -------
         tuple
-            Three lists of arrays, for each target model one array with the infered
-            members, one array with the infered non-members and one array with the
-            p-values of the corresponding hypothesis test.
+            Two lists of lists of arrays. For each cut-off-p-value between 0 ...0.01
+            ... 0.02, ...1 two lists of arrays, for each target model one array with the
+            infered members and one array with the infered non-members.
         """
-        members_list = []
+        members_list = []  # infered members per cut-of-p-value and per target model
         non_members_list = []
-        p_values_list = []
 
-        for i, one_target_inferences in enumerate(target_inferences.T):
-            logger.debug(f"One target inferences shape: {one_target_inferences.shape}")
-            members, non_members, p_values = DirectGmia._hypothesis_test(
-                cut_off_p_value,
-                pchip_references,
-                np.array([one_target_inferences]).T,
-                used_target_records,
-            )
+        for i in range(101):
+            cut_off_p_value = i / 100
 
-            logger.debug(f"Members determined for the {i}-th target model: {members}")
+            members_list_p = []  # infered members for the i-th target model
+            non_members_list_p = []
 
-            members_list.append(members)
-            non_members_list.append(non_members)
-            p_values_list.append(p_values)
+            for j, one_target_inferences in enumerate(target_inferences.T):
+                members, non_members, _ = DirectGmia._hypothesis_test(
+                    cut_off_p_value,
+                    pchip_references,
+                    np.array([one_target_inferences]).T,
+                    used_target_records,
+                )
 
-        return members_list, non_members_list, p_values_list
+                logger.debug(
+                    f"Members determined for the {j}-th target model: " f"{members}"
+                )
+
+                members_list_p.append(members)
+                non_members_list_p.append(non_members)
+
+            members_list.append(members_list_p)
+            non_members_list.append(non_members_list_p)
+
+        return members_list, non_members_list
 
     @staticmethod
     def _attack_evaluation(
@@ -795,11 +817,11 @@ class DirectGmia:
         Parameters
         ----------
         infered_members : list
-            List, that contains for each target a numpy.ndarray of the infered members
-            of the training data set.
+            List, that contains for each cut-off-p-value and target a numpy.ndarray of
+            the infered members of the training data set.
         infered_non_members : list
-            List, that contains for each target a numpy.ndarray of the infered
-            non-members of the training dataset.
+            List, that contains for each cut-off-p-value and target a numpy.ndarray of
+            the infered non-members of the training dataset.
         records_per_target_model : numpy.ndarray
             Array describing which target model is trained with which data records. The
             array has the shape: number-of-targets x number_of_attacked_target_records.
@@ -809,53 +831,98 @@ class DirectGmia:
         dict
             Dictionary containing the attack results.
         """
-        tp_list = []  # true positives per attacked target model
+        tp_list = []
         fp_list = []
         fn_list = []
         tn_list = []
         accuracy_list = []
-        for i, members in enumerate(records_per_target_model):
-            # count tps, etc.
-            valid_infered_members = np.isin(infered_members[i], members)
-            tp = np.count_nonzero(valid_infered_members)
-            fp = len(valid_infered_members) - tp
+        recall_list = []
+        overall_accuracy = []
+        overall_recall = []
 
-            invalid_infered_non_members = np.isin(infered_non_members[i], members)
-            fn = np.count_nonzero(invalid_infered_non_members)
-            tn = len(invalid_infered_non_members) - fn
+        # unpack lists per p-value
+        for i in range(len(infered_members)):
+            infered_members_p = infered_members[i]  # infered members per target model
+            infered_non_members_p = infered_non_members[i]
 
-            tp_list.append(tp)
-            fp_list.append(fp)
-            fn_list.append(fn)
-            tn_list.append(tn)
+            tp_list_p = []  # true positives per attacked target model
+            fp_list_p = []
+            fn_list_p = []
+            tn_list_p = []
+            accuracy_list_p = []
+            recall_list_p = []
 
-            accuracy = tp / (tp + fp) if (tp + fp) else 1
-            accuracy_list.append(accuracy)
+            # unpack lists per target model
+            for j, members in enumerate(records_per_target_model):
+                # count tps, etc.
+                valid_infered_members = np.isin(infered_members_p[j], members)
+                tp = np.count_nonzero(valid_infered_members)
+                fp = len(valid_infered_members) - tp
 
-        # compute overall accuracy
-        sum_tp = sum(tp_list)
-        sum_fp = sum(fp_list)
-        overall_accuracy = sum_tp / (sum_tp + sum_fp) if (sum_tp + sum_fp) else 1
+                invalid_infered_non_members = np.isin(infered_non_members_p[j], members)
+                fn = np.count_nonzero(invalid_infered_non_members)
+                tn = len(invalid_infered_non_members) - fn
 
+                tp_list_p.append(tp)
+                fp_list_p.append(fp)
+                fn_list_p.append(fn)
+                tn_list_p.append(tn)
+
+                accuracy = tp / (tp + fp) if (tp + fp) else 1
+                recall = tp / (fn + tp) if (fn + tp) else 0
+                accuracy_list_p.append(accuracy)
+                recall_list_p.append(recall)
+
+            # compute accuracy for all target models per cut-off-p-value
+            number_of_target_models = len(infered_members_p)
+            overall_accuracy_p = sum(accuracy_list_p) / number_of_target_models
+            overall_recall_p = sum(recall_list_p) / number_of_target_models
+
+            tp_list.append(tp_list_p)
+            fp_list.append(fp_list_p)
+            fn_list.append(fn_list_p)
+            tn_list.append(tn_list_p)
+            accuracy_list.append(accuracy_list_p)
+            recall_list.append(recall_list_p)
+            overall_accuracy.append(overall_accuracy_p)
+            overall_recall.append(overall_recall_p)
+
+        # attack results per cut-off-p-value and target model
         attack_results = {
             "tp_list": tp_list,
             "fp_list": fp_list,
             "fn_list": fn_list,
             "tn_list": tn_list,
             "accuracy_list": accuracy_list,
+            "recall_list": recall_list,
             "overall_accuracy": overall_accuracy,
+            "overall_recall": overall_recall,
         }
 
         return attack_results
 
-    def _create_attack_section(self):
+    def create_attack_report(self, save_path="gmia_report"):
+        """Create an attack report for just this attack instantiation."""
+
+        # Create directory structure for the attack report, including the figure
+        # directory for the figures of the results subsubsection.
+        os.makedirs(save_path + "/fig", exist_ok=True)
+
+        self._create_attack_section(save_path=save_path)
+        report.report_generator(save_path, [self.report_section])
+
+    def _create_attack_section(self, save_path):
         """Create a report section for the gmia attack instantiation."""
+
         self.report_section = report.ReportSection(
             "Generalized Membership Inference Attack (Direct)",
             self.attack_alias,
             "gmia",
         )
+
         self._report_attack_configuration()
+
+        self._report_attack_results(save_path)
 
     def _report_attack_configuration(self):
         """Create subsubsection about the attack and data configuration."""
@@ -898,9 +965,7 @@ class DirectGmia:
                         ["Probability-Threshold", ap["probability_threshold"]]
                     )
                     tab_ap.add_hline()
-                    tab_ap.add_row(["Cut-off-p-value", ap["cut_off_p_value"]])
-                    tab_ap.add_hline()
-                subtab_ap.add_caption("Attack parameters")
+                subtab_ap.add_caption("Attack Parameters")
 
             # -- Create subtable for the data configuration
             with self.report_section.create(
@@ -948,12 +1013,135 @@ class DirectGmia:
                         ]
                     )
                     tab_dc.add_hline()
-                subtab_dc.add_caption("Data and target configuration")
+                subtab_dc.add_caption("Data and Target Configuration")
 
-    def create_attack_report(self):
-        """Create an attack report for just this attack instantiation."""
-        self._create_attack_section()
-        report.report_generator([self.report_section])
+    def _report_attack_results(self, save_path):
+        """Create subsubsection describing the most important results of the attack.
+
+        This subsection contains results only for the first target model.
+        """
+        self.report_section.append(Subsubsection("Attack Results"))
+
+        # Accuracy-Recall Curve of the first target model
+        accuracy = np.array(self.attack_results["accuracy_list"])
+        recall = np.array(self.attack_results["recall_list"])
+
+        fig = plt.figure()
+        ax = plt.axes()
+        ax.plot(accuracy[:, 0], recall[:, 0])
+        ax.set_xlabel("Accuracy")
+        ax.set_ylabel("Recall")
+        fig.savefig(save_path + "/fig/accuracy_recall_curve.png")
+        plt.close(fig)
+
+        res = self.attack_results
+
+        with self.report_section.create(MiniPage()):
+            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+                self.report_section.append(Command("centering"))
+                self.report_section.append(
+                    Command(
+                        "includegraphics",
+                        NoEscape("fig/accuracy_recall_curve.png"),
+                        "width=8cm",
+                    )
+                )
+                self.report_section.append(Command("captionsetup", "labelformat=empty"))
+                self.report_section.append(
+                    Command(
+                        "captionof",
+                        "figure",
+                        extra_arguments="Accuracy-Recall Curve (for Selected Target Records)",
+                    )
+                )
+            self.report_section.append(Command("hfill"))
+            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+                self.report_section.append(Command("centering"))
+                with self.report_section.create(Tabular("|l|c|c|c|")) as result_tab:
+                    result_tab.add_hline()
+                    result_tab.add_row(
+                        list(map(bold, ["Cut-Off-P-Value", "0.01", "0.02", "0.05"]))
+                    )
+                    result_tab.add_hline()
+                    result_tab.add_row(
+                        [
+                            "True Positives",
+                            res["tp_list"][1][0],
+                            res["tp_list"][2][0],
+                            res["tp_list"][5][0],
+                        ]
+                    )
+                    result_tab.add_hline()
+                    result_tab.add_row(
+                        [
+                            "False Positives",
+                            res["fp_list"][1][0],
+                            res["fp_list"][2][0],
+                            res["fp_list"][5][0],
+                        ]
+                    )
+                    result_tab.add_hline()
+                    result_tab.add_row(
+                        [
+                            "Accuracy",
+                            round(res["accuracy_list"][1][0], 3),
+                            round(res["accuracy_list"][2][0], 3),
+                            round(res["accuracy_list"][5][0], 3),
+                        ]
+                    )
+                    result_tab.add_hline()
+                    result_tab.add_row(
+                        [
+                            "Recall",
+                            round(res["recall_list"][1][0], 3),
+                            round(res["recall_list"][2][0], 3),
+                            round(res["recall_list"][5][0], 3),
+                        ]
+                    )
+                    result_tab.add_hline()
+                    result_tab.add_row(
+                        "Selected Target Records",
+                        MultiColumn(
+                            3, align="|c|", data=len(res["selected_target_records"])
+                        ),
+                    )
+                    result_tab.add_hline()
+                    result_tab.add_row(
+                        "Used Target Records",
+                        MultiColumn(
+                            3, align="|c|", data=len(res["used_target_records"])
+                        ),
+                    )
+                    result_tab.add_hline()
+                self.report_section.append(Command("captionsetup", "labelformat=empty"))
+                self.report_section.append(
+                    Command("captionof", "table", extra_arguments="Attack Results")
+                )
+
+        selected_t = res["selected_target_records"]
+        selected_t = self.labels[selected_t]
+        used_t = res["used_target_records"]
+        used_t = self.labels[used_t]
+        classes = self.attack_pars["number_classes"]
+
+        fig = plt.figure()
+        ax = plt.axes()
+        ax.set_xticks([i for i in range(classes)])
+        ax.hist(selected_t, bins=np.arange(classes + 1) - 0.5, edgecolor="black")
+        ax.hist(
+            used_t,
+            bins=np.arange(classes + 1) - 0.5,
+            histtype="step",
+            edgecolor="black",
+        )
+        fig.savefig(save_path + "/fig/hist_selected_records.png")
+        plt.close(fig)
+
+        with self.report_section.create(Figure()) as fig:
+            fig.add_image(
+                "fig/hist_selected_records.png", width=NoEscape(r"0.5\textwidth")
+            )
+            fig.add_caption("Accuracy-Recall Curve for the Selected Target Records")
 
 
 class SubTable(Environment):

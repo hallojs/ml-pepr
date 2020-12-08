@@ -7,7 +7,7 @@ descriptions = {
         "Implementation of the direct gmia from Long, Yunhui and Bindschaedler, "
         "Vincent and Wang, Lei and Bu, Diyue and Wang, Xiaofeng and Tang, Haixu and "
         "Gunter, Carl A and Chen, Kai (2018). Understanding membership inferences on "
-        "well generalized learning models.arXiv preprint arXiv: 1802.04889."
+        "well generalized learning models. arXiv preprint arXiv: 1802.04889."
     )
 }
 
@@ -51,9 +51,10 @@ class ReportSection(Container):
         return s
 
 
-def report_generator(attack_sections):
+def report_generator(save_path, attack_sections):
     """Create a report out of multiple attack sections."""
     doc = Document(documentclass='article')
+    doc.preamble.append(Command("usepackage", "graphicx"))
     doc.preamble.append(Command("usepackage", "subcaption"))
     doc.preamble.append(Command("usepackage", "geometry"))
     doc.preamble.append(Command("geometry", "textwidth=180mm, textheight=240mm"))
@@ -66,4 +67,4 @@ def report_generator(attack_sections):
             doc.append(descriptions[section.attack_type])
             doc.append(section)
 
-    doc.generate_pdf("attack_report", clean_tex=False)
+    doc.generate_pdf(save_path + "/attack_report", clean_tex=False)
