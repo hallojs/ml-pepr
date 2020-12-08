@@ -1,7 +1,7 @@
 Installation
 ============
 
-.. warning:: Caution, this is a preAlpha version. Always do plausibility to your results!
+.. warning:: Caution, this is a preAlpha version. Always do check the plausibility of your results!
 
 We offer various installation options. Follow the instructions below to perform the desired installation. If you want to
 install the latest developer version please use the code-repository of this library. The current release is only tested
