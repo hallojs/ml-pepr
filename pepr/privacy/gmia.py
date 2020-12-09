@@ -930,11 +930,9 @@ class DirectGmia:
         ap = self.attack_pars
         dc = self.data_conf
         self.report_section.append(Subsubsection("Attack Details"))
-        with self.report_section.create(Table(position="!h")):
-            # -- Create subtables for the attack parameters.
-            with self.report_section.create(
-                SubTable(arguments=NoEscape(r"0.4\linewidth"))
-            ) as subtab_ap:
+        with self.report_section.create(MiniPage()):
+            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+                # -- Create table for the attack parameters.
                 self.report_section.append(Command("centering"))
                 with self.report_section.create(Tabular("|l|c|")) as tab_ap:
                     tab_ap.add_hline()
@@ -965,12 +963,17 @@ class DirectGmia:
                         ["Probability-Threshold", ap["probability_threshold"]]
                     )
                     tab_ap.add_hline()
-                subtab_ap.add_caption("Attack Parameters")
+                self.report_section.append(Command("captionsetup", "labelformat=empty"))
+                self.report_section.append(
+                    Command(
+                        "captionof",
+                        "table",
+                        extra_arguments="Attack parameters",
+                    )
+                )
 
-            # -- Create subtable for the data configuration
-            with self.report_section.create(
-                SubTable(arguments=NoEscape(r"0.6\linewidth"))
-            ) as subtab_dc:
+            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+                # -- Create table for the data configuration
                 self.report_section.append(Command("centering"))
                 nr_targets, target_training_set_size = dc[
                     "record_indices_per_target"
@@ -1013,7 +1016,14 @@ class DirectGmia:
                         ]
                     )
                     tab_dc.add_hline()
-                subtab_dc.add_caption("Data and Target Configuration")
+                self.report_section.append(Command("captionsetup", "labelformat=empty"))
+                self.report_section.append(
+                    Command(
+                        "captionof",
+                        "table",
+                        extra_arguments="Target and Data Configuration",
+                    )
+                )
 
     def _report_attack_results(self, save_path):
         """Create subsubsection describing the most important results of the attack.
@@ -1141,30 +1151,11 @@ class DirectGmia:
             fig.add_image(
                 "fig/hist_selected_records.png", width=NoEscape(r"0.5\textwidth")
             )
-            fig.add_caption("Accuracy-Recall Curve for the Selected Target Records")
-
-
-class SubTable(Environment):
-    """Environment that allows to place tables next to each other."""
-
-    _latex_name = "subtable"
-
-    def __init__(self, arguments):
-        """Initialize subtable environment.
-
-        Parameters
-        ----------
-        arguments: str
-            Arguments for the subtable environment (e.g. the width of the subtable).
-        """
-        super().__init__(arguments=arguments)
-
-    def add_caption(self, caption):
-        """Add a caption to the subtable.
-
-        Parameters
-        ----------
-        caption: str
-            Caption-string.
-        """
-        self.append(Command("caption", caption))
+            self.report_section.append(Command("captionsetup", "labelformat=empty"))
+            self.report_section.append(
+                Command(
+                    "captionof",
+                    "figure",
+                    extra_arguments="Accuracy-Recall Curve for the Selected Target Records",
+                )
+            )
