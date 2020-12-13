@@ -22,7 +22,7 @@ copyright = '2020, Institute for IT-Security (University of Luebeck)'
 author = 'University of Luebeck: ITS KI-Lab Group'
 
 # The full version, including alpha/beta/rc tags
-release = 'preAlpha'
+release = 'alpha'
 
 
 # -- General configuration ---------------------------------------------------
