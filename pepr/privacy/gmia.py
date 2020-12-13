@@ -13,11 +13,10 @@ from sklearn.metrics import pairwise_distances
 from statsmodels.distributions.empirical_distribution import ECDF
 
 from scipy.interpolate import pchip
-import tensorflow as tf
 from tensorflow.keras.models import Model
 from tensorflow.keras import models
 
-from pepr import report
+from pepr import attack, report
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -25,7 +24,7 @@ logger.setLevel(logging.DEBUG)
 plt.style.use("seaborn-white")
 
 
-class DirectGmia:
+class DirectGmia(attack.Attack):
     """Direct Generalized Membership Inference Attack (d-GMIA)
 
     Attack-Steps:
@@ -74,9 +73,9 @@ class DirectGmia:
         * probability_threshold (float): For details see section 4.3 from the paper.
 
     data : numpy.ndarray
-        Dataset with all training samples used in this pentesting setting.
+        Dataset with all training samples used in the given pentesting setting.
     labels : numpy.ndarray
-        Array of all labels used in this pentesting setting.
+        Array of all labels used in the given pentesting setting.
     data_conf: dict
         Dictionary describing which record-indices are used to train the reference
         models, the target model(s) and which are used for the evaluation of the
@@ -98,26 +97,23 @@ class DirectGmia:
 
     References
     ----------
-    Implementation of the direct gmia from Long, Yunhui and Bindschaedler, Vincent and Wang,
-    Lei and Bu, Diyue and Wang, Xiaofeng and Tang, Haixu and Gunter, Carl A and Chen, Kai
-    (2018). Understanding membership inferences on well-generalized learning models. arXiv
-    preprint arXiv:1802.04889.
+    Implementation of the direct gmia from Long, Yunhui and Bindschaedler, Vincent and
+    Wang, Lei and Bu, Diyue and Wang, Xiaofeng and Tang, Haixu and Gunter, Carl A and
+    Chen, Kai (2018). Understanding membership inferences on well-generalized learning
+    models. arXiv preprint arXiv:1802.04889.
     """
 
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        """Initialize direct generalized membership inference attack."""
-        self.attack_alias = attack_alias
-        self.attack_pars = attack_pars
-        self.data = data
-        self.labels = labels
-        self.labels_cat = tf.keras.utils.to_categorical(
-            labels, num_classes=attack_pars["number_classes"]
+        super().__init__(
+            attack_alias, attack_pars, data, labels, data_conf, target_models
         )
-        self.data_conf = data_conf
-        self.target_models = target_models
-        self.attack_results = {}
+        self.report_section = report.ReportSection(
+            "Generalized Membership Inference Attack (Direct)",
+            self.attack_alias,
+            "gmia",
+        )
 
     def run(self, save_path=None, load_pars=None):
         """Run the direct generalized membership inference attack.
@@ -889,26 +885,25 @@ class DirectGmia:
         return attack_results
 
     def create_attack_report(self, save_path="gmia_report"):
-        """Create an attack report for just this attack instantiation."""
+        """Create an attack report just for the given attack instantiation.
+
+        Parameters
+        ----------
+        save_path : str
+            Path to save the tex and pdf file of the attack report.
+        """
 
         # Create directory structure for the attack report, including the figure
         # directory for the figures of the results subsubsection.
         os.makedirs(save_path + "/fig", exist_ok=True)
 
-        self._create_attack_section(save_path=save_path)
+        self.create_attack_section(save_path=save_path)
         report.report_generator(save_path, [self.report_section])
 
-    def _create_attack_section(self, save_path):
+    def create_attack_section(self, save_path):
         """Create a report section for the gmia attack instantiation."""
 
-        self.report_section = report.ReportSection(
-            "Generalized Membership Inference Attack (Direct)",
-            self.attack_alias,
-            "gmia",
-        )
-
         self._report_attack_configuration()
-
         self._report_attack_results(save_path)
 
     def _report_attack_configuration(self):
