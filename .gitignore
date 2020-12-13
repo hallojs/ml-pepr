@@ -15,3 +15,8 @@ docs/build
 
 # logs
 *.log
+
+# package
+pepr.egg-info
+build
+dist
