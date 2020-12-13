@@ -1,3 +1,5 @@
+"""Report module for generating attack reports describing the attack results."""
+
 from pylatex.base_classes.containers import Container
 from pylatex import Document, Command, Section, Subsection
 from pylatex.utils import NoEscape
@@ -49,7 +51,15 @@ class ReportSection(Container):
 
 
 def report_generator(save_path, attack_sections):
-    """Create a report out of multiple attack sections."""
+    """Create a report out of multiple attack sections.
+
+    Parameters
+    ----------
+    save_path : str
+        Path to save the tex and pdf file of the report.
+    attack_sections : List of AttackSections
+        List containing one attack section per attack in the pentesting setting.
+    """
     doc = Document(documentclass='article')
     doc.preamble.append(Command("usepackage", "graphicx"))
     doc.preamble.append(Command("usepackage", "subcaption"))

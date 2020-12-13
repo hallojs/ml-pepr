@@ -1,3 +1,5 @@
+"""Utility module containing utilities to speed up pentesting."""
+
 import numpy as np
 
 
