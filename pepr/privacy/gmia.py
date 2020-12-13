@@ -5,8 +5,7 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-from pylatex import Command, NoEscape, Tabular, Table, Figure, MiniPage, MultiColumn
-from pylatex.base_classes import Environment
+from pylatex import Command, NoEscape, Tabular, Figure, MiniPage, MultiColumn
 from pylatex.section import Subsubsection
 from pylatex.utils import bold
 from sklearn.metrics import pairwise_distances
