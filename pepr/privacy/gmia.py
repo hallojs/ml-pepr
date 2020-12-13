@@ -423,7 +423,7 @@ class DirectGmia(attack.Attack):
         for i, records in enumerate(records_per_reference_model):
             logger.info(
                 f"Progress: Train reference model {i}/"
-                f"{len(records_per_reference_model)}."
+                f"{len(records_per_reference_model)-1}."
             )
             tmp_model = create_compile_model()
             tmp_model.fit(
