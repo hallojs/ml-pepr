@@ -1156,6 +1156,7 @@ class DirectGmia:
                 Command(
                     "captionof",
                     "figure",
-                    extra_arguments="Accuracy-Recall Curve for the Selected Target Records",
+                    extra_arguments="Selected potential vulnerable target records per "
+                    "class",
                 )
             )
