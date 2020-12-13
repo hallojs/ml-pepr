@@ -14,9 +14,6 @@ descriptions = {
 
 class ReportSection(Container):
     """Attack section for a specific attack instantiation in the attack report."""
-    attack_type: str
-    attack_name: str
-    attack_alias: str
     _latex_name = "reportsection"
 
     def __init__(self, attack_name, attack_alias, attack_type):

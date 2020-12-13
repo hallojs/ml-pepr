@@ -105,18 +105,6 @@ class DirectGmia:
     preprint arXiv:1802.04889.
     """
 
-    attack_alias: str
-    attack_pars: dict
-    data: np.ndarray
-    labels: np.ndarray
-    data_conf: dict
-    target_models: list
-    report_section: report.ReportSection
-    save_path: str  # TODO: Change this to pythons path object
-    load_pars: dict
-    end_results: dict
-    attack_results: dict
-
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
