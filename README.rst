@@ -4,7 +4,7 @@ ML-PePR: Pentesting Privacy and Robustness [alpha]
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
 
-PePR is a library for pentesting the privacy risk and robustness of machine learning models.
+PePR [ˈpɛpɚ] is a library for pentesting the privacy risk and robustness of machine learning models.
 
 **Caution, this is a alpha version. Always check the plausibility of your results!**
 
@@ -33,9 +33,36 @@ Coming soon!
 
 Basic Usage
 -----------
+PePR offers the following options to structure privacy and/or robustness pentesting:
+
+1. Run a single attack from the attack catalog with a single attack configuration
+
+    1.1a Run the attack on a single target model
+
+    1.1b Or run the attack on multiple target models to get a more general result, that is averaged over multiple target
+    model instances and target training data sets (see also ``pepr.utilities.assign_record_ids_to_target_models`` for
+    a utility function to generate appropriate training data sets)
+
+    1.2a Generate a privacy and robustness report for just this attack configuration and the attacked target model
+
+    1.2b Or generate a report section which can later be combined with other report sections to a more extensive report
+         containing results of multiple attack types and attack configurations (see ``pepr.report.report_generator``)
+
+2. Run multiple attacks from the attack catalog with a single or multiple attack configurations [work in progress]
+
+    2.1 Write an attack configuration (YAML format) for the attack runner
+
+    2.2a Run the attacks on a single target model
+
+    2.2b Or run the attack on multiple target models to get a more general result, that is averaged over multiple target
+    model instances and target training data sets (see also ``pepr.utilities.assign_record_ids_to_target_models`` for
+    a utility function for generating appropriate training data sets)
+
+    2.3 Generate a privacy and robustness report for all or a selection of the performed attacks
+
+    2.4 Optional: Rerun a selection of attacks with a new attack configuration to optimize the attack results
 
 
-Implemented Attacks
--------------------
 
-
+Attack Catalog
+--------------
