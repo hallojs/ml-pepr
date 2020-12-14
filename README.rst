@@ -26,8 +26,8 @@ Via Repository
 2. Cd to project directory: ``cd ml-pepr``
 3. Run in the terminal: ``pip install -e .``
 
-*Hint: If you want to use ``pip install -e .`` in Google Colab, you must restart the runtime before you can
-``import pepr``.*
+Hint: If you want to use ``pip install -e .`` in Google Colab, you must restart the runtime before you can
+``import pepr``.
 
 Via PyPi
 ~~~~~~~~
