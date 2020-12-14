@@ -77,7 +77,7 @@ Example Notebooks
   single target model with a single attack configuration.
 
 .. image:: https://colab.research.google.com/assets/colab-badge.svg
-    :target: https://github.com/hallojs/ml-pepr/blob/master/notebooks/direct_gmia_tutorial.ipynb
+    :target: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/direct_gmia_tutorial.ipynb
 
 Attack Catalog
 --------------
