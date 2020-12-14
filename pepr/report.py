@@ -50,7 +50,7 @@ class ReportSection(Container):
         return s
 
 
-def report_generator(save_path, attack_sections):
+def report_generator(save_path, attack_sections, pdf=False):
     """Create a report out of multiple attack sections.
 
     Parameters
@@ -59,6 +59,8 @@ def report_generator(save_path, attack_sections):
         Path to save the tex and pdf file of the report.
     attack_sections : List of AttackSections
         List containing one attack section per attack in the pentesting setting.
+    pdf : bool
+        If set, generate pdf out of latex file.
     """
     doc = Document(documentclass='article')
     doc.preamble.append(Command("usepackage", "graphicx"))
@@ -74,4 +76,7 @@ def report_generator(save_path, attack_sections):
             doc.append(descriptions[section.attack_type])
             doc.append(section)
 
-    doc.generate_pdf(save_path + "/attack_report", clean_tex=False)
+    if pdf:
+        doc.generate_pdf(save_path + "/attack_report", clean_tex=False)
+    else:
+        doc.generate_tex(save_path + "/attack_report")

@@ -884,13 +884,15 @@ class DirectGmia(attack.Attack):
 
         return attack_results
 
-    def create_attack_report(self, save_path="gmia_report"):
+    def create_attack_report(self, save_path="gmia_report", pdf=False):
         """Create an attack report just for the given attack instantiation.
 
         Parameters
         ----------
         save_path : str
             Path to save the tex and pdf file of the attack report.
+        pdf : bool
+            If set, generate pdf out of latex file.
         """
 
         # Create directory structure for the attack report, including the figure
@@ -898,7 +900,7 @@ class DirectGmia(attack.Attack):
         os.makedirs(save_path + "/fig", exist_ok=True)
 
         self.create_attack_section(save_path=save_path)
-        report.report_generator(save_path, [self.report_section])
+        report.report_generator(save_path, [self.report_section], pdf)
 
     def create_attack_section(self, save_path):
         """Create a report section for the gmia attack instantiation."""
