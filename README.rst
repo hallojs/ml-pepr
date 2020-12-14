@@ -46,7 +46,7 @@ PePR offers the following options to structure privacy and/or robustness pentest
     1.2a Generate a privacy and robustness report for just this attack configuration and the attacked target model
 
     1.2b Or generate a report section which can later be combined with other report sections to a more extensive report
-         containing results of multiple attack types and attack configurations (see ``pepr.report.report_generator``)
+    containing results of multiple attack types and attack configurations (see ``pepr.report.report_generator``)
 
 2. Run multiple attacks from the attack catalog with a single or multiple attack configurations [work in progress]
 
