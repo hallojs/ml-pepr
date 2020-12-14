@@ -1,8 +1,14 @@
 ML-PePR: Pentesting Privacy and Robustness [alpha]
 =====================================================
 
+.. image:: https://mybinder.org/badge_logo.svg
+    :target: https://mybinder.org/v2/gh/hallojs/ml-pepr/master
+
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
+
+.. image:: pybadges/python_version.svg
+    :target: https://www.python.org
 
 PePR [ˈpɛpɚ] is a library for pentesting the privacy risk and robustness of machine learning models.
 
@@ -20,6 +26,8 @@ Via Repository
 2. Cd to project directory: ``cd ml-pepr``
 3. Run in the terminal: ``pip install -e .``
 
+*Hint: If you want to use ``pip install -e .`` in Google Colab, you must restart the runtime before you can
+``import pepr``.*
 
 Via PyPi
 ~~~~~~~~
@@ -63,6 +71,30 @@ PePR offers the following options to structure privacy and/or robustness pentest
     2.4 Optional: Rerun a selection of attacks with a new attack configuration to optimize the attack results
 
 
+Example Notebooks
+-----------------
+* direct_gmia_tutorial: A first really simple example notebook of using the direct membership inference attack on a
+  | single target model with a single attack configuration.
+
+.. image:: https://colab.research.google.com/assets/colab-badge.svg
+  :target: https://github.com/hallojs/ml-pepr/blob/master/notebooks/direct_gmia_tutorial.ipynb
 
 Attack Catalog
 --------------
+PePR offers the following attacks:
+
++------------------------------------------------------------+---------------------+
+| Attack                                                     | Type                |
++============================================================+=====================+
+| [1]_ Membership Inference Attack (Coming Soon!)            | Privacy (Black Box) |
++------------------------------------------------------------+---------------------+
+| [2]_ Direct Generalized Membership Inference Attack (gmia) | Privacy (Black Box) |
++------------------------------------------------------------+---------------------+
+
+References
+----------
+.. [1] Shokri, Reza, et al. "Membership inference attacks against machine learning models." 2017 IEEE Symposium on
+   Security and Privacy (SP). IEEE, 2017.
+
+.. [2] Long, Yunhui, et al. "Understanding membership inferences on well-generalized learning models." arXiv preprint
+   arXiv:1802.04889 (2018).
