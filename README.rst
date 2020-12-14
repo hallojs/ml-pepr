@@ -74,10 +74,10 @@ PePR offers the following options to structure privacy and/or robustness pentest
 Example Notebooks
 -----------------
 * direct_gmia_tutorial: A first really simple example notebook of using the direct membership inference attack on a
-  | single target model with a single attack configuration.
+  single target model with a single attack configuration.
 
 .. image:: https://colab.research.google.com/assets/colab-badge.svg
-  :target: https://github.com/hallojs/ml-pepr/blob/master/notebooks/direct_gmia_tutorial.ipynb
+    :target: https://github.com/hallojs/ml-pepr/blob/master/notebooks/direct_gmia_tutorial.ipynb
 
 Attack Catalog
 --------------
