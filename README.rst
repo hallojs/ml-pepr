@@ -40,7 +40,8 @@ Basic Usage
 -----------
 PePR offers the following options to structure privacy and/or robustness pentesting:
 
-1. Run a single attack from the attack catalog with a single attack configuration
+1. Run a single attack with a single attack configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1.1a Run the attack on a single target model
 
@@ -53,7 +54,8 @@ a utility function to generate appropriate training data sets)
 1.2b Or generate a report section which can later be combined with other report sections to a more extensive report
 containing results of multiple attack types and attack configurations (see ``pepr.report.report_generator``)
 
-2. Run multiple attacks from the attack catalog with a single or multiple attack configurations [work in progress]
+2. Run multiple attacks with a single or multiple attack configurations [work in progress]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 2.1 Write an attack configuration (YAML format) for the attack runner
 
