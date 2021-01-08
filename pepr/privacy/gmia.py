@@ -285,7 +285,6 @@ class DirectGmia(attack.Attack):
             len(target_train_data),
             hlf_distances,
         )
-
         self.attack_results["selected_target_records"] = target_records
 
         # -- Compute Step 8
@@ -294,6 +293,7 @@ class DirectGmia(attack.Attack):
             target_records, attack_eval_data, attack_eval_labels_cat, reference_models
         )
         logger.debug(f"Reference inferences shape: {reference_inferences.shape}")
+        self.attack_results["reference_inferences"] = reference_inferences
 
         # -- Compute Step 9
         logger.info("Infer log losses of target model.")
@@ -301,6 +301,7 @@ class DirectGmia(attack.Attack):
             target_records, attack_eval_data, attack_eval_labels_cat, self.target_models
         )
         logger.debug(f"Target inferences shape: {target_inferences.shape}")
+        self.attack_results["target_inferences"] = target_inferences
 
         # -- Compute Step 10
         logger.info(
@@ -314,8 +315,9 @@ class DirectGmia(attack.Attack):
         ) = DirectGmia._sample_reference_losses(target_records, reference_inferences)
         logger.debug(f"PCHIP references shape: {len(pchip_references)}")
         logger.debug(f"ECDF references shape: {len(ecdf_references)}")
-
         self.attack_results["used_target_records"] = used_target_records
+        self.attack_results["pchip_references"] = pchip_references
+        self.attack_results["ecdf_references"] = ecdf_references
 
         # -- Compute Step 11
         logger.info(
