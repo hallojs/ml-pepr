@@ -283,14 +283,20 @@ class DirectGmia(attack.Attack):
         max_rounds = 100
         if "max_rounds" in self.attack_pars.keys():
             max_rounds = self.attack_pars["max_rounds"]
+        neighbor_threshold = 0.5
+        if "neighbor_threshold" in self.attack_pars.keys():
+            neighbor_threshold = self.attack_pars["neighbor_threshold"]
+        probability_threshold = 0.1
+        if "probability_threshold" in self.attack_pars.keys():
+            probability_threshold = self.attack_pars["probability_threshold"]
 
         logger.info("Determine potential vulnerable target records.")
         target_records = DirectGmia._select_target_records(
             len(reference_train_data),
             len(target_train_data),
             hlf_distances,
-            self.attack_pars["neighbor_threshold"],
-            self.attack_pars["probability_threshold"],
+            neighbor_threshold,
+            probability_threshold,
             number_target_records,
             max_rounds
         )
