@@ -26,7 +26,7 @@ gast==0.3.3
 google-auth==1.23.0
 google-auth-oauthlib==0.4.2
 google-pasta==0.2.0
-grpcio==1.33.2
+grpcio==1.32.0
 h5py==2.10.0
 idna==2.10
 imagesize==1.2.0
@@ -58,7 +58,7 @@ nbconvert==6.0.7
 nbformat==5.0.8
 nest-asyncio==1.4.3
 notebook==6.1.5
-numpy==1.18.5
+numpy==1.19.5
 oauthlib==3.1.0
 opt-einsum==3.3.0
 ordered-set==4.0.2
@@ -113,7 +113,7 @@ statsmodels==0.12.1
 tensorboard==2.4.0
 tensorboard-plugin-wit==1.7.0
 tensorflow==2.4.0
-tensorflow-estimator==2.3.0
+tensorflow-estimator==2.4.0
 termcolor==1.1.0
 terminado==0.9.1
 testpath==0.4.4
