@@ -341,15 +341,43 @@ class DirectGmia(attack.Attack):
         self.attack_results = {**self.attack_results, **results}
 
         logger.info(
-            f"Attack accuracy over all target model per cut-off-p-value: "
+            f"Attack accuracy over all target models per cut-off-p-value: "
             f'{self.attack_results["overall_accuracy"]}'
         )
         logger.info(
-            f"Attack recall over all target model per cut-off-p-value: "
+            f"Attack recall over all target models per cut-off-p-value: "
             f'{self.attack_results["overall_recall"]}'
         )
-        print(
-            "Attack accuracy per target model: ", self.attack_results["accuracy_list"]
+
+        # -- Output Attack Summary
+        res = self.attack_results
+        logger.info(
+            "Attack Summary"
+            f"\n"
+            f"\n###################### Attack Results ######################"
+            f"\n"
+            f"\n{'Cut-Off-P-Value:':<30}{'0.01':>10}{'0.02':>10}{'0.05':>10}"
+            f"\n{'True Positives:':<30}"
+            f"{res['tp_list'][1][0]:>10}"
+            f"{res['tp_list'][2][0]:>10}"
+            f"{res['tp_list'][5][0]:>10}"
+            f"\n{'False Positives:':<30}"
+            f"{res['fp_list'][1][0]:>10}"
+            f"{res['fp_list'][2][0]:>10}"
+            f"{res['fp_list'][5][0]:>10}"
+            f"\n{'Accuracy:':<30}"
+            f"{round(res['accuracy_list'][1][0], 3):>10}"
+            f"{round(res['accuracy_list'][2][0], 3):>10}"
+            f"{round(res['accuracy_list'][5][0], 3):>10}"
+            f"\n{'Recall:':<30}"
+            f"{round(res['recall_list'][1][0], 3):>10}"
+            f"{round(res['recall_list'][2][0], 3):>10}"
+            f"{round(res['recall_list'][5][0], 3):>10}"
+            f"\n"
+            f"\n{'Selected Target Records:':<30}"
+            f"{len(res['selected_target_records']):>10}"
+            f"\n{'Used Target Records:':<30}"
+            f"{len(res['used_target_records']):>10}"
         )
 
     @staticmethod
