@@ -280,9 +280,9 @@ class DirectGmia(attack.Attack):
         number_target_records = None
         if "number_target_records" in self.attack_pars.keys():
             number_target_records = self.attack_pars["number_target_records"]
-        max_rounds = 100
-        if "max_rounds" in self.attack_pars.keys():
-            max_rounds = self.attack_pars["max_rounds"]
+        max_search_rounds = 100
+        if "max_search_rounds" in self.attack_pars.keys():
+            max_rounds = self.attack_pars["max_search_rounds"]
         neighbor_threshold = 0.5
         if "neighbor_threshold" in self.attack_pars.keys():
             neighbor_threshold = self.attack_pars["neighbor_threshold"]
@@ -291,16 +291,22 @@ class DirectGmia(attack.Attack):
             probability_threshold = self.attack_pars["probability_threshold"]
 
         logger.info("Determine potential vulnerable target records.")
-        target_records = DirectGmia._select_target_records(
+        (
+            target_records,
+            neighbor_threshold,
+            probability_threshold,
+        ) = DirectGmia._select_target_records(
             len(reference_train_data),
             len(target_train_data),
             hlf_distances,
             neighbor_threshold,
             probability_threshold,
             number_target_records,
-            max_rounds
+            max_search_rounds,
         )
         self.attack_results["selected_target_records"] = target_records
+        self.attack_results["neighbor_threshold"] = neighbor_threshold
+        self.attack_results["probability_threshold"] = probability_threshold
 
         # -- Compute Step 8
         logger.info("Infer log losses of reference models.")
@@ -707,7 +713,7 @@ class DirectGmia(attack.Attack):
         logger.info(f"Target records (indexes): {target_records}.")
         logger.info(f"Neighbor threshold: {neighbor_threshold}")
 
-        return target_records
+        return target_records, neighbor_threshold, probability_threshold
 
     @staticmethod
     def _get_model_inference(idx_records, records, labels_cat, prediction_models):
@@ -999,6 +1005,11 @@ class DirectGmia(attack.Attack):
         # Create tables for attack parameters and the data configuration.
         ap = self.attack_pars
         dc = self.data_conf
+        neighbor_threshold = str(self.attack_results["neighbor_threshold"])
+        probability_threshold = str(self.attack_results["probability_threshold"])
+        if "number_target_records" in ap.keys():
+            neighbor_threshold += " (auto)"
+            probability_threshold += " (auto)"
         self.report_section.append(Subsubsection("Attack Details"))
         with self.report_section.create(MiniPage()):
             with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
@@ -1027,10 +1038,10 @@ class DirectGmia(attack.Attack):
                     tab_ap.add_hline()
                     tab_ap.add_row(["HLF-Layer-Number", ap["hlf_layer_number"]])
                     tab_ap.add_hline()
-                    tab_ap.add_row(["Neighbor-Threshold", ap["neighbor_threshold"]])
+                    tab_ap.add_row(["Neighbor-Threshold", neighbor_threshold])
                     tab_ap.add_hline()
                     tab_ap.add_row(
-                        ["Probability-Threshold", ap["probability_threshold"]]
+                        ["Probability-Threshold", probability_threshold]
                     )
                     tab_ap.add_hline()
                 self.report_section.append(Command("captionsetup", "labelformat=empty"))
