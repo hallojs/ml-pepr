@@ -351,6 +351,17 @@ class DirectGmia(attack.Attack):
 
         # -- Output Attack Summary
         res = self.attack_results
+        # Number of selected target records which are members
+        selected_target_records_in = len(
+            set(res["selected_target_records"]).intersection(
+                records_per_target_model[0]
+            )
+        )
+        # Number of used target records which are members
+        used_target_records_in = len(
+            set(res["used_target_records"]).intersection(records_per_target_model[0])
+        )
+
         logger.info(
             "Attack Summary"
             f"\n"
@@ -376,8 +387,10 @@ class DirectGmia(attack.Attack):
             f"\n"
             f"\n{'Selected Target Records:':<30}"
             f"{len(res['selected_target_records']):>10}"
+            f" ({selected_target_records_in} members)"
             f"\n{'Used Target Records:':<30}"
             f"{len(res['used_target_records']):>10}"
+            f" ({used_target_records_in} members)"
         )
 
     @staticmethod
@@ -1079,6 +1092,20 @@ class DirectGmia(attack.Attack):
                     )
                 )
             self.report_section.append(Command("hfill"))
+
+            # Number of selected target records which are members
+            selected_target_records_in = len(
+                set(res["selected_target_records"]).intersection(
+                    self.data_conf["record_indices_per_target"][0]
+                )
+            )
+            # Number of used target records which are members
+            used_target_records_in = len(
+                set(res["used_target_records"]).intersection(
+                    self.data_conf["record_indices_per_target"][0]
+                )
+            )
+
             with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
                 self.report_section.append(Command("centering"))
                 with self.report_section.create(Tabular("|l|c|c|c|")) as result_tab:
@@ -1126,14 +1153,20 @@ class DirectGmia(attack.Attack):
                     result_tab.add_row(
                         "Selected Target Records",
                         MultiColumn(
-                            3, align="|c|", data=len(res["selected_target_records"])
+                            3,
+                            align="|c|",
+                            data=f"{len(res['selected_target_records'])} "
+                            f"({selected_target_records_in} members)",
                         ),
                     )
                     result_tab.add_hline()
                     result_tab.add_row(
                         "Used Target Records",
                         MultiColumn(
-                            3, align="|c|", data=len(res["used_target_records"])
+                            3,
+                            align="|c|",
+                            data=f"{len(res['used_target_records'])} "
+                            f"({used_target_records_in} members)",
                         ),
                     )
                     result_tab.add_hline()
