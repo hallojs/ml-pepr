@@ -277,13 +277,22 @@ class DirectGmia(attack.Attack):
             hlf_distances = np.load(path)
 
         # -- Compute Step 7
+        number_target_records = None
+        if "number_target_records" in self.attack_pars.keys():
+            number_target_records = self.attack_pars["number_target_records"]
+        max_rounds = 100
+        if "max_rounds" in self.attack_pars.keys():
+            max_rounds = self.attack_pars["max_rounds"]
+
         logger.info("Determine potential vulnerable target records.")
         target_records = DirectGmia._select_target_records(
-            self.attack_pars["neighbor_threshold"],
-            self.attack_pars["probability_threshold"],
             len(reference_train_data),
             len(target_train_data),
             hlf_distances,
+            self.attack_pars["neighbor_threshold"],
+            self.attack_pars["probability_threshold"],
+            number_target_records,
+            max_rounds
         )
         self.attack_results["selected_target_records"] = target_records
 
@@ -609,60 +618,88 @@ class DirectGmia(attack.Attack):
 
         return distances
 
-    # TODO: Precise parameter description.
-
     @staticmethod
     def _select_target_records(
-        neighbor_threshold,
-        probability_threshold,
         background_knowledge_size,
         training_set_size,
         distances,
+        neighbor_threshold=0.5,
+        probability_threshold=0.1,
+        n_targets=None,
+        max_search_rounds=100,
     ):
         """Select vulnerable target records.
 
-        A record is selected as target record if it has few neighbours regarding
-        its high level features. We estimate the number of neighbours of a record
-        in the target training set over the number of neighbours in the reference
+        A record is selected as target record if it has few neighbours regarding its
+        high level features. We estimate the number of neighbours of a record in the
+        target training set over the number of neighbours in the reference
         training sets.
 
         Parameters
         ----------
-        neighbor_threshold : float
-            If distance is smaller then the neighbor threshold the record is
-            selected as target record.
-        probability_threshold : float
-            For details see section 4.3 from the paper.
         background_knowledge_size : int
             Size of the background knowledge of the attacker.
         training_set_size : int
             Number of samples used to train target model.
         distances : numpy.ndarray
             Distance array used for target selection.
-
+        neighbor_threshold : float
+            If distance is smaller then the neighbor threshold the record is selected
+            as target record.
+        probability_threshold : float
+            For details see section 4.3 from the original publication.
+        n_targets : int
+            If set, the selection algorithm performs `max_search_rounds`, to find a
+            `neighbor_threshold`, that leads to a finding of `n_targets` target records.
+            These target records are most vulnerable with respect to our selection
+            criterion.
+        max_search_rounds : int
+            Maximal number of search rounds performed, if `n_targets` is given.
         Returns
         -------
         numpy.ndarray
             Selected target records
         """
-        logger.info("Start target record selection.")
-        if np.min(distances) >= neighbor_threshold:
-            logger.warning("neighbor_threshold is smaller then all distances!")
 
-        n_neighbors = np.count_nonzero(distances < neighbor_threshold, axis=1)
+        def selection():
+            # Number of neighbors in the reference data sets
+            n_neighbors = np.count_nonzero(distances < neighbor_threshold, axis=1)
+            # Estimated number of records in the training dataset of the target model
+            est_n_neighbors = n_neighbors * (
+                background_knowledge_size / training_set_size
+            )
+            records = np.where(est_n_neighbors < probability_threshold)[0]
+            return records
 
-        est_n_neighbors = n_neighbors * (background_knowledge_size / training_set_size)
+        if n_targets is None:
+            return selection()
 
-        target_records = np.where(est_n_neighbors < probability_threshold)[0]
+        target_records = selection()
+        cnt = 0
+        last_jmp = neighbor_threshold
+        while len(target_records) != n_targets and cnt < max_search_rounds:
+            if cnt == 0 and len(target_records) < n_targets:
+                neighbor_threshold += last_jmp
+            elif cnt == 0 and len(target_records) > n_targets:
+                neighbor_threshold += last_jmp
+            else:
+                if len(target_records) < n_targets:
+                    last_jmp *= 2
+                    neighbor_threshold -= last_jmp
+                else:
+                    last_jmp /= 2
+                    neighbor_threshold += last_jmp
+            cnt += 1
+            target_records = selection()
+            if cnt % 5 == 0:
+                logger.debug(f"Performed {cnt} search rounds.")
+                logger.debug(f"Found {len(target_records)} target records.")
+                logger.debug(f"Neighbor threshold: {neighbor_threshold}")
 
-        logger.info(f"Minimal distance: {np.min(distances)}.")
-        logger.info(f"Mean number of neighbors: {np.mean(n_neighbors)}.")
-        logger.info(f"Mean estimates number of neighbors: {np.mean(est_n_neighbors)}.")
+        logger.info(f"Performed {cnt} search rounds.")
         logger.info(f"Number of target records: {len(target_records)}.")
         logger.info(f"Target records (indexes): {target_records}.")
-        logger.info(
-            f"Number of neighbors per target record: {n_neighbors[target_records]}."
-        )
+        logger.info(f"Neighbor threshold: {neighbor_threshold}")
 
         return target_records
 
