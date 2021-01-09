@@ -71,6 +71,13 @@ class DirectGmia(attack.Attack):
         * neighbor_threshold (float): If distance is smaller then the neighbor
           threshold the record is selected as target record.
         * probability_threshold (float): For details see section 4.3 from the paper.
+        * number_target_records (int): If set, the selection algorithm performs
+          `max_search_rounds`, to find a `neighbor_threshold`, that leads to a finding
+          of `n_targets` target records. These target records are most vulnerable with
+          respect to our selection criterion.
+        * max_search_rounds (int): If `number_target_records` is given, maximal
+          `max_search_rounds` are performed to find `number_target_records` of potential
+          vulnerable target records.
 
     data : numpy.ndarray
         Dataset with all training samples used in the given pentesting setting.
@@ -94,6 +101,49 @@ class DirectGmia(attack.Attack):
 
     target_models: iterable
         List of target models which should be tested.
+
+    Attributes
+    ----------
+    attack_alias : str
+        Alias for a specific instantiation of the attack class.
+    attack_pars : dict
+        Dictionary containing all needed parameters fo the attack.
+    data : numpy.ndarray
+        Dataset with all training samples used in the given pentesting setting.
+    labels : numpy.ndarray
+        Array of all labels used in the given pentesting setting.
+    data_conf : dict
+        Dictionary describing the data configuration of the given pentesting
+        setting.
+    target_models : iterable
+        List of target models which should be tested.
+    attack_results : dict
+
+        * selected_target_records (numpy.ndarray): List of record indices selected as
+          potential vulnerable.
+        * neighbor_threshold (float): If distance is smaller then the neighbor threshold
+          the record is selected as target record.
+        * probability_threshold (float): For details see section 4.3 from the original
+          publication.
+        * reference_inferences (numpy.ndarray): Array of log losses of the predictions
+          on the reference models.
+        * target_inferences (numpy.ndarray): Array of log losses of the predictions on
+          the target models.
+        * used_target_records (numpy.ndarray): Target records finally used for the
+          attack.
+        * pchip_references (list): Interpolated ecdfs of sampled log losses.
+        * ecdf_references (list): Estimated CDF of sampled log losses.
+        * tp_list (list): True positives per cut-off-p-value (0, 0.01, 0.02, ..., 1) and
+          target model.
+        * fp_list (list): False positives per cut-off-p-value and target model.
+        * fn_list (list): False negatives per cut-off-p-value and target model.
+        * tn_list (list): True negatives per cut-off-p-value and target model.
+        * accuracy_list (list): Attack accuracy per cut-off-p-value and target model.
+        * recall_list (list): Attack recall per cut-off-p-value and target model.
+        * overall_accuracy (list): Attack accuracy averaged over all target models per
+          cut-off-p-value.
+        * overall_recall (list): Attack recall averaged over all target models per
+          cut-off-p-value.
 
     References
     ----------
@@ -637,7 +687,7 @@ class DirectGmia(attack.Attack):
         distances,
         neighbor_threshold=0.5,
         probability_threshold=0.1,
-        n_targets=None,
+        number_target_records=None,
         max_search_rounds=100,
     ):
         """Select vulnerable target records.
@@ -660,13 +710,15 @@ class DirectGmia(attack.Attack):
             as target record.
         probability_threshold : float
             For details see section 4.3 from the original publication.
-        n_targets : int
+        number_target_records : int
             If set, the selection algorithm performs `max_search_rounds`, to find a
             `neighbor_threshold`, that leads to a finding of `n_targets` target records.
             These target records are most vulnerable with respect to our selection
             criterion.
         max_search_rounds : int
-            Maximal number of search rounds performed, if `n_targets` is given.
+            If `number_target_records` is given, maximal `max_search_rounds` are
+            performed to find `number_target_records` of potential vulnerable target
+            records.
         Returns
         -------
         numpy.ndarray
@@ -683,19 +735,19 @@ class DirectGmia(attack.Attack):
             records = np.where(est_n_neighbors < probability_threshold)[0]
             return records
 
-        if n_targets is None:
+        if number_target_records is None:
             return selection()
 
         target_records = selection()
         cnt = 0
         last_jmp = neighbor_threshold
-        while len(target_records) != n_targets and cnt < max_search_rounds:
-            if cnt == 0 and len(target_records) < n_targets:
+        while len(target_records) != number_target_records and cnt < max_search_rounds:
+            if cnt == 0 and len(target_records) < number_target_records:
                 neighbor_threshold += last_jmp
-            elif cnt == 0 and len(target_records) > n_targets:
+            elif cnt == 0 and len(target_records) > number_target_records:
                 neighbor_threshold += last_jmp
             else:
-                if len(target_records) < n_targets:
+                if len(target_records) < number_target_records:
                     last_jmp *= 2
                     neighbor_threshold -= last_jmp
                 else:
@@ -765,7 +817,7 @@ class DirectGmia(attack.Attack):
         Returns
         -------
         tuple
-            Successfully used target records and smoothed ecdf.
+            Successfully used target records, smoothed ecdf, ecdf.
         """
         # empirical cdf
         ecdf_references = []
@@ -1040,9 +1092,7 @@ class DirectGmia(attack.Attack):
                     tab_ap.add_hline()
                     tab_ap.add_row(["Neighbor-Threshold", neighbor_threshold])
                     tab_ap.add_hline()
-                    tab_ap.add_row(
-                        ["Probability-Threshold", probability_threshold]
-                    )
+                    tab_ap.add_row(["Probability-Threshold", probability_threshold])
                     tab_ap.add_hline()
                 self.report_section.append(Command("captionsetup", "labelformat=empty"))
                 self.report_section.append(
