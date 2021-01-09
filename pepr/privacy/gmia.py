@@ -332,7 +332,7 @@ class DirectGmia(attack.Attack):
             number_target_records = self.attack_pars["number_target_records"]
         max_search_rounds = 100
         if "max_search_rounds" in self.attack_pars.keys():
-            max_rounds = self.attack_pars["max_search_rounds"]
+            max_search_rounds = self.attack_pars["max_search_rounds"]
         neighbor_threshold = 0.5
         if "neighbor_threshold" in self.attack_pars.keys():
             neighbor_threshold = self.attack_pars["neighbor_threshold"]
