@@ -131,42 +131,44 @@ def test_gmia_fashion_loaded():
     target_models = target_model
 
     attack_pars = {
-        'number_classes': 10,
-        'number_reference_models': 100,
-        'reference_training_set_size': 10000,
-        'create_compile_model': create_compile_model,
-        'reference_epochs': 50,
-        'reference_batch_size': 50,
-        'hlf_metric': 'cosine',
-        'hlf_layer_number': 10,
-        'neighbor_threshold': 0.15,
-        'probability_threshold': 0.1,
+        "number_classes": 10,
+        "number_reference_models": 100,
+        "reference_training_set_size": 10000,
+        "create_compile_model": create_compile_model,
+        "reference_epochs": 50,
+        "reference_batch_size": 50,
+        "hlf_metric": "cosine",
+        "hlf_layer_number": 10,
+        "neighbor_threshold": 0.15,
+        "probability_threshold": 0.1,
     }
 
     data_conf = {
-        'reference_indices': list(range(40000)),
-        'target_indices': list(range(40000, 50000)),
-        'evaluation_indices': list(range(40000, 60000)),
-        'record_indices_per_target': np.array([np.arange(10000)])
+        "reference_indices": list(range(40000)),
+        "target_indices": list(range(40000, 50000)),
+        "evaluation_indices": list(range(40000, 60000)),
+        "record_indices_per_target": np.array([np.arange(10000)]),
     }
 
     reference_models_path = (
-        '/Users/jonassander/Documents/Repositories/ml-pepr/tests/'
-        'integration/fixtures/data_fashion_mnist/reference_model'
+        "/Users/jonassander/Documents/Repositories/ml-pepr/tests/"
+        "integration/fixtures/data_fashion_mnist/reference_model"
     )
 
     load_pars = {
-        'records_per_reference_model': '/Users/jonassander/Documents/Repositories/'
-        'ml-pepr/tests/integration/fixtures/data_fashion_mnist/'
-        'records_per_reference_model.npy',
-        'reference_models': [reference_models_path + str(i) for i in range(100)],
-        'pairwise_distances_hlf_cosine': '/Users/jonassander/Documents/Repositories/'
-        'ml-pepr/tests/integration/fixtures/data_fashion_mnist/'
-        'pairwise_distances_hlf_cosine.npy',
+        "records_per_reference_model": "/Users/jonassander/Documents/Repositories/"
+        "ml-pepr/tests/integration/fixtures/data_fashion_mnist/"
+        "records_per_reference_model.npy",
+        "reference_models": [reference_models_path + str(i) for i in range(100)],
+        "pairwise_distances_hlf_cosine": "/Users/jonassander/Documents/Repositories/"
+        "ml-pepr/tests/integration/fixtures/data_fashion_mnist/"
+        "pairwise_distances_hlf_cosine.npy",
     }
 
     name = "GMIA Test - Loaded Pars - Single Target"
-    gmia_attack = gmia.DirectGmia(name, attack_pars, data, labels, data_conf, target_models)
+    gmia_attack = gmia.DirectGmia(
+        name, attack_pars, data, labels, data_conf, target_models
+    )
     gmia_attack.run(load_pars=load_pars)
 
     # Check whether the attack accuracy for the cut-off-p-values 0.01, ..., 0.05 is
