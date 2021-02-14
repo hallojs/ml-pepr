@@ -736,7 +736,7 @@ class DirectGmia(attack.Attack):
             return records
 
         if number_target_records is None:
-            return selection()
+            return selection(), neighbor_threshold, probability_threshold
 
         target_records = selection()
         cnt = 0
