@@ -420,7 +420,7 @@ class DirectGmia(attack.Attack):
             f'{self.attack_results["overall_recall"]}'
         )
 
-        # -- Output Attack Summary
+        # -- Output Attack Summary (for the first target model)
         res = self.attack_results
         # Number of selected target records which are members
         selected_target_records_in = len(
