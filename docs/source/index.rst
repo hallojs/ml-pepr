@@ -10,6 +10,3 @@ Welcome to ML-PePR's documentation!
    privacy_attacks
    robustness_attacks
    utilities
-   changelog
-
-

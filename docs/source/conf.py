@@ -12,13 +12,16 @@
 #
 import os
 import sys
+import datetime
+
 sys.path.insert(0, os.path.abspath('../../'))
 print('######PATH: ', sys.path)
 
 # -- Project information -----------------------------------------------------
 
 project = 'ML-PePR'
-copyright = '2020, Institute for IT-Security (University of Luebeck)'
+now = datetime.datetime.now()
+copyright = f'{now.year}, Institute for IT-Security (University of Luebeck)'
 author = 'University of Luebeck: ITS KI-Lab Group'
 
 # The full version, including alpha/beta/rc tags
@@ -30,7 +33,10 @@ release = 'alpha'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon']
+extensions = ['sphinx_rtd_theme',
+              'sphinx.ext.autodoc',
+              'sphinx.ext.napoleon',
+              'sphinx.ext.githubpages']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -46,7 +52,7 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
