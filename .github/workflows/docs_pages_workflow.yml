@@ -9,17 +9,14 @@ jobs:
 
   build_docs_job:
     runs-on: ubuntu-latest
-    container: debian:buster-slim
+    container: hallojs/pepr
 
     steps:
 
     - name: Prereqs
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        apt-get update
-        apt-get install -y git
-        git clone "https://token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" .
+      run: git clone "https://token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" .
       shell: bash
 
     - name: Execute script to build our documentation and update pages
