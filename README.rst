@@ -1,10 +1,15 @@
 ML-PePR: Pentesting Privacy and Robustness [alpha]
 =====================================================
 
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+|docs_pages_workflow| |black| |python_versions|
+
+.. |docs_pages_workflow| image:: https://github.com/maltfield/rtd-github-pages/workflows/docs_pages_workflow/badge.svg?branch=master
+    :target: https://github.com/hallojs/ml-pepr/actions/workflows/docs_pages_workflow.yml
+
+.. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
 
-.. image:: pybadges/python_version.svg
+.. |python_versions| image:: pybadges/python_version.svg
     :target: https://www.python.org
 
 PePR [ˈpɛpɚ] is a library for pentesting the privacy risk and robustness of machine learning models.
