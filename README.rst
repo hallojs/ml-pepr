@@ -90,6 +90,12 @@ PePR offers the following attacks:
 | [2]_ Direct Generalized Membership Inference Attack (gmia) | Privacy (Black Box) |
 +------------------------------------------------------------+---------------------+
 
+License
+-------
+The entire content of the repository is licensed under GPLv3. The workflow for generating the documentation was
+developed by `Michael Altfield <https://github.com/maltfield/rtd-github-pages>`_ and was modified and extended for our
+purposes.
+
 References
 ----------
 .. [1] Shokri, Reza, et al. "Membership inference attacks against machine learning models." 2017 IEEE Symposium on
