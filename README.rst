@@ -43,7 +43,8 @@ Coming soon!
 
 Basic Usage
 -----------
-PePR offers the following options to structure privacy and/or robustness pentesting:
+The full API documentation can be found `here <https://hallojs.github.io/ml-pepr/>`_. PePR offers the following options
+to structure privacy and/or robustness pentesting:
 
 1. Run a single attack with a single attack configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
