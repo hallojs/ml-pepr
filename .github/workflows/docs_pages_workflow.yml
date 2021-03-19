@@ -9,7 +9,7 @@ jobs:
 
   build_docs_job:
     runs-on: ubuntu-latest
-    container: hallojs/pepr
+    container: hallojs/pepr:doc
 
     steps:
 
