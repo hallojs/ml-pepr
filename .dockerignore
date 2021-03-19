@@ -1,0 +1,28 @@
+# macOS dust
+**/.DS_Store
+
+# jetbrains stuff
+**/.idea
+
+# python stuff
+**/__pycache__
+
+# logs
+**/*.log
+
+# builds
+**/build
+
+# package
+pepr.egg-info
+dist
+
+# fixtures
+**/fixtures
+
+# git
+.github
+.git
+
+# pytest
+.pytest_cache
