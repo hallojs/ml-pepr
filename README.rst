@@ -26,7 +26,7 @@ Via Repository
 ~~~~~~~~~~~~~~
 1. Clone the repository: ``git clone https://github.com/hallojs/ml-pepr.git``
 2. Cd to project directory: ``cd ml-pepr``
-3. Run in the terminal: ``pip install -e .``
+3. Install pepr: ``pip install -e .``
 
 Hint: If you want to use ``pip install -e .`` in Google Colab, you must restart the runtime before you can
 ``import pepr``.
@@ -38,8 +38,14 @@ Coming soon!
 
 As Docker
 ~~~~~~~~~
-Coming soon!
+To use pepr inside a docker container build a cpu or gpu image. Note that your system must be set up for GPU use:
+`TensorFlow Docker Requirements <https://www.tensorflow.org/install/docker>`_.
 
+Build the docker image:
+
+1. Clone the repository: ``git clone https://github.com/hallojs/ml-pepr.git``
+2. Cd to project directory: ``cd ml-pepr``
+3. Build the docker image: ``docker build -t <image name> . -f Dockerfile-tf-<cpu or gpu>``
 
 Basic Usage
 -----------
