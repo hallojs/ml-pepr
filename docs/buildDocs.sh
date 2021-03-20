@@ -18,7 +18,7 @@ set -x
 ###################
 
 apt-get update
-DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install git rsync python3-sphinx python3-sphinx-rtd-theme
+DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install rsync python3-sphinx python3-sphinx-rtd-theme
 
 #####################
 # DECLARE VARIABLES #
