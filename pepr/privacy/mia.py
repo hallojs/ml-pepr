@@ -29,11 +29,11 @@ class Mia(attack.Attack):
     Membership Inference Attacks (MIA) Against Machine Learning Models
 
     Attack-Steps:
-    TODO: describe attack
+    TODO: doc - describe attack
 
     Parameters
     ----------
-    TODO: finish param list
+    TODO: doc - finish param list
     attack_alias : str
             Alias for a specific instantiation of the mia.
     attack_pars : dict
@@ -133,10 +133,25 @@ class Mia(attack.Attack):
         Parameters
         ----------
         save_path : str
-        load_pars : str
+            If path is given, the following (partly computational expensive)
+            intermediate results are saved to disk:
+
+            * The mapping of training-records to shadow models.
+            * The trained shadow models.
+            * The attack datasets for training the attack model.
+            * The trained attack models.
+        load_pars : dict
+            If this dictionary is given, the following computational intermediate
+            results can be loaded from disk.
+
+            * shadow_data_indices (str) : Path to shadow data mapping.
+            * shadow_models (list) : List of paths to shadow models.
+            * attack_datasets (str) : Path to attack datasets.
+            * attack_models (list) : List of paths to attack models.
         """
 
-        # TODO: Load and store functionality
+        load = load_pars != None
+        save = save_path != None
 
         # Slice dataset
         shadow_train_data = self.data[self.data_conf["shadow_indices"]]
@@ -151,47 +166,89 @@ class Mia(attack.Attack):
         #       shadow_train_indices - index 0
         #   Test:
         #       shadow_test_indices - index 1
-        logger.info("Create mapping of records to shadow models.")
-        shadow_data_indices = Mia._create_shadow_model_datasets(
-            len(self.data_conf["shadow_indices"]),
-            self.attack_pars["number_shadow_models"],
-            self.attack_pars["shadow_training_set_size"],
-        )
+        if load and "shadow_data_indices" in load_pars.keys():
+            path = load_pars["shadow_data_indices"]
+            logger.info(f"Load mapping of records to shadow models: {path}.")
+            shadow_data_indices = np.load(path)
+        else:
+            logger.info("Create mapping of records to shadow models.")
+            shadow_data_indices = Mia._create_shadow_model_datasets(
+                len(self.data_conf["shadow_indices"]),
+                self.attack_pars["number_shadow_models"],
+                self.attack_pars["shadow_training_set_size"],
+            )
+        if save:
+            path = save_path + "/shadow_data_indices.npy"
+            logger.info(f"Save mapping of records to shadow models: {path}.")
+            np.save(path, shadow_data_indices)
         logger.debug(f"shadow_datasets shape: {shadow_data_indices.shape}")
 
         # Train shadow models
-        logger.info("Train shadow models.")
-        shadow_models = Mia._train_shadow_models(
-            self.attack_pars["create_compile_model"],
-            shadow_data_indices,
-            shadow_train_data,
-            shadow_train_labels,
-            self.attack_pars["shadow_epochs"],
-            self.attack_pars["shadow_batch_size"],
-        )
+        if load and "shadow_models" in load_pars.keys():
+            paths = load_pars["shadow_models"]
+            shadow_models = []
+            for path in paths:
+                logger.info(f"Load pre-trained shadow models: {path}.")
+                shadow_models.append(models.load_model(path))
+        else:
+            logger.info("Train shadow models.")
+            shadow_models = Mia._train_shadow_models(
+                self.attack_pars["create_compile_model"],
+                shadow_data_indices,
+                shadow_train_data,
+                shadow_train_labels,
+                self.attack_pars["shadow_epochs"],
+                self.attack_pars["shadow_batch_size"],
+            )
+        if save:
+            for i, model in enumerate(shadow_models):
+                path = save_path + "/shadow_model" + str(i)
+                logger.info(f"Save trained shadow model: {path}.")
+                model.save(path)
 
         # Attack model dataset generation
         # attack_datasets[i]:
-        #   "indeices"
+        #   "indices"
         #   "prediction_vectors"
         #   "attack_labels"
-        logger.info("Generate attack dataset.")
-        attack_datasets = Mia._generate_attack_dataset(
-            shadow_models,
-            shadow_data_indices,
-            self.attack_pars["number_classes"],
-            shadow_train_data,
-            shadow_train_labels,
-        )
+        if load and "attack_datasets" in load_pars.keys():
+            path = load_pars["attack_datasets"]
+            logger.info(f"Load attack model datasets: {path}.")
+            attack_datasets = list(np.load(path, allow_pickle=True))
+        else:
+            logger.info("Generate attack dataset.")
+            attack_datasets = Mia._generate_attack_dataset(
+                shadow_models,
+                shadow_data_indices,
+                self.attack_pars["number_classes"],
+                shadow_train_data,
+                shadow_train_labels,
+            )
+        if save:
+            path = save_path + "/attack_datasets.npy"
+            logger.info(f"Save attack model datasets: {path}.")
+            np.save(path, attack_datasets)
 
         # Train attack models
-        logger.info("Train attack models.")
-        attack_models = Mia._train_attack_models(
-            self.attack_pars["create_compile_attack_model"],
-            attack_datasets,
-            self.attack_pars["attack_epochs"],
-            self.attack_pars["attack_batch_size"],
-        )
+        if load and "attack_models" in load_pars.keys():
+            paths = load_pars["attack_models"]
+            attack_models = []
+            for path in paths:
+                logger.info(f"Load pre-trained attack models: {path}.")
+                attack_models.append(models.load_model(path))
+        else:
+            logger.info("Train attack models.")
+            attack_models = Mia._train_attack_models(
+                self.attack_pars["create_compile_attack_model"],
+                attack_datasets,
+                self.attack_pars["attack_epochs"],
+                self.attack_pars["attack_batch_size"],
+            )
+        if save:
+            for i, model in enumerate(attack_models):
+                path = save_path + "/attack_model" + str(i)
+                logger.info(f"Save trained attack model: {path}.")
+                model.save(path)
 
         # Evaluate attack models
         logger.info("Evaluate attack models.")
