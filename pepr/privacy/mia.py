@@ -47,7 +47,8 @@ class Mia(attack.Attack):
           TensorFlow model (typically identical to the target model) used in the
           training of the shadow models.
         * create_compile_attack_model (function): Function that returns a compiled
-          TensorFlow model used for the attack models.
+          TensorFlow model used for the attack models. There should be a single
+          floating-point value per prediction.
         * shadow_epochs (int): Number of training epochs of the shadow models.
         * shadow_batch_size (int): Batch size used in the training of the
           shadow models.
@@ -451,7 +452,8 @@ class Mia(attack.Attack):
             pred = attack_model.predict(
                 attack_test_data[attack_test_indices_classified[i]]
             )
-            pred = np.argmax(pred, axis=1)
+            pred = pred.flatten()
+            pred = pred > 0.5
 
             tn = np.count_nonzero((pred == False) & (true_labels == False))
             tp = np.count_nonzero((pred == True) & (true_labels == True))
