@@ -93,18 +93,36 @@ class Mia(attack.Attack):
         List of target models which should be tested.
     attack_results : dict
 
-        * accuracy_list (list): Attack accuracy per attack model and target model.
+        * precision_list (list): Attack precision per attack model and target model.
         * recall_list (list): Attack recall per attack model and target model.
         * tp_list (list): True positives per attack model and target model.
         * fp_list (list): False positives per attack model and target model.
         * fn_list (list): False negatives per attack model and target model.
         * tn_list (list): True negatives per attack model and target model.
-        * accuracy (list): Attack accuracy averaged over all attack models per target
+        * precision (float): Attack precision averaged over all attack models per target
           model.
-        * recall (list): Attack recall averaged over all attack models per target
+        * recall (float): Attack recall averaged over all attack models per target
           model.
-        * overall_accuracy (list): Attack accuracy averaged over all target models.
-        * overall_recall (list): Attack recall averaged over all target models.
+        * test_accuracy (float): Attack test accuracy averaged over all attack models.
+        * overall_precision (float): Attack precision averaged over all target models.
+        * overall_recall (float): Attack recall averaged over all target models.
+        * test_accuracy_list (list): Accuracy on evaluation records per attack model and
+          target model.
+        * shadow_train_accuracy_list (list): Accuracy on training records per shadow
+          model and target model.
+        * shadow_test_accuracy_list (list): Accuracy on evaluation records per shadow
+          model and target model.
+        * shadow_train_accuracy (float): Accuracy on train records averaged over all
+          shadow models per target model.
+        * shadow_test_accuracy (float): Accuracy on evaluation records averaged over all
+          shadow models per target model.
+        * target_train_accuracy_list (list): Accuracy on train records per target model.
+        * target_test_accuracy_list (list): Accuracy on evaluation records per target
+          model.
+        * target_train_accuracy (float): Accuracy on train records averaged over all
+          target models.
+        * target_test_accuracy (float): Accuracy on evaluation records averaged over all
+          target models.
 
     References
     ----------
@@ -277,27 +295,80 @@ class Mia(attack.Attack):
             attack_test_indices_classified.append(np.where(attack_test_labels == i))
 
         # -- Evaluate
-        logger.info("Calculate attack summary.")
+        logger.info("Calculate attack model summary.")
         self.attack_results = Mia._attack_model_evaluation(
             attack_models,
             target_prediction,
             attack_test_bool,
             attack_test_indices_classified,
         )
+        logger.info("Calculate shadow model summary.")
+        self.attack_results.update(
+            Mia._shadow_model_evaluation(
+                shadow_models,
+                shadow_data_indices,
+                shadow_train_data,
+                shadow_train_labels,
+            )
+        )
+        logger.info("Calculate target model summary.")
+        not_target_test_indices = np.searchsorted(
+            self.data_conf["evaluation_indices"],
+            np.array(self.data_conf["target_indices"]).flatten(),
+        )
+        self.attack_results.update(
+            Mia._target_model_evaluation(
+                self.target_models,
+                self.data[self.data_conf["target_indices"]],
+                self.labels[self.data_conf["target_indices"]],
+                np.delete(attack_test_data, not_target_test_indices, axis=0),
+                np.delete(attack_test_labels, not_target_test_indices, axis=0),
+                self.data_conf["record_indices_per_target"],
+            )
+        )
 
         # Print attack summary
-        def _list_to_formatted_string(arr, rnd=False):
+        def _list_to_formatted_string(arr):
             string = ""
             for item in arr:
-                if round:
-                    string = string + f"{round(item, 3):>10}"
-                else:
-                    string = string + f"{item:>10}"
+                string = string + f"{round(item, 3):>10}"
             return string
 
         logger.info(
             "Attack Summary"
             f"\n"
+            f"\n################# Target and Shadow Results ################"
+            f"\n"
+            f"\n{'Target Model:':<30}"
+            + _list_to_formatted_string(range(len(self.target_models)))
+            + f"\n{'Training Accuracy:':<30}"
+            + _list_to_formatted_string(
+                self.attack_results["target_train_accuracy_list"]
+            )
+            + f"\n{'Evaluation Accuracy:':<30}"
+            + _list_to_formatted_string(
+                self.attack_results["target_test_accuracy_list"]
+            )
+            + f"\n{'Average Training Accuracy:':<30}"
+            + _list_to_formatted_string(self.attack_results["target_train_accuracy"])
+            + f"\n{'Average Evaluation Accuracy:':<30}"
+            + _list_to_formatted_string(self.attack_results["target_test_accuracy"])
+            + f"\n"
+            + f"\n{'Shadow Model:':<30}"
+            + _list_to_formatted_string(range(len(shadow_models)))
+            + f"\n{'Training Accuracy:':<30}"
+            + _list_to_formatted_string(
+                self.attack_results["shadow_train_accuracy_list"]
+            )
+            + f"\n{'Evaluation Accuracy:':<30}"
+            + _list_to_formatted_string(
+                self.attack_results["shadow_test_accuracy_list"]
+            )
+            + f"\n{'Average Training Accuracy:':<30}"
+            + _list_to_formatted_string(self.attack_results["shadow_train_accuracy"])
+            + f"\n{'Average Evaluation Accuracy:':<30}"
+            + _list_to_formatted_string(self.attack_results["shadow_test_accuracy"])
+            + f"\n"
             f"\n###################### Attack Results ######################"
             f"\n"
             f"\n{'Attack Model:':<30}"
@@ -310,15 +381,19 @@ class Mia(attack.Attack):
             + _list_to_formatted_string(self.attack_results["tn_list"])
             + f"\n{'False Negatives:':<30}"
             + _list_to_formatted_string(self.attack_results["fn_list"])
-            + f"\n{'Accuracy:':<30}"
-            + _list_to_formatted_string(self.attack_results["accuracy_list"], rnd=True)
+            + f"\n{'Test Accuracy:':<30}"
+            + _list_to_formatted_string(self.attack_results["test_accuracy_list"])
+            + f"\n{'Precision:':<30}"
+            + _list_to_formatted_string(self.attack_results["precision_list"])
             + f"\n{'Recall:':<30}"
-            + _list_to_formatted_string(self.attack_results["recall_list"], rnd=True)
+            + _list_to_formatted_string(self.attack_results["recall_list"])
             + f"\n"
-            f"\n{'Average Accuracy:':<30}"
-            + _list_to_formatted_string(self.attack_results["accuracy"], rnd=True)
+            f"\n{'Average Test Accuracy:':<30}"
+            + _list_to_formatted_string(self.attack_results["test_accuracy"])
+            + f"\n{'Average Precision:':<30}"
+            + _list_to_formatted_string(self.attack_results["precision"])
             + f"\n{'Average Recall:':<30}"
-            + _list_to_formatted_string(self.attack_results["recall"], rnd=True)
+            + _list_to_formatted_string(self.attack_results["recall"])
         )
 
     @staticmethod
@@ -346,27 +421,30 @@ class Mia(attack.Attack):
         Returns
         -------
         dict
-            Dictionary storing the attack results.
+            Dictionary storing the attack model results.
 
-            * accuracy_list (list): Attack accuracy per attack model and target model.
-            * recall_list (list): Attack recall per attack model and target model.
-            * tp_list (list): True positives per attack model and target model.
-            * fp_list (list): False positives per attack model and target model.
-            * fn_list (list): False negatives per attack model and target model.
-            * tn_list (list): True negatives per attack model and target model.
-            * accuracy (list): Attack accuracy averaged over all attack models per
-              target model.
-            * recall (list): Attack recall averaged over all attack models per target
-              model.
+            * precision_list (list): Attack precision per attack model.
+            * recall_list (list): Attack recall per attack model.
+            * tp_list (list): True positives per attack model.
+            * fp_list (list): False positives per attack model.
+            * fn_list (list): False negatives per attack model.
+            * tn_list (list): True negatives per attack model.
+            * precision (float): Attack precision averaged over all attack models.
+            * recall (float): Attack recall averaged over all attack models.
+            * test_accuracy_list (list): Accuracy on test data per attack model.
+            * test_accuracy (float): Attack test accuracy averaged over all attack
+              models.
         """
         tn_list = []
         tp_list = []
         fn_list = []
         fp_list = []
-        accuracy_list = []
+        precision_list = []
         recall_list = []
-        accuracy_all = []
+        test_accuracy_list = []
+        precision_all = []
         recall_all = []
+        accuracy_all = []
 
         for i, attack_model in enumerate(attack_models):
             true_labels = attack_test_true_labels[attack_test_indices_classified[i]]
@@ -379,31 +457,176 @@ class Mia(attack.Attack):
             tp = np.count_nonzero((pred == True) & (true_labels == True))
             fn = np.count_nonzero((pred == False) & (true_labels == True))
             fp = np.count_nonzero((pred == True) & (true_labels == False))
-            accuracy = tp / (tp + fp) if (tp + fp) else 1
+            precision = tp / (tp + fp) if (tp + fp) else 1
             recall = tp / (fn + tp) if (fn + tp) else 0
+            test_accuracy = np.count_nonzero(pred == true_labels) / len(pred)
 
             tn_list.append(tn)
             tp_list.append(tp)
             fn_list.append(fn)
             fp_list.append(fp)
-            accuracy_list.append(accuracy)
+            precision_list.append(precision)
             recall_list.append(recall)
+            test_accuracy_list.append(test_accuracy)
 
-        accuracy_all.append(sum(accuracy_list) / len(accuracy_list))
+        precision_all.append(sum(precision_list) / len(precision_list))
         recall_all.append(sum(recall_list) / len(recall_list))
+        accuracy_all.append(sum(test_accuracy_list) / len(test_accuracy_list))
 
-        attack_results = {
+        attack_model_results = {
             "tn_list": tn_list,
             "tp_list": tp_list,
             "fn_list": fn_list,
             "fp_list": fp_list,
-            "accuracy_list": accuracy_list,
+            "precision_list": precision_list,
             "recall_list": recall_list,
-            "accuracy": accuracy_all,
+            "test_accuracy_list": test_accuracy_list,
+            "test_accuracy": accuracy_all,
+            "precision": precision_all,
             "recall": recall_all,
         }
 
-        return attack_results
+        return attack_model_results
+
+    @staticmethod
+    def _shadow_model_evaluation(
+        shadow_models,
+        shadow_data_indices,
+        shadow_data,
+        shadow_labels,
+    ):
+        """
+        Evaluate shadow models.
+
+        Parameters
+        ----------
+        shadow_models : iterable
+            List of trained shadow models to evaluate.
+        shadow_data_indices : numpy.ndarray
+            Array of training and evaluation indices for the shadow models
+        shadow_data : numpy.ndarray
+            Training and evaluation data for the shadow models.
+        shadow_labels : numpy.ndarray
+            Training and evaluation labels for the shadow models.
+
+        Returns
+        -------
+        dict
+            Dictionary storing the shadow model results.
+
+            * shadow_train_accuracy_list (list): Accuracy on train data per shadow
+              model.
+            * shadow_test_accuracy_list (list): Accuracy on evaluation data per shadow
+              model.
+            * shadow_train_accuracy (float): Accuracy on train records averaged over all
+              shadow models.
+            * shadow_test_accuracy (float): Accuracy on evaluation records averaged over
+              all shadow models.
+        """
+
+        train_accuracy_list = []
+        test_accuracy_list = []
+        train_accuracy_all = []
+        test_accuracy_all = []
+
+        for i, shadow_model in enumerate(shadow_models):
+            true_train_labels = shadow_labels[shadow_data_indices[i][0]]
+            true_test_labels = shadow_labels[shadow_data_indices[i][1]]
+
+            train_pred = shadow_model.predict(shadow_data[shadow_data_indices[i][0]])
+            test_pred = shadow_model.predict(shadow_data[shadow_data_indices[i][1]])
+
+            train_pred = np.argmax(train_pred, axis=1)
+            test_pred = np.argmax(test_pred, axis=1)
+
+            train_accuracy_list.append(
+                np.count_nonzero(train_pred == true_train_labels) / len(train_pred)
+            )
+            test_accuracy_list.append(
+                np.count_nonzero(test_pred == true_test_labels) / len(test_pred)
+            )
+
+        train_accuracy_all.append(sum(train_accuracy_list) / len(train_accuracy_list))
+        test_accuracy_all.append(sum(test_accuracy_list) / len(test_accuracy_list))
+
+        shadow_model_results = {
+            "shadow_train_accuracy_list": train_accuracy_list,
+            "shadow_test_accuracy_list": test_accuracy_list,
+            "shadow_train_accuracy": train_accuracy_all,
+            "shadow_test_accuracy": test_accuracy_all,
+        }
+        return shadow_model_results
+
+    @staticmethod
+    def _target_model_evaluation(
+        target_models,
+        train_data,
+        train_labels,
+        test_data,
+        test_labels,
+        indices_per_target,
+    ):
+        """
+        Evaluate target models.
+
+        Parameters
+        ----------
+        target_models : list
+            List of target models to evaluate.
+        train_data : numpy.ndarray
+            Training data for the target models.
+        train_labels : numpy.ndarray
+            Training labels for the target models.
+        test_data : numpy.ndarray
+            Evaluation data for the target models.
+        test_labels : numpy.ndarray
+            Evaluation labels for the target models.
+
+        Returns
+        -------
+        dict
+            Dictionary storing the shadow model results.
+
+            * target_train_accuracy_list (list): Accuracy on train data per target
+              model.
+            * target_test_accuracy_list (list): Accuracy on evaluation data per target
+              model.
+            * target_train_accuracy (float): Accuracy on train records averaged over all
+              target models.
+            * target_test_accuracy (float): Accuracy on evaluation records averaged over
+              all target models.
+        """
+        train_accuracy_list = []
+        test_accuracy_list = []
+        train_accuracy_all = []
+        test_accuracy_all = []
+
+        for i, target_model in enumerate(target_models):
+            train_pred = target_model.predict(train_data[indices_per_target[i]])
+            test_pred = target_model.predict(test_data[indices_per_target[i]])
+
+            train_pred = np.argmax(train_pred, axis=1)
+            test_pred = np.argmax(test_pred, axis=1)
+
+            train_accuracy_list.append(
+                np.count_nonzero(train_pred == train_labels[indices_per_target[i]])
+                / len(train_pred)
+            )
+            test_accuracy_list.append(
+                np.count_nonzero(test_pred == test_labels[indices_per_target[i]])
+                / len(test_pred)
+            )
+
+        train_accuracy_all.append(sum(train_accuracy_list) / len(train_accuracy_list))
+        test_accuracy_all.append(sum(test_accuracy_list) / len(test_accuracy_list))
+
+        target_model_results = {
+            "target_train_accuracy_list": train_accuracy_list,
+            "target_test_accuracy_list": test_accuracy_list,
+            "target_train_accuracy": train_accuracy_all,
+            "target_test_accuracy": test_accuracy_all,
+        }
+        return target_model_results
 
     def create_attack_report(self, save_path):
         """Create an attack report just for the given attack instantiation.
