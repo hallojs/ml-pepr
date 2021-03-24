@@ -340,31 +340,13 @@ class Mia(attack.Attack):
             f"\n"
             f"\n################# Target and Shadow Results ################"
             f"\n"
-            f"\n{'Target Model:':<30}"
-            + _list_to_formatted_string(range(len(self.target_models)))
-            + f"\n{'Training Accuracy:':<30}"
-            + _list_to_formatted_string(
-                self.attack_results["target_train_accuracy_list"]
-            )
-            + f"\n{'Evaluation Accuracy:':<30}"
-            + _list_to_formatted_string(
-                self.attack_results["target_test_accuracy_list"]
-            )
+            f"\n{'Target Models:':<30}"
             + f"\n{'Average Training Accuracy:':<30}"
             + _list_to_formatted_string(self.attack_results["target_train_accuracy"])
             + f"\n{'Average Evaluation Accuracy:':<30}"
             + _list_to_formatted_string(self.attack_results["target_test_accuracy"])
             + f"\n"
-            + f"\n{'Shadow Model:':<30}"
-            + _list_to_formatted_string(range(len(shadow_models)))
-            + f"\n{'Training Accuracy:':<30}"
-            + _list_to_formatted_string(
-                self.attack_results["shadow_train_accuracy_list"]
-            )
-            + f"\n{'Evaluation Accuracy:':<30}"
-            + _list_to_formatted_string(
-                self.attack_results["shadow_test_accuracy_list"]
-            )
+            + f"\n{'Shadow Models:':<30}"
             + f"\n{'Average Training Accuracy:':<30}"
             + _list_to_formatted_string(self.attack_results["shadow_train_accuracy"])
             + f"\n{'Average Evaluation Accuracy:':<30}"
@@ -372,24 +354,8 @@ class Mia(attack.Attack):
             + f"\n"
             f"\n###################### Attack Results ######################"
             f"\n"
-            f"\n{'Attack Model:':<30}"
-            + _list_to_formatted_string(range(len(attack_models)))
-            + f"\n{'True Positives:':<30}"
-            + _list_to_formatted_string(self.attack_results["tp_list"])
-            + f"\n{'False Positives:':<30}"
-            + _list_to_formatted_string(self.attack_results["fp_list"])
-            + f"\n{'True Negatives:':<30}"
-            + _list_to_formatted_string(self.attack_results["tn_list"])
-            + f"\n{'False Negatives:':<30}"
-            + _list_to_formatted_string(self.attack_results["fn_list"])
-            + f"\n{'Test Accuracy:':<30}"
-            + _list_to_formatted_string(self.attack_results["test_accuracy_list"])
-            + f"\n{'Precision:':<30}"
-            + _list_to_formatted_string(self.attack_results["precision_list"])
-            + f"\n{'Recall:':<30}"
-            + _list_to_formatted_string(self.attack_results["recall_list"])
-            + f"\n"
-            f"\n{'Average Test Accuracy:':<30}"
+            f"\n{'Attack Models:':<30}"
+            + f"\n{'Average Test Accuracy:':<30}"
             + _list_to_formatted_string(self.attack_results["test_accuracy"])
             + f"\n{'Average Precision:':<30}"
             + _list_to_formatted_string(self.attack_results["precision"])
@@ -777,11 +743,12 @@ class Mia(attack.Attack):
         }
 
         # Populate
+        logger.info(f"Get prediction of shadow models.")
         in_array = np.full(int(shadow_data_size / 2), True, dtype=np.bool_)
         out_array = np.full(int(shadow_data_size / 2), False, dtype=np.bool_)
         for i, shadow_model in enumerate(shadow_models):
             # Make predictions
-            logger.info(f"Get prediction of shadow model ({i+1}/{len(shadow_models)}).")
+            logger.debug(f"Get prediction of shadow model ({i+1}/{len(shadow_models)}).")
             in_prediction = shadow_model.predict(shadow_data[shadow_data_indices[i][0]])
             out_prediction = shadow_model.predict(
                 shadow_data[shadow_data_indices[i][1]]
