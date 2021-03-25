@@ -12,9 +12,10 @@ descriptions = {
         "well generalized learning models. arXiv preprint arXiv: 1802.04889."
     ),
     'mia': (
-        "Implementation of the basic membership inference attack by Reza Shokri, Marco Stronati, "
-        "Congzheng Song and Vitaly Shmatikov (2017). Membership inference attacks against "
-        "machine learning models. arXiv preprint arXiv:1610.05820."
+        "Implementation of the basic membership inference attack by Reza Shokri, Marco "
+        "Stronati, Congzheng Song and Vitaly Shmatikov. Membership inference attacks "
+        "against machine learning models 2017 IEEE Symposium on Security and Privacy "
+        "(SP). IEEE, 2017."
     )
 }
 

@@ -596,15 +596,25 @@ class Mia(attack.Attack):
         }
         return target_model_results
 
-    def create_attack_report(self, save_path):
+    def create_attack_report(self, save_path="mia_report", pdf=False):
         """Create an attack report just for the given attack instantiation.
 
         Parameters
         ----------
+        Parameters
+        ----------
         save_path : str
             Path to save the tex and pdf file of the attack report.
+        pdf : bool
+            If set, generate pdf out of latex file.
         """
-        pass
+
+        # Create directory structure for the attack report, including the figure
+        # directory for the figures of the results subsubsection.
+        os.makedirs(save_path + "/fig", exist_ok=True)
+
+        self.create_attack_section(save_path=save_path)
+        report.report_generator(save_path, [self.report_section], pdf)
 
     def create_attack_section(self, save_path):
         """Create an attack section for the given attack instantiation.
@@ -614,7 +624,312 @@ class Mia(attack.Attack):
         save_path :
             Path to save the report assets like figures.
         """
-        pass
+        self._report_attack_configuration()
+        self._report_attack_results(save_path)
+
+    def _report_attack_configuration(self):
+        """Create subsubsection about the attack and data configuration."""
+        # Create tables for attack parameters and the data configuration.
+        ap = self.attack_pars
+        dc = self.data_conf
+        self.report_section.append(Subsubsection("Attack Details"))
+        with self.report_section.create(MiniPage()):
+            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+                # -- Create table for the attack parameters.
+                self.report_section.append(Command("centering"))
+                with self.report_section.create(Tabular("|l|c|")) as tab_ap:
+                    tab_ap.add_hline()
+                    tab_ap.add_row(["Number of classes", ap["number_classes"]])
+                    tab_ap.add_hline()
+                    tab_ap.add_row(
+                        ["Number of shadow models", ap["number_shadow_models"]]
+                    )
+                    tab_ap.add_hline()
+                    tab_ap.add_row(
+                        [
+                            "Shadow training set size",
+                            ap["shadow_training_set_size"],
+                        ]
+                    )
+                    tab_ap.add_hline()
+                    tab_ap.add_row(["Shadow epochs", ap["shadow_epochs"]])
+                    tab_ap.add_hline()
+                    tab_ap.add_row(["Shadow batch size", ap["shadow_batch_size"]])
+                    tab_ap.add_hline()
+                    tab_ap.add_row(["Attack epochs", ap["attack_epochs"]])
+                    tab_ap.add_hline()
+                    tab_ap.add_row(["Attack batch size", ap["attack_batch_size"]])
+                    tab_ap.add_hline()
+                self.report_section.append(Command("captionsetup", "labelformat=empty"))
+                self.report_section.append(
+                    Command(
+                        "captionof",
+                        "table",
+                        extra_arguments="Attack parameters",
+                    )
+                )
+
+            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+                # -- Create table for the data configuration
+                self.report_section.append(Command("centering"))
+                nr_targets, target_training_set_size = dc[
+                    "record_indices_per_target"
+                ].shape
+                with self.report_section.create(Tabular("|l|c|")) as tab_dc:
+                    tab_dc.add_hline()
+                    tab_dc.add_row(
+                        [
+                            NoEscape("Samples used to train shadow models ($S$)"),
+                            len(dc["shadow_indices"]),
+                        ]
+                    )
+                    tab_dc.add_hline()
+                    tab_dc.add_row(
+                        [
+                            NoEscape("Samples used to train target models ($T$)"),
+                            len(dc["target_indices"]),
+                        ]
+                    )
+                    tab_dc.add_hline()
+                    tab_dc.add_row(
+                        [
+                            "Samples used to evaluate the attack",
+                            len(dc["evaluation_indices"]),
+                        ]
+                    )
+                    tab_dc.add_hline()
+                    tab_dc.add_row(["Attacked target models", nr_targets])
+                    tab_dc.add_hline()
+                    tab_dc.add_row(
+                        ["Target model's training sets size", target_training_set_size]
+                    )
+                    tab_dc.add_hline()
+                    tab_dc.add_row(
+                        [
+                            NoEscape("Size of $S \cap T$"),
+                            len(set(dc["shadow_indices"]) & set(dc["target_indices"])),
+                        ]
+                    )
+                    tab_dc.add_hline()
+                self.report_section.append(Command("captionsetup", "labelformat=empty"))
+                self.report_section.append(
+                    Command(
+                        "captionof",
+                        "table",
+                        extra_arguments="Target and Data Configuration",
+                    )
+                )
+
+    def _report_attack_results(self, save_path):
+        """Create subsubsection describing the most important results of the attack.
+
+        This subsection contains results only for the first target model.
+        """
+        self.report_section.append(Subsubsection("Attack Results"))
+        np_rl = np.array(self.attack_results["recall_list"])
+        np_pl = np.array(self.attack_results["precision_list"])
+        sorted = np.argsort(np_rl)
+
+        fig = plt.figure()
+        ax = plt.axes()
+        ax.plot(np_rl[sorted], np_pl[sorted])
+        ax.set_xlabel("Recall")
+        ax.set_ylabel("Precision")
+        plt.grid(True)
+        fig.savefig(save_path + "/fig/precision_recall_curve.pdf")
+        plt.close(fig)
+
+        with self.report_section.create(MiniPage()):
+            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+                self.report_section.append(Command("centering"))
+                self.report_section.append(
+                    Command(
+                        "includegraphics",
+                        NoEscape("fig/precision_recall_curve.pdf"),
+                        "width=8cm",
+                    )
+                )
+                self.report_section.append(Command("captionsetup", "labelformat=empty"))
+                self.report_section.append(
+                    Command(
+                        "captionof",
+                        "figure",
+                        extra_arguments="Precision-Recall Curve",
+                    )
+                )
+
+            res = self.attack_results
+            tp_row = []
+            fp_row = []
+            tn_row = []
+            fn_row = []
+            class_row = []
+            precision_row = []
+            accuracy_row = []
+            recall_row = []
+
+            # Average column
+            class_row.append("")
+            tp_row.append(round(sum(res["tp_list"]) / len(res["tp_list"]), 2))
+            fp_row.append(round(sum(res["fp_list"]) / len(res["fp_list"]), 2))
+            tn_row.append(round(sum(res["tn_list"]) / len(res["tn_list"]), 2))
+            fn_row.append(round(sum(res["fn_list"]) / len(res["fn_list"]), 2))
+            accuracy_row.append(
+                round(
+                    sum(res["test_accuracy_list"]) / len(res["test_accuracy_list"]), 3
+                )
+            )
+            precision_row.append(
+                round(sum(res["precision_list"]) / len(res["precision_list"]), 3)
+            )
+            recall_row.append(
+                round(sum(res["recall_list"]) / len(res["recall_list"]), 3)
+            )
+
+            # Maximum accuracy class
+            max_class = res["test_accuracy_list"].index(max(res["test_accuracy_list"]))
+            class_row.append(max_class)
+            tp_row.append(res["tp_list"][max_class])
+            fp_row.append(res["fp_list"][max_class])
+            tn_row.append(res["tn_list"][max_class])
+            fn_row.append(res["fn_list"][max_class])
+            accuracy_row.append(round(res["test_accuracy_list"][max_class], 3))
+            precision_row.append(round(res["precision_list"][max_class], 3))
+            recall_row.append(round(res["recall_list"][max_class], 3))
+
+            # Minimum accuracy class
+            min_class = res["test_accuracy_list"].index(min(res["test_accuracy_list"]))
+            class_row.append(min_class)
+            tp_row.append(res["tp_list"][min_class])
+            fp_row.append(res["fp_list"][min_class])
+            tn_row.append(res["tn_list"][min_class])
+            fn_row.append(res["fn_list"][min_class])
+            accuracy_row.append(round(res["test_accuracy_list"][min_class], 3))
+            precision_row.append(round(res["precision_list"][min_class], 3))
+            recall_row.append(round(res["recall_list"][min_class], 3))
+
+            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+                self.report_section.append(Command("centering"))
+                with self.report_section.create(Tabular("|l|c|c|c|")) as result_tab:
+                    result_tab.add_hline()
+                    result_tab.add_row(
+                        list(
+                            map(
+                                bold,
+                                [
+                                    "Classes",
+                                    "Average",
+                                    "max. Accuracy",
+                                    "min. Accuracy",
+                                ],
+                            )
+                        )
+                    )
+                    result_tab.add_hline()
+                    result_tab.add_row(
+                        ["Class", class_row[0], class_row[1], class_row[2]]
+                    )
+                    result_tab.add_hline()
+                    result_tab.add_row(
+                        ["True Positives", tp_row[0], tp_row[1], tp_row[2]]
+                    )
+                    result_tab.add_hline()
+                    result_tab.add_row(
+                        ["False Positives", fp_row[0], fp_row[1], fp_row[2]]
+                    )
+                    result_tab.add_hline()
+                    result_tab.add_row(
+                        ["True Negatives", tn_row[0], tn_row[1], tn_row[2]]
+                    )
+                    result_tab.add_hline()
+                    result_tab.add_row(
+                        ["False Negatives", fn_row[0], fn_row[1], fn_row[2]]
+                    )
+                    result_tab.add_hline()
+                    result_tab.add_row(
+                        ["Accuracy", accuracy_row[0], accuracy_row[1], accuracy_row[2]]
+                    )
+                    result_tab.add_hline()
+                    result_tab.add_row(
+                        [
+                            "Precision",
+                            precision_row[0],
+                            precision_row[1],
+                            precision_row[2],
+                        ]
+                    )
+                    result_tab.add_hline()
+                    result_tab.add_row(
+                        ["Recall", recall_row[0], recall_row[1], recall_row[2]]
+                    )
+                    result_tab.add_hline()
+                self.report_section.append(Command("captionsetup", "labelformat=empty"))
+                self.report_section.append(
+                    Command("captionof", "table", extra_arguments="Attack Results")
+                )
+
+        ap = self.attack_pars
+
+        # Bar plot
+        fig = plt.figure()
+        ax = plt.axes()
+        ax.set_ylim(0,1)
+        ax.bar(np.arange(ap["number_classes"])-0.3, res["test_accuracy_list"], width=0.3, label="Accuracy")
+        ax.bar(np.arange(ap["number_classes"]), res["precision_list"], width=0.3, label="Precision")
+        ax.bar(np.arange(ap["number_classes"])+0.3, res["recall_list"], width=0.3, label="Recall")
+        ax.set_xticks(np.arange(ap["number_classes"]))
+        ax.set_xlabel("Attack model")
+        ax.legend(bbox_to_anchor=(1.3,1))
+        ax.grid(axis="y")
+
+        fig.savefig(save_path + "/fig/bar_accuracy.pdf", bbox_inches='tight')
+        plt.close(fig)
+
+        with self.report_section.create(Figure()) as fig:
+            fig.add_image(
+                "fig/bar_accuracy.pdf", width=NoEscape(r"0.8\textwidth")
+            )
+            self.report_section.append(Command("captionsetup", "labelformat=empty"))
+            self.report_section.append(
+                Command(
+                    "captionof",
+                    "figure",
+                    extra_arguments="Accuracy, precision and recall for all attack models",
+                )
+            )
+
+        # ECDF like in paper
+        # TODO: For every target model
+        precision_sorted = np.sort(res["precision_list"])
+        recall_sorted = np.sort(res["recall_list"])
+        py = np.arange(1, len(precision_sorted) + 1) / len(precision_sorted)
+        ry = np.arange(1, len(recall_sorted) + 1) / len(recall_sorted)
+
+        fig = plt.figure()
+        ax = plt.axes()
+        ax.set_xlabel("Accuracy")
+        ax.set_ylabel("Cumulative Fraction of Classes")
+        ax.plot(precision_sorted, py, "k-", label="Precision")
+        ax.plot(recall_sorted, ry, "k--", label="Recall")
+        ax.grid(linestyle=":")
+        ax.legend()
+
+        fig.savefig(save_path + "/fig/ecdf.pdf", bbox_inches='tight')
+        plt.close(fig)
+
+        with self.report_section.create(Figure()) as fig:
+            fig.add_image(
+                "fig/ecdf.pdf", width=NoEscape(r"0.7\textwidth")
+            )
+            self.report_section.append(Command("captionsetup", "labelformat=empty"))
+            self.report_section.append(
+                Command(
+                    "captionof",
+                    "figure",
+                    extra_arguments="Empirical CDF",
+                )
+            )
+
 
     @staticmethod
     def _create_shadow_model_datasets(
@@ -748,7 +1063,9 @@ class Mia(attack.Attack):
         out_array = np.full(int(shadow_data_size / 2), False, dtype=np.bool_)
         for i, shadow_model in enumerate(shadow_models):
             # Make predictions
-            logger.debug(f"Get prediction of shadow model ({i+1}/{len(shadow_models)}).")
+            logger.debug(
+                f"Get prediction of shadow model ({i+1}/{len(shadow_models)})."
+            )
             in_prediction = shadow_model.predict(shadow_data[shadow_data_indices[i][0]])
             out_prediction = shadow_model.predict(
                 shadow_data[shadow_data_indices[i][1]]
