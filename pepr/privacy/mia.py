@@ -8,11 +8,7 @@ import numpy as np
 from pylatex import Command, NoEscape, Tabular, Figure, MiniPage, MultiColumn
 from pylatex.section import Subsubsection
 from pylatex.utils import bold
-from sklearn.metrics import pairwise_distances
 
-from statsmodels.distributions.empirical_distribution import ECDF
-
-from scipy.interpolate import pchip
 from tensorflow.keras.models import Model
 from tensorflow.keras import models
 
@@ -21,7 +17,7 @@ from pepr import attack, report
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-plt.style.use("seaborn-white")
+plt.style.use("default")
 
 
 class Mia(attack.Attack):
@@ -726,17 +722,25 @@ class Mia(attack.Attack):
         This subsection contains results only for the first target model.
         """
         self.report_section.append(Subsubsection("Attack Results"))
-        np_rl = np.array(self.attack_results["recall_list"])
-        np_pl = np.array(self.attack_results["precision_list"])
-        sorted = np.argsort(np_rl)
+        res = self.attack_results
+
+        # ECDF like in paper
+        # TODO: For every target model
+        precision_sorted = np.sort(res["precision_list"])
+        recall_sorted = np.sort(res["recall_list"])
+        py = np.arange(1, len(precision_sorted) + 1) / len(precision_sorted)
+        ry = np.arange(1, len(recall_sorted) + 1) / len(recall_sorted)
 
         fig = plt.figure()
         ax = plt.axes()
-        ax.plot(np_rl[sorted], np_pl[sorted])
-        ax.set_xlabel("Recall")
-        ax.set_ylabel("Precision")
-        plt.grid(True)
-        fig.savefig(save_path + "/fig/precision_recall_curve.pdf")
+        ax.set_xlabel("Accuracy")
+        ax.set_ylabel("Cumulative Fraction of Classes")
+        ax.plot(precision_sorted, py, "k-", label="Precision")
+        ax.plot(recall_sorted, ry, "k--", label="Recall")
+        ax.grid(linestyle=":")
+        ax.legend()
+
+        fig.savefig(save_path + "/fig/ecdf.pdf", bbox_inches="tight")
         plt.close(fig)
 
         with self.report_section.create(MiniPage()):
@@ -745,7 +749,7 @@ class Mia(attack.Attack):
                 self.report_section.append(
                     Command(
                         "includegraphics",
-                        NoEscape("fig/precision_recall_curve.pdf"),
+                        NoEscape("fig/ecdf.pdf"),
                         "width=8cm",
                     )
                 )
@@ -754,11 +758,10 @@ class Mia(attack.Attack):
                     Command(
                         "captionof",
                         "figure",
-                        extra_arguments="Precision-Recall Curve",
+                        extra_arguments="Empirical CDF",
                     )
                 )
 
-            res = self.attack_results
             tp_row = []
             fp_row = []
             tn_row = []
@@ -769,7 +772,7 @@ class Mia(attack.Attack):
             recall_row = []
 
             # Average column
-            class_row.append("")
+            class_row.append(f"0-{self.attack_pars['number_classes']}")
             tp_row.append(round(sum(res["tp_list"]) / len(res["tp_list"]), 2))
             fp_row.append(round(sum(res["fp_list"]) / len(res["fp_list"]), 2))
             tn_row.append(round(sum(res["tn_list"]) / len(res["tn_list"]), 2))
@@ -817,10 +820,10 @@ class Mia(attack.Attack):
                             map(
                                 bold,
                                 [
-                                    "Classes",
+                                    "",
                                     "Average",
-                                    "max. Accuracy",
-                                    "min. Accuracy",
+                                    "max. Acc.",
+                                    "min. Acc.",
                                 ],
                             )
                         )
@@ -865,71 +868,48 @@ class Mia(attack.Attack):
                     result_tab.add_hline()
                 self.report_section.append(Command("captionsetup", "labelformat=empty"))
                 self.report_section.append(
-                    Command("captionof", "table", extra_arguments="Attack Results")
+                    Command("captionof", "table", extra_arguments="Attack Summary")
                 )
 
         ap = self.attack_pars
 
-        # Bar plot
-        fig = plt.figure()
-        ax = plt.axes()
-        ax.set_ylim(0,1)
-        ax.bar(np.arange(ap["number_classes"])-0.3, res["test_accuracy_list"], width=0.3, label="Accuracy")
-        ax.bar(np.arange(ap["number_classes"]), res["precision_list"], width=0.3, label="Precision")
-        ax.bar(np.arange(ap["number_classes"])+0.3, res["recall_list"], width=0.3, label="Recall")
-        ax.set_xticks(np.arange(ap["number_classes"]))
-        ax.set_xlabel("Attack model")
-        ax.legend(bbox_to_anchor=(1.3,1))
-        ax.grid(axis="y")
+        # Bar plots
+        fig, (ax0, ax1, ax2) = plt.subplots(1, 3, sharey=True, figsize=(12, 3))
+        ax0.hist(res["test_accuracy_list"], edgecolor="black")
+        ax1.hist(res["precision_list"], edgecolor="black")
+        ax2.hist(res["recall_list"], edgecolor="black")
+        ax0.set_xlabel("Accuracy")
+        ax1.set_xlabel("Precision")
+        ax2.set_xlabel("Recall")
+        ax0.set_ylabel("Number of Classes")
+        ax0.grid(linestyle=":")
+        ax1.grid(linestyle=":")
+        ax2.grid(linestyle=":")
+        ax0.tick_params(axis="x", labelrotation=45)
+        ax1.tick_params(axis="x", labelrotation=45)
+        ax2.tick_params(axis="x", labelrotation=45)
+        ax0.set_axisbelow(True)
+        ax1.set_axisbelow(True)
+        ax2.set_axisbelow(True)
 
-        fig.savefig(save_path + "/fig/bar_accuracy.pdf", bbox_inches='tight')
+        fig.savefig(
+            save_path + "/fig/bar_accuracy_precision_recall.pdf", bbox_inches="tight"
+        )
         plt.close(fig)
 
         with self.report_section.create(Figure()) as fig:
             fig.add_image(
-                "fig/bar_accuracy.pdf", width=NoEscape(r"0.8\textwidth")
+                "fig/bar_accuracy_precision_recall.pdf", width=NoEscape(r"\textwidth")
             )
             self.report_section.append(Command("captionsetup", "labelformat=empty"))
             self.report_section.append(
                 Command(
                     "captionof",
                     "figure",
-                    extra_arguments="Accuracy, precision and recall for all attack models",
+                    extra_arguments="Accuracy, precision and recall histogram for all "
+                    "attack models",
                 )
             )
-
-        # ECDF like in paper
-        # TODO: For every target model
-        precision_sorted = np.sort(res["precision_list"])
-        recall_sorted = np.sort(res["recall_list"])
-        py = np.arange(1, len(precision_sorted) + 1) / len(precision_sorted)
-        ry = np.arange(1, len(recall_sorted) + 1) / len(recall_sorted)
-
-        fig = plt.figure()
-        ax = plt.axes()
-        ax.set_xlabel("Accuracy")
-        ax.set_ylabel("Cumulative Fraction of Classes")
-        ax.plot(precision_sorted, py, "k-", label="Precision")
-        ax.plot(recall_sorted, ry, "k--", label="Recall")
-        ax.grid(linestyle=":")
-        ax.legend()
-
-        fig.savefig(save_path + "/fig/ecdf.pdf", bbox_inches='tight')
-        plt.close(fig)
-
-        with self.report_section.create(Figure()) as fig:
-            fig.add_image(
-                "fig/ecdf.pdf", width=NoEscape(r"0.7\textwidth")
-            )
-            self.report_section.append(Command("captionsetup", "labelformat=empty"))
-            self.report_section.append(
-                Command(
-                    "captionof",
-                    "figure",
-                    extra_arguments="Empirical CDF",
-                )
-            )
-
 
     @staticmethod
     def _create_shadow_model_datasets(
