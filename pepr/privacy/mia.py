@@ -39,7 +39,7 @@ class Mia(attack.Attack):
         * number_shadow_models (int): Number of shadow models to be trained.
         * shadow_training_set_size (int): Size of the trainings set for each
           shadow model. The corresponding evaluation sets will have the same size.
-        * create_compile_model (function): Function that returns a compiled
+        * create_compile_shadow_model (function): Function that returns a compiled
           TensorFlow model (typically identical to the target model) used in the
           training of the shadow models.
         * create_compile_attack_model (function): Function that returns a compiled
@@ -208,7 +208,7 @@ class Mia(attack.Attack):
         else:
             logger.info("Train shadow models.")
             shadow_models = Mia._train_shadow_models(
-                self.attack_pars["create_compile_model"],
+                self.attack_pars["create_compile_shadow_model"],
                 shadow_data_indices,
                 shadow_train_data,
                 shadow_train_labels,
@@ -952,7 +952,7 @@ class Mia(attack.Attack):
 
     @staticmethod
     def _train_shadow_models(
-        create_compile_model,
+        create_compile_shadow_model,
         shadow_data_indices,
         train_data,
         train_labels,
@@ -960,11 +960,12 @@ class Mia(attack.Attack):
         batch_size,
     ):
         """
-        Trains shadow models based on the model which create_compile_model returns.
+        Trains shadow models based on the model which create_compile_shadow_model
+        returns.
 
         Parameters
         ----------
-        create_compile_model : function
+        create_compile_shadow_model : function
             Return compiled TensorFlow Keras model for the shadow models.
         shadow_data_indices : numpy.ndarray
             Provides dataset mappings for the shadow models.
@@ -988,7 +989,7 @@ class Mia(attack.Attack):
             logger.info(
                 f"Progress: Train shadow model ({i + 1}/{number_shadow_models})."
             )
-            shadow_model = create_compile_model()
+            shadow_model = create_compile_shadow_model()
             shadow_model.fit(
                 train_data[shadow_data_indices[i][0]],
                 train_labels[shadow_data_indices[i][0]],
