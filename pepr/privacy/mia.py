@@ -360,6 +360,79 @@ class Mia(attack.Attack):
         )
 
     @staticmethod
+    def _get_target_model_indices(
+        eval_set_size,
+        target_indices,
+        record_indices_per_target,
+        attack_test_labels,
+        number_classes,
+    ):
+        """
+        Calculate classified indices per target with their true attack label for
+        evaluation.
+
+        Parameters
+        ----------
+        eval_set_size : int
+            Size of the evaluation dataset.
+        target_indices : numpy.ndarray
+            Array of indices used to train all target models. Indices of complete
+            dataset.
+        record_indices_per_target : iterable
+            List of mapping which records of the target_indices are used to train a
+            target model.
+        attack_test_labels : numpy.ndarray
+            List of labels in the evaluation dataset.
+        number_classes : int
+            Number of classes in the dataset.
+
+        Returns
+        -------
+        dict
+            Dictionary storing the classified indices and labels.
+
+            * indices_per_target (list): Classified indices of the evaluation dataset
+              per target model and per class. Shape: (target_models, classes)
+            * true_attack_labels_per_target (list): The true labels for the attack
+              evaluation per target model and per class. Shape: (target_models, classes)
+        """
+        tm_i_c_per_target = []  # per target model classified shape = (tm, classes)
+        a_true_labels_c_per_target = []  # shape = (tm, classes)
+
+        attack_eval_i = np.arange(eval_set_size)
+        for i, record_indices in enumerate(record_indices_per_target):
+            tm_train_i = target_indices[record_indices]
+            tm_test_i = np.delete(attack_eval_i, tm_train_i)
+
+            # Train and test indices should have the same length
+            if len(tm_test_i) > len(tm_train_i):
+                tm_test_i = tm_test_i[: len(tm_train_i)]
+            elif len(tm_test_i) < len(tm_train_i):
+                tm_train_i = tm_train_i[: len(tm_test_i)]
+
+            tm_i = np.concatenate((tm_train_i, tm_test_i))
+            attack_true_labels = np.in1d(tm_i, tm_train_i)
+
+            # Classify
+            tm_i_c_per_target.append([])
+            a_true_labels_c_per_target.append([])
+            for j in range(number_classes):
+                # indices for tm_i and attack_true_labels
+                classified_i = np.where(attack_test_labels[tm_i] == j)
+
+                tm_c = tm_i[classified_i]
+                a_true_labels_c = attack_true_labels[classified_i]
+                tm_i_c_per_target[i].append(list(tm_c))
+                a_true_labels_c_per_target[i].append(list(a_true_labels_c))
+
+        target_model_indices = {
+            "indices_per_target": tm_i_c_per_target,
+            "true_attack_labels_per_target": a_true_labels_c_per_target,
+        }
+
+        return target_model_indices
+
+    @staticmethod
     def _attack_model_evaluation(
         attack_models,
         attack_test_data,
