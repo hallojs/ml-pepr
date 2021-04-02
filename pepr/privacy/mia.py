@@ -579,9 +579,9 @@ class Mia(attack.Attack):
             "test_accuracy": test_accuracy,
             "precision": precision,
             "recall": recall,
-            "": test_accuracy_all,
-            "": precision_all,
-            "": recall_all,
+            "overall_test_accuracy": test_accuracy_all,
+            "overall_precision": precision_all,
+            "overall_recall": recall_all,
         }
 
         return attack_model_results
