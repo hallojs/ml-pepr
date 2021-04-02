@@ -29,7 +29,6 @@ class Mia(attack.Attack):
 
     Parameters
     ----------
-    TODO: doc - finish param list
     attack_alias : str
             Alias for a specific instantiation of the mia.
     attack_pars : dict
@@ -90,21 +89,25 @@ class Mia(attack.Attack):
         List of target models which should be tested.
     attack_results : dict
 
-        * precision_list (list): Attack precision per attack model and target model.
-        * recall_list (list): Attack recall per attack model and target model.
-        * tp_list (list): True positives per attack model and target model.
-        * fp_list (list): False positives per attack model and target model.
-        * fn_list (list): False negatives per attack model and target model.
-        * tn_list (list): True negatives per attack model and target model.
-        * precision (float): Attack precision averaged over all attack models per target
+        * tp_list (numpy.ndarray): True positives per attack model and target model.
+        * fp_list (numpy.ndarray): False positives per attack model and target model.
+        * fn_list (numpy.ndarray): False negatives per attack model and target model.
+        * tn_list (numpy.ndarray): True negatives per attack model and target model.
+        * test_accuracy_list (numpy.ndarray): Accuracy on evaluation records per attack
+          model and target model.
+        * precision_list (numpy.ndarray): Attack precision per attack model and target
           model.
-        * recall (float): Attack recall averaged over all attack models per target
-          model.
-        * test_accuracy (float): Attack test accuracy averaged over all attack models.
+        * recall_list (numpy.ndarray): Attack recall per attack model and target model.
+        * test_accuracy (numpy.ndarray): Attack test accuracy averaged over all attack
+          models per target model.
+        * precision (numpy.ndarray): Attack precision averaged over all attack models
+          per target model.
+        * recall (numpy.ndarray): Attack recall averaged over all attack models per
+          target model.
+        * overall_test_accuracy (float): Attack test accuracy averaged over all target
+          models.
         * overall_precision (float): Attack precision averaged over all target models.
         * overall_recall (float): Attack recall averaged over all target models.
-        * test_accuracy_list (list): Accuracy on evaluation records per attack model and
-          target model.
         * shadow_train_accuracy_list (list): Accuracy on training records per shadow
           model and target model.
         * shadow_test_accuracy_list (list): Accuracy on evaluation records per shadow
@@ -267,37 +270,27 @@ class Mia(attack.Attack):
 
         # Evaluate attack models
         logger.info("Evaluate attack models.")
-        # -- Target prediction + true label
-        # TODO: Support more than one target model
-        target_prediction = self.target_models[0].predict(attack_test_data)
-        attack_test_bool = np.concatenate(
-            (
-                np.full(
-                    len(self.data_conf["record_indices_per_target"][0]),
-                    True,
-                    dtype=np.bool_,
-                ),
-                np.full(
-                    len(attack_test_data)
-                    - len(self.data_conf["record_indices_per_target"][0]),
-                    False,
-                    dtype=np.bool_,
-                ),
-            )
+
+        # -- Generate target model dataset and true labels
+        target_data = Mia._get_target_model_indices(
+            self.data_conf["target_indices"],
+            self.data_conf["evaluation_indices"],
+            self.data_conf["record_indices_per_target"],
+            attack_test_labels,
+            self.attack_pars["number_classes"],
         )
 
-        # -- Classifiy attack evaluation dataset (prediction vectors)
-        attack_test_indices_classified = []
-        for i in range(self.attack_pars["number_classes"]):
-            attack_test_indices_classified.append(np.where(attack_test_labels == i))
+        # -- Get target predictions for attack model input
+        target_prediction = Mia._get_target_predictions(
+            self.target_models, target_data, attack_test_data
+        )
 
         # -- Evaluate
         logger.info("Calculate attack model summary.")
         self.attack_results = Mia._attack_model_evaluation(
             attack_models,
             target_prediction,
-            attack_test_bool,
-            attack_test_indices_classified,
+            target_data,
         )
         logger.info("Calculate shadow model summary.")
         self.attack_results.update(
@@ -352,11 +345,11 @@ class Mia(attack.Attack):
             f"\n"
             f"\n{'Attack Models:':<30}"
             + f"\n{'Average Test Accuracy:':<30}"
-            + _list_to_formatted_string(self.attack_results["test_accuracy"])
+            + _list_to_formatted_string([self.attack_results["overall_test_accuracy"]])
             + f"\n{'Average Precision:':<30}"
-            + _list_to_formatted_string(self.attack_results["precision"])
+            + _list_to_formatted_string([self.attack_results["overall_precision"]])
             + f"\n{'Average Recall:':<30}"
-            + _list_to_formatted_string(self.attack_results["recall"])
+            + _list_to_formatted_string([self.attack_results["overall_recall"]])
         )
 
     @staticmethod
@@ -373,13 +366,13 @@ class Mia(attack.Attack):
 
         Parameters
         ----------
-        target_indices : numpy.ndarray
+        target_indices : iterable
             Array of indices used to train all target models. Indices in complete
             dataset range.
-        evaluation_indices : numpy.ndarray
+        evaluation_indices : iterable
             Array of indices for attack model evaluation. Indices in complete dataset
             range.
-        record_indices_per_target : iterable
+        record_indices_per_target : numpy.ndarray
             List of mapping which records of the target_indices are used to train a
             target model.
         attack_test_labels : numpy.ndarray
@@ -405,7 +398,7 @@ class Mia(attack.Attack):
         for i, record_indices in enumerate(record_indices_per_target):
 
             # Extract target model training data indices (full range)
-            tm_train_origin = target_indices[record_indices]
+            tm_train_origin = np.array(target_indices)[record_indices]
             # Convert indices from full range to evaluation data range
             e_train_i = np.nonzero(tm_train_origin[:, None] == evaluation_indices)[1]
 
@@ -444,11 +437,42 @@ class Mia(attack.Attack):
         return target_model_indices
 
     @staticmethod
+    def _get_target_predictions(target_models, target_data, attack_test_data):
+        """
+        Get classified target model predictions for every target model.
+
+        Parameters
+        ----------
+        target_models : iterable
+            List of target models to attack.
+        target_data : dict
+            Dictionary storing the classified indices and labels of target training and
+            evaluation records.
+        attack_test_data : numpy.ndarray
+            Array of evaluation data.
+
+        Returns
+        -------
+        iterable
+            Array of shape (target_models, classes) containing the classified
+            predictions per target model and data class.
+        """
+        pred_list = []
+        for i, target_model in enumerate(target_models):
+            pred_list.append([])
+            for j in range(len(target_data["indices_per_target"][i])):
+                class_indices = target_data["indices_per_target"][i][j]
+                pred_list[i].append(
+                    target_model.predict(attack_test_data[class_indices])
+                )
+
+        return pred_list
+
+    @staticmethod
     def _attack_model_evaluation(
         attack_models,
-        attack_test_data,
-        attack_test_true_labels,
-        attack_test_indices_classified,
+        target_predictions,
+        target_data,
     ):
         """
         Evaluate attack models.
@@ -457,69 +481,92 @@ class Mia(attack.Attack):
         ----------
         attack_models : iterable
             List of trained attack models to evaluate.
-        attack_test_data : numpy.ndarray
-            Array of prediction vectors of the target model.
-        attack_test_true_labels : numpy.ndarray
-            Array of the true classification of the prediction vectors.
-        attack_test_indices_classified : iterable
-            Array of indices mapping the attack evaluation data to classes debending on
-            the true label.
+        target_predictions : iterable
+            Array of prediction vectors per target model and attack model.
+        target_data : dict
+            Dictionary storing the classified indices and labels of target training and
+            evaluation records.
 
         Returns
         -------
         dict
-            Dictionary storing the attack model results.
+            Dictionary storing the attack model results. A list "per attack model and
+            target model" has the shape (attack model, target model) -> First index
+            specifies the attack model, the second index the target model.
 
-            * precision_list (list): Attack precision per attack model.
-            * recall_list (list): Attack recall per attack model.
-            * tp_list (list): True positives per attack model.
-            * fp_list (list): False positives per attack model.
-            * fn_list (list): False negatives per attack model.
-            * tn_list (list): True negatives per attack model.
-            * precision (float): Attack precision averaged over all attack models.
-            * recall (float): Attack recall averaged over all attack models.
-            * test_accuracy_list (list): Accuracy on test data per attack model.
-            * test_accuracy (float): Attack test accuracy averaged over all attack
-              models.
+            * test_accuracy_list (numpy.ndarray): Accuracy on test data per attack model
+              and target model.
+            * precision_list (numpy.ndarray): Attack precision per attack model and
+              target model.
+            * recall_list (numpy.ndarray): Attack recall per attack model and target
+              model.
+            * tp_list (numpy.ndarray): True positives per attack model and target model.
+            * fp_list (numpy.ndarray): False positives per attack model and target
+              model.
+            * fn_list (numpy.ndarray): False negatives per attack model and target
+              model.
+            * tn_list (numpy.ndarray): True negatives per attack model and target model.
+            * test_accuracy (numpy.ndarray): Attack test accuracy averaged over all
+              attack models per target model.
+            * precision (numpy.ndarray): Attack precision averaged over all attack
+              models per target model.
+            * recall (numpy.ndarray): Attack recall averaged over all attack models per
+              target model.
+            * overall_test_accuracy (float): Attack test accuracy averaged over all
+              attack models and target models.
+            * overall_precision (float): Attack precision averaged over all attack
+              models and target models.
+            * overall_recall (float): Attack recall averaged over all attack models and
+              target models.
         """
-        tn_list = []
-        tp_list = []
-        fn_list = []
-        fp_list = []
-        precision_list = []
-        recall_list = []
-        test_accuracy_list = []
-        precision_all = []
-        recall_all = []
-        accuracy_all = []
+        # Preallocate result matrices
+        target_model_number = len(target_data["indices_per_target"])
+        tn_list = np.empty((len(attack_models), target_model_number), dtype=np.int_)
+        tp_list = np.empty((len(attack_models), target_model_number), dtype=np.int_)
+        fn_list = np.empty((len(attack_models), target_model_number), dtype=np.int_)
+        fp_list = np.empty((len(attack_models), target_model_number), dtype=np.int_)
+        precision_list = np.empty((len(attack_models), target_model_number))
+        recall_list = np.empty((len(attack_models), target_model_number))
+        test_accuracy_list = np.empty((len(attack_models), target_model_number))
 
-        for i, attack_model in enumerate(attack_models):
-            true_labels = attack_test_true_labels[attack_test_indices_classified[i]]
-            pred = attack_model.predict(
-                attack_test_data[attack_test_indices_classified[i]]
-            )
-            pred = pred.flatten()
-            pred = pred > 0.5
+        for tm in range(target_model_number):
+            for am, attack_model in enumerate(attack_models):
+                true_labels = np.array(
+                    target_data["true_attack_labels_per_target"][tm][am]
+                )
 
-            tn = np.count_nonzero((pred == False) & (true_labels == False))
-            tp = np.count_nonzero((pred == True) & (true_labels == True))
-            fn = np.count_nonzero((pred == False) & (true_labels == True))
-            fp = np.count_nonzero((pred == True) & (true_labels == False))
-            precision = tp / (tp + fp) if (tp + fp) else 1
-            recall = tp / (fn + tp) if (fn + tp) else 0
-            test_accuracy = np.count_nonzero(pred == true_labels) / len(pred)
+                # Get attack model prediction
+                pred = attack_model.predict(target_predictions[tm][am])
+                pred = pred.flatten()
+                pred = pred > 0.5
 
-            tn_list.append(tn)
-            tp_list.append(tp)
-            fn_list.append(fn)
-            fp_list.append(fp)
-            precision_list.append(precision)
-            recall_list.append(recall)
-            test_accuracy_list.append(test_accuracy)
+                # Evaluate attack model prediction
+                tn = np.count_nonzero((pred == False) & (true_labels == False))
+                tp = np.count_nonzero((pred == True) & (true_labels == True))
+                fn = np.count_nonzero((pred == False) & (true_labels == True))
+                fp = np.count_nonzero((pred == True) & (true_labels == False))
+                precision = tp / (tp + fp) if (tp + fp) else 1
+                recall = tp / (fn + tp) if (fn + tp) else 0
+                test_accuracy = np.count_nonzero(pred == true_labels) / len(pred)
 
-        precision_all.append(sum(precision_list) / len(precision_list))
-        recall_all.append(sum(recall_list) / len(recall_list))
-        accuracy_all.append(sum(test_accuracy_list) / len(test_accuracy_list))
+                # Store evaluation results to matrices
+                tn_list[am][tm] = tn
+                tp_list[am][tm] = tp
+                fn_list[am][tm] = fn
+                fp_list[am][tm] = fp
+                precision_list[am][tm] = precision
+                recall_list[am][tm] = recall
+                test_accuracy_list[am][tm] = test_accuracy
+
+        # Average over all attack models per target model
+        precision = np.average(precision_list, axis=0)
+        recall = np.average(recall_list, axis=0)
+        test_accuracy = np.average(test_accuracy_list, axis=0)
+
+        # Average over all attack models and target models
+        precision_all = np.average(precision)
+        recall_all = np.average(recall)
+        test_accuracy_all = np.average(test_accuracy)
 
         attack_model_results = {
             "tn_list": tn_list,
@@ -529,9 +576,12 @@ class Mia(attack.Attack):
             "precision_list": precision_list,
             "recall_list": recall_list,
             "test_accuracy_list": test_accuracy_list,
-            "test_accuracy": accuracy_all,
-            "precision": precision_all,
-            "recall": recall_all,
+            "test_accuracy": test_accuracy,
+            "precision": precision,
+            "recall": recall,
+            "": test_accuracy_all,
+            "": precision_all,
+            "": recall_all,
         }
 
         return attack_model_results
@@ -805,13 +855,13 @@ class Mia(attack.Attack):
 
         This subsection contains results only for the first target model.
         """
+        tm = 0  # Specify target model
         self.report_section.append(Subsubsection("Attack Results"))
         res = self.attack_results
 
         # ECDF like in paper
-        # TODO: For every target model
-        precision_sorted = np.sort(res["precision_list"])
-        recall_sorted = np.sort(res["recall_list"])
+        precision_sorted = np.sort(res["precision_list"], axis=0)[:, tm]
+        recall_sorted = np.sort(res["recall_list"], axis=0)[:, tm]
         py = np.arange(1, len(precision_sorted) + 1) / len(precision_sorted)
         ry = np.arange(1, len(recall_sorted) + 1) / len(recall_sorted)
 
@@ -857,43 +907,59 @@ class Mia(attack.Attack):
 
             # Average column
             class_row.append(f"0-{self.attack_pars['number_classes']}")
-            tp_row.append(round(sum(res["tp_list"]) / len(res["tp_list"]), 2))
-            fp_row.append(round(sum(res["fp_list"]) / len(res["fp_list"]), 2))
-            tn_row.append(round(sum(res["tn_list"]) / len(res["tn_list"]), 2))
-            fn_row.append(round(sum(res["fn_list"]) / len(res["fn_list"]), 2))
+            tp_row.append(
+                np.round(np.sum(res["tp_list"], axis=0)[tm] / len(res["tp_list"]), 2)
+            )
+            fp_row.append(
+                np.round(np.sum(res["fp_list"], axis=0)[tm] / len(res["fp_list"]), 2)
+            )
+            tn_row.append(
+                np.round(np.sum(res["tn_list"], axis=0)[tm] / len(res["tn_list"]), 2)
+            )
+            fn_row.append(
+                np.round(np.sum(res["fn_list"], axis=0)[tm] / len(res["fn_list"]), 2)
+            )
             accuracy_row.append(
-                round(
-                    sum(res["test_accuracy_list"]) / len(res["test_accuracy_list"]), 3
+                np.round(
+                    np.sum(res["test_accuracy_list"], axis=0)[tm]
+                    / len(res["test_accuracy_list"]),
+                    3,
                 )
             )
             precision_row.append(
-                round(sum(res["precision_list"]) / len(res["precision_list"]), 3)
+                np.round(
+                    np.sum(res["precision_list"], axis=0)[tm]
+                    / len(res["precision_list"]),
+                    3,
+                )
             )
             recall_row.append(
-                round(sum(res["recall_list"]) / len(res["recall_list"]), 3)
+                np.round(
+                    np.sum(res["recall_list"], axis=0)[tm] / len(res["recall_list"]), 3
+                )
             )
 
             # Maximum accuracy class
-            max_class = res["test_accuracy_list"].index(max(res["test_accuracy_list"]))
+            max_class = np.argmax(res["test_accuracy_list"], axis=0)[tm]
             class_row.append(max_class)
-            tp_row.append(res["tp_list"][max_class])
-            fp_row.append(res["fp_list"][max_class])
-            tn_row.append(res["tn_list"][max_class])
-            fn_row.append(res["fn_list"][max_class])
-            accuracy_row.append(round(res["test_accuracy_list"][max_class], 3))
-            precision_row.append(round(res["precision_list"][max_class], 3))
-            recall_row.append(round(res["recall_list"][max_class], 3))
+            tp_row.append(res["tp_list"][max_class][tm])
+            fp_row.append(res["fp_list"][max_class][tm])
+            tn_row.append(res["tn_list"][max_class][tm])
+            fn_row.append(res["fn_list"][max_class][tm])
+            accuracy_row.append(np.round(res["test_accuracy_list"][max_class][tm], 3))
+            precision_row.append(np.round(res["precision_list"][max_class][tm], 3))
+            recall_row.append(np.round(res["recall_list"][max_class][tm], 3))
 
             # Minimum accuracy class
-            min_class = res["test_accuracy_list"].index(min(res["test_accuracy_list"]))
+            min_class = np.argmin(res["test_accuracy_list"], axis=0)[tm]
             class_row.append(min_class)
-            tp_row.append(res["tp_list"][min_class])
-            fp_row.append(res["fp_list"][min_class])
-            tn_row.append(res["tn_list"][min_class])
-            fn_row.append(res["fn_list"][min_class])
-            accuracy_row.append(round(res["test_accuracy_list"][min_class], 3))
-            precision_row.append(round(res["precision_list"][min_class], 3))
-            recall_row.append(round(res["recall_list"][min_class], 3))
+            tp_row.append(res["tp_list"][min_class][tm])
+            fp_row.append(res["fp_list"][min_class][tm])
+            tn_row.append(res["tn_list"][min_class][tm])
+            fn_row.append(res["fn_list"][min_class][tm])
+            accuracy_row.append(np.round(res["test_accuracy_list"][min_class][tm], 3))
+            precision_row.append(np.round(res["precision_list"][min_class][tm], 3))
+            recall_row.append(np.round(res["recall_list"][min_class][tm], 3))
 
             with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
                 self.report_section.append(Command("centering"))
@@ -959,9 +1025,9 @@ class Mia(attack.Attack):
 
         # Bar plots
         fig, (ax0, ax1, ax2) = plt.subplots(1, 3, sharey=True, figsize=(12, 3))
-        ax0.hist(res["test_accuracy_list"], edgecolor="black")
-        ax1.hist(res["precision_list"], edgecolor="black")
-        ax2.hist(res["recall_list"], edgecolor="black")
+        ax0.hist(res["test_accuracy_list"][:, tm], edgecolor="black")
+        ax1.hist(res["precision_list"][:, tm], edgecolor="black")
+        ax2.hist(res["recall_list"][:, tm], edgecolor="black")
         ax0.set_xlabel("Accuracy")
         ax1.set_xlabel("Precision")
         ax2.set_xlabel("Recall")
