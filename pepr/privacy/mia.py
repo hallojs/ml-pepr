@@ -22,15 +22,20 @@ plt.style.use("default")
 
 class Mia(attack.Attack):
     """
-    Membership Inference Attacks (MIA) Against Machine Learning Models
+    Membership Inference Attacks (MIA) Against Machine Learning Models.
 
     Attack-Steps:
-    TODO: doc - describe attack
+
+    1. Create dataset mapping for shadow models.
+    2. Train shadow models.
+    3. Generate attack model dataset.
+    4. Train attack models.
+    5. Evaluate attack models.
 
     Parameters
     ----------
     attack_alias : str
-            Alias for a specific instantiation of the mia.
+        Alias for a specific instantiation of the mia class.
     attack_pars : dict
         Dictionary containing all needed attack parameters:
 
@@ -42,8 +47,8 @@ class Mia(attack.Attack):
           TensorFlow model (typically identical to the target model) used in the
           training of the shadow models.
         * create_compile_attack_model (function): Function that returns a compiled
-          TensorFlow model used for the attack models. There should be a single
-          floating-point value per prediction.
+          TensorFlow model used for the attack models. The model output is expected to
+          be a single floating-point value per prediction.
         * shadow_epochs (int): Number of training epochs of the shadow models.
         * shadow_batch_size (int): Batch size used in the training of the
           shadow models.
@@ -93,18 +98,18 @@ class Mia(attack.Attack):
         * fp_list (numpy.ndarray): False positives per attack model and target model.
         * fn_list (numpy.ndarray): False negatives per attack model and target model.
         * tn_list (numpy.ndarray): True negatives per attack model and target model.
-        * test_accuracy_list (numpy.ndarray): Accuracy on evaluation records per attack
-          model and target model.
+        * test_accuracy_list (numpy.ndarray): Evaluation accuracy on evaluation records
+          per attack model and target model.
         * precision_list (numpy.ndarray): Attack precision per attack model and target
           model.
         * recall_list (numpy.ndarray): Attack recall per attack model and target model.
-        * test_accuracy (numpy.ndarray): Attack test accuracy averaged over all attack
+        * test_accuracy (numpy.ndarray): Evaluation accuracy averaged over all attack
           models per target model.
         * precision (numpy.ndarray): Attack precision averaged over all attack models
           per target model.
         * recall (numpy.ndarray): Attack recall averaged over all attack models per
           target model.
-        * overall_test_accuracy (float): Attack test accuracy averaged over all target
+        * overall_test_accuracy (float): Evaluation accuracy averaged over all target
           models.
         * overall_precision (float): Attack precision averaged over all target models.
         * overall_recall (float): Attack recall averaged over all target models.
@@ -171,7 +176,7 @@ class Mia(attack.Attack):
         attack_test_data = self.data[self.data_conf["evaluation_indices"]]
         attack_test_labels = self.labels[self.data_conf["evaluation_indices"]]
 
-        # Setup shadow model datasets:
+        # Step 1: Create dataset mapping for shadow models
         # shadow_data_indices[i]:
         #   Training:
         #       shadow_train_indices - index 0
@@ -194,7 +199,7 @@ class Mia(attack.Attack):
             np.save(path, shadow_data_indices)
         logger.debug(f"shadow_datasets shape: {shadow_data_indices.shape}")
 
-        # Train shadow models
+        # Step 2: Train shadow models
         if load and "shadow_models" in load_pars.keys():
             paths = load_pars["shadow_models"]
             shadow_models = []
@@ -217,7 +222,7 @@ class Mia(attack.Attack):
                 logger.info(f"Save trained shadow model: {path}.")
                 model.save(path)
 
-        # Attack model dataset generation
+        # Step 3: Generate attack model dataset
         # attack_datasets[i]:
         #   "indices"
         #   "prediction_vectors"
@@ -240,7 +245,7 @@ class Mia(attack.Attack):
             logger.info(f"Save attack model datasets: {path}.")
             np.save(path, attack_datasets)
 
-        # Train attack models
+        # Step 4: Train attack models
         if load and "attack_models" in load_pars.keys():
             paths = load_pars["attack_models"]
             attack_models = []
@@ -261,7 +266,7 @@ class Mia(attack.Attack):
                 logger.info(f"Save trained attack model: {path}.")
                 model.save(path)
 
-        # Evaluate attack models
+        # Step 5: Evaluate attack models
         logger.info("Evaluate attack models.")
 
         # -- Generate target model dataset and true labels
@@ -338,11 +343,11 @@ class Mia(attack.Attack):
 
         Parameters
         ----------
-        target_indices : iterable
-            Array of indices used to train all target models. Indices in complete
+        target_indices : list
+            List of indices used to train all target models. Indices in complete
             dataset range.
-        evaluation_indices : iterable
-            Array of indices for attack model evaluation. Indices in complete dataset
+        evaluation_indices : list
+            List of indices for attack model evaluation. Indices in complete dataset
             range.
         record_indices_per_target : numpy.ndarray
             List of mapping which records of the target_indices are used to train a
@@ -425,8 +430,8 @@ class Mia(attack.Attack):
 
         Returns
         -------
-        iterable
-            Array of shape (target_models, classes) containing the classified
+        list
+            List of shape (target_models, classes) containing the classified
             predictions per target model and data class.
         """
         pred_list = []
@@ -453,8 +458,8 @@ class Mia(attack.Attack):
         ----------
         attack_models : iterable
             List of trained attack models to evaluate.
-        target_predictions : iterable
-            Array of prediction vectors per target model and attack model.
+        target_predictions : list
+            List of prediction vectors per target model and attack model.
         target_data : dict
             Dictionary storing the classified indices and labels of target training and
             evaluation records.
@@ -466,8 +471,8 @@ class Mia(attack.Attack):
             target model" has the shape (attack model, target model) -> First index
             specifies the attack model, the second index the target model.
 
-            * test_accuracy_list (numpy.ndarray): Accuracy on test data per attack model
-              and target model.
+            * test_accuracy_list (numpy.ndarray): Evaluation accuracy on test data per
+              attack model and target model.
             * precision_list (numpy.ndarray): Attack precision per attack model and
               target model.
             * recall_list (numpy.ndarray): Attack recall per attack model and target
@@ -478,13 +483,13 @@ class Mia(attack.Attack):
             * fn_list (numpy.ndarray): False negatives per attack model and target
               model.
             * tn_list (numpy.ndarray): True negatives per attack model and target model.
-            * test_accuracy (numpy.ndarray): Attack test accuracy averaged over all
+            * test_accuracy (numpy.ndarray): Evaluation accuracy averaged over all
               attack models per target model.
             * precision (numpy.ndarray): Attack precision averaged over all attack
               models per target model.
             * recall (numpy.ndarray): Attack recall averaged over all attack models per
               target model.
-            * overall_test_accuracy (float): Attack test accuracy averaged over all
+            * overall_test_accuracy (float): Evaluation accuracy averaged over all
               attack models and target models.
             * overall_precision (float): Attack precision averaged over all attack
               models and target models.
@@ -628,10 +633,9 @@ class Mia(attack.Attack):
         return shadow_model_results
 
     def create_attack_report(self, save_path="mia_report", pdf=False):
-        """Create an attack report just for the given attack instantiation.
+        """
+        Create an attack report just for the given attack instantiation.
 
-        Parameters
-        ----------
         Parameters
         ----------
         save_path : str
@@ -648,7 +652,8 @@ class Mia(attack.Attack):
         report.report_generator(save_path, [self.report_section], pdf)
 
     def create_attack_section(self, save_path):
-        """Create an attack section for the given attack instantiation.
+        """
+        Create an attack section for the given attack instantiation.
 
         Parameters
         ----------
@@ -752,7 +757,8 @@ class Mia(attack.Attack):
                 )
 
     def _report_attack_results(self, save_path):
-        """Create subsubsection describing the most important results of the attack.
+        """
+        Create subsubsection describing the most important results of the attack.
 
         This subsection contains results only for the first target model.
         """
@@ -924,7 +930,7 @@ class Mia(attack.Attack):
 
         ap = self.attack_pars
 
-        # Bar plots
+        # Histograms
         fig, (ax0, ax1, ax2) = plt.subplots(1, 3, sharey=True, figsize=(12, 3))
         ax0.hist(res["test_accuracy_list"][:, tm], edgecolor="black")
         ax1.hist(res["precision_list"][:, tm], edgecolor="black")
@@ -967,7 +973,7 @@ class Mia(attack.Attack):
         origin_dataset_size, number_shadow_models, shadow_train_size, seed=None
     ):
         """
-        Create datasets (for training and evaluating) for the shadow models.
+        Create datasets (containing training and evaluating data) for the shadow models.
 
         Parameters
         ----------
@@ -1011,8 +1017,7 @@ class Mia(attack.Attack):
         batch_size,
     ):
         """
-        Trains shadow models based on the model which create_compile_shadow_model
-        returns.
+        Train shadow models which are based on the given create model function.
 
         Parameters
         ----------
@@ -1076,7 +1081,7 @@ class Mia(attack.Attack):
         -------
         list
             List of dictionaries for every class containing data indices, prediction
-            vectors and attack model labels (in or out)
+            vectors and attack model labels (in or out).
         """
         shadow_data_size = len(shadow_data_indices[0][0]) * 2
         attack_dataset_size = shadow_data_size * len(shadow_models)
@@ -1140,8 +1145,7 @@ class Mia(attack.Attack):
         batch_size,
     ):
         """
-        Trains attack models based on the model which create_compile_attack_model
-        returns.
+        Train attack models which are based on the given create model function.
 
         Parameters
         ----------
