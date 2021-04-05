@@ -78,6 +78,12 @@ a utility function for generating appropriate training data sets)
 
 Example Notebooks
 -----------------
+* |nb0|_ mia_tutorial: A simple example notebook of using the basic membership inference attack (MIA) on a
+  single target model with a single attack configuration.
+
+.. |nb0| image:: https://colab.research.google.com/assets/colab-badge.svg
+.. _nb0: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/mia_example.ipynb
+
 * |nb1|_ direct_gmia_tutorial: A first really simple example notebook of using the direct membership inference attack on a
   single target model with a single attack configuration.
 
@@ -91,7 +97,7 @@ PePR offers the following attacks:
 +------------------------------------------------------------+---------------------+
 | Attack                                                     | Type                |
 +============================================================+=====================+
-| [1]_ Membership Inference Attack (Coming Soon!)            | Privacy (Black Box) |
+| [1]_ Membership Inference Attack (mia)                     | Privacy (Black Box) |
 +------------------------------------------------------------+---------------------+
 | [2]_ Direct Generalized Membership Inference Attack (gmia) | Privacy (Black Box) |
 +------------------------------------------------------------+---------------------+
