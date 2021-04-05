@@ -1128,7 +1128,7 @@ class DirectGmia(attack.Attack):
                     tab_dc.add_row(
                         [
                             "Samples used to evaluate the attack",
-                            len(dc["target_indices"]),
+                            len(dc["evaluation_indices"]),
                         ]
                     )
                     tab_dc.add_hline()
@@ -1172,7 +1172,7 @@ class DirectGmia(attack.Attack):
         ax.plot(accuracy[:, 0], recall[:, 0])
         ax.set_xlabel("Accuracy")
         ax.set_ylabel("Recall")
-        fig.savefig(save_path + "/fig/accuracy_recall_curve.png")
+        fig.savefig(save_path + "/fig/accuracy_recall_curve.pdf")
         plt.close(fig)
 
         res = self.attack_results
@@ -1183,7 +1183,7 @@ class DirectGmia(attack.Attack):
                 self.report_section.append(
                     Command(
                         "includegraphics",
-                        NoEscape("fig/accuracy_recall_curve.png"),
+                        NoEscape("fig/accuracy_recall_curve.pdf"),
                         "width=8cm",
                     )
                 )
@@ -1295,12 +1295,12 @@ class DirectGmia(attack.Attack):
             histtype="step",
             edgecolor="black",
         )
-        fig.savefig(save_path + "/fig/hist_selected_records.png")
+        fig.savefig(save_path + "/fig/hist_selected_records.pdf")
         plt.close(fig)
 
         with self.report_section.create(Figure()) as fig:
             fig.add_image(
-                "fig/hist_selected_records.png", width=NoEscape(r"0.5\textwidth")
+                "fig/hist_selected_records.pdf", width=NoEscape(r"0.5\textwidth")
             )
             self.report_section.append(Command("captionsetup", "labelformat=empty"))
             self.report_section.append(
