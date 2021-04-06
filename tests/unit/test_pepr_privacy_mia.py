@@ -8,7 +8,7 @@ def test_get_target_model_indices_small():
     # Simple example (1 target model, 2 classes, shuffled)
     target_indices = np.array([10, 13, 7, 6, 11, 4])
     evaluation_indices = np.array([10, 18, 16, 11, 4, 13, 9, 1, 8, 6, 14, 7])
-    record_indices_per_target = list([[3, 1, 0]])
+    record_indices_per_target = np.array([np.array([3, 1, 0])])
     attack_test_labels = np.array([1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0])
     number_classes = 2
 
@@ -30,7 +30,7 @@ def test_get_target_model_indices_medium():
     # Medium example (2 target models, 2 classes, shuffled)
     target_indices = np.array([10, 13, 7, 6, 11, 4])
     evaluation_indices = np.array([10, 18, 16, 11, 4, 13, 9, 1, 8, 6, 14, 7])
-    record_indices_per_target = list([[3, 1, 0], [2, 5, 4, 3]])
+    record_indices_per_target = np.array([np.array([3, 1, 0]), np.array([2, 5, 4, 3])])
     attack_test_labels = np.array([1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0])
     number_classes = 2
 
@@ -93,13 +93,13 @@ def test_attack_model_evaluation():
     assert np.allclose(res["fn_list"], [[1, 2], [2, 0], [0, 0]])
     assert np.allclose(res["fp_list"], [[1, 0], [1, 1], [1, 1]])
     assert np.allclose(
-        res["test_accuracy_list"], [[1 / 3, 1 / 2], [1 / 4, 2 / 3], [2 / 3, 2 / 3]]
+        res["eval_accuracy_list"], [[1 / 3, 1 / 2], [1 / 4, 2 / 3], [2 / 3, 2 / 3]]
     )
     assert np.allclose(res["precision_list"], [[0, 1], [1 / 2, 1 / 2], [1 / 2, 1 / 2]])
     assert np.allclose(res["recall_list"], [[0, 1 / 3], [1 / 3, 1], [1, 1]])
-    assert np.allclose(res["test_accuracy"], [5 / 12, 11 / 18])
+    assert np.allclose(res["eval_accuracy"], [5 / 12, 11 / 18])
     assert np.allclose(res["precision"], [1 / 3, 2 / 3])
     assert np.allclose(res["recall"], [4 / 9, 7 / 9])
-    assert np.allclose(res["overall_test_accuracy"], 37 / 72)
+    assert np.allclose(res["overall_eval_accuracy"], 37 / 72)
     assert np.allclose(res["overall_precision"], 1 / 2)
     assert np.allclose(res["overall_recall"], 11 / 18)
