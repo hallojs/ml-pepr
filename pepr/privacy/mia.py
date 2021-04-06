@@ -375,8 +375,9 @@ class Mia(attack.Attack):
         Returns
         -------
         dict
-            Dictionary storing the classified indices and labels. Index range is the
-            evaluation data segment.
+            Dictionary storing the classified indices and labels. Indices are in the
+            evaluation data slice. The indices range starts with 0 and ends with the
+            length of the evaluation data slice.
 
             * indices_per_target (list): Classified indices of the evaluation dataset
               per target model and per class. Shape: (target_models, classes)
@@ -438,8 +439,15 @@ class Mia(attack.Attack):
         target_models : iterable
             List of target models to attack.
         target_data : dict
-            Dictionary storing the classified indices and labels of target training and
-            evaluation records.
+            Dictionary storing the classified indices and labels. Indices are in the
+            evaluation data slice. The indices range starts with 0 and ends with the
+            length of the evaluation data slice.
+
+            * indices_per_target (list): Classified indices of the evaluation dataset
+              per target model and per class. Shape: (target_models, classes)
+            * true_attack_labels_per_target (list): The true labels for the attack
+              evaluation per target model and per class. Shape: (target_models, classes)
+
         attack_test_data : numpy.ndarray
             Array of evaluation data.
 
