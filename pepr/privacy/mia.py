@@ -655,6 +655,219 @@ class Mia(attack.Attack):
         }
         return shadow_model_results
 
+    @staticmethod
+    def _create_shadow_model_datasets(
+        origin_dataset_size, number_shadow_models, shadow_train_size, seed=None
+    ):
+        """
+        Create datasets (containing training and evaluating data) for the shadow models.
+
+        Parameters
+        ----------
+        origin_dataset_size : int
+            Size of the full origin dataset.
+        number_shadow_models : int
+            Amount of shadow models to be trained.
+        shadow_train_size : int
+            Size of each shadow model's training set. The corresponding evaluation sets
+            will have the same size.
+        seed : int
+            Explict seed for the distribution. Can be used to achieve deterministic
+            behavior. If None, no explict seed will be used.
+
+        Returns
+        -------
+        numpy.ndarray
+            Array of shape (n, 2, m) containing m training records and m evaluation
+            records for n shadow models.
+        """
+        rng = np.random.default_rng(seed)
+        shadow_datasets = np.empty(
+            (number_shadow_models, 2, shadow_train_size), dtype=np.uint32
+        )
+        for i in range(number_shadow_models):
+            choice = rng.choice(
+                origin_dataset_size, size=shadow_train_size * 2, replace=False
+            )
+            # Split to training and evaluation set (no overlap)
+            shadow_datasets[i] = np.split(choice, 2)
+
+        return shadow_datasets
+
+    @staticmethod
+    def _train_shadow_models(
+        create_compile_shadow_model,
+        shadow_data_indices,
+        train_data,
+        train_labels,
+        epochs,
+        batch_size,
+    ):
+        """
+        Train shadow models which are based on the given create model function.
+
+        Parameters
+        ----------
+        create_compile_shadow_model : function
+            Return compiled TensorFlow Keras model for the shadow models.
+        shadow_data_indices : numpy.ndarray
+            Provides dataset mappings for the shadow models.
+        train_data : numpy.ndarray
+            Training data for the shadow models.
+        train_labels : numpy.ndarray
+            Training labels for the shadow models.
+        epochs : int
+            Number of training epochs for each shadow model.
+        batch_size : int
+            Size of mini batches used during the training.
+
+        Returns
+        -------
+        list
+            Array of the trained shadow models.
+        """
+        shadow_models = []
+        number_shadow_models = len(shadow_data_indices)
+        for i in range(number_shadow_models):
+            logger.info(
+                f"Progress: Train shadow model ({i + 1}/{number_shadow_models})."
+            )
+            shadow_model = create_compile_shadow_model()
+            shadow_model.fit(
+                train_data[shadow_data_indices[i][0]],
+                train_labels[shadow_data_indices[i][0]],
+                epochs=epochs,
+                batch_size=batch_size,
+                verbose=0,
+            )
+            shadow_models.append(shadow_model)
+
+        return shadow_models
+
+    @staticmethod
+    def _generate_attack_dataset(
+        shadow_models, shadow_data_indices, number_classes, shadow_data, shadow_labels
+    ):
+        """
+        Generate training data for the attack models.
+
+        Parameters
+        ----------
+        shadow_models : list
+            List of trained shadow models.
+        shadow_data_indices : numpy.ndarray
+            Array with train data and evaluation data for every shadow model.
+        number_classes : int
+            Number of different classes in the dataset.
+        shadow_data : numpy.ndarray
+            Array of data records for the shadow models.
+        shadow_labels : numpy.ndarray
+            Array of label records for the shadow models.
+
+        Returns
+        -------
+        list
+            List of dictionaries for every class containing data indices, prediction
+            vectors and attack model labels (in or out).
+        """
+        shadow_data_size = len(shadow_data_indices[0][0]) * 2
+        attack_dataset_size = shadow_data_size * len(shadow_models)
+        # Preallocate
+        attack_train_data = {
+            "indices": np.empty(attack_dataset_size, dtype=np.uint32),
+            "prediction_vectors": np.empty(
+                (attack_dataset_size, number_classes), dtype=np.float32
+            ),
+            "attack_labels": np.empty(attack_dataset_size, dtype=np.bool_),
+        }
+
+        # Populate
+        logger.info(f"Get prediction of shadow models.")
+        in_array = np.full(int(shadow_data_size / 2), True, dtype=np.bool_)
+        out_array = np.full(int(shadow_data_size / 2), False, dtype=np.bool_)
+        for i, shadow_model in enumerate(shadow_models):
+            # Make predictions
+            logger.debug(
+                f"Get prediction of shadow model ({i+1}/{len(shadow_models)})."
+            )
+            in_prediction = shadow_model.predict(shadow_data[shadow_data_indices[i][0]])
+            out_prediction = shadow_model.predict(
+                shadow_data[shadow_data_indices[i][1]]
+            )
+            # Populate unclassified attack dataset
+            start_index = i * shadow_data_size
+            end_index = start_index + shadow_data_size
+            attack_train_data["indices"][start_index:end_index] = np.concatenate(
+                (shadow_data_indices[i][0], shadow_data_indices[i][1])
+            )
+            attack_train_data["prediction_vectors"][
+                start_index:end_index
+            ] = np.concatenate((in_prediction, out_prediction))
+            attack_train_data["attack_labels"][start_index:end_index] = np.concatenate(
+                (in_array, out_array)
+            )
+
+        # Classify attack data
+        logger.debug(f"Classify attack train data.")
+        attack_train_data_classified = []
+        for i in range(number_classes):
+            indices = np.where(shadow_labels[attack_train_data["indices"]] == i)
+            attack_train_data_classified.append(
+                {
+                    "indices": attack_train_data["indices"][indices],
+                    "prediction_vectors": attack_train_data["prediction_vectors"][
+                        indices
+                    ],
+                    "attack_labels": attack_train_data["attack_labels"][indices],
+                }
+            )
+
+        return attack_train_data_classified
+
+    @staticmethod
+    def _train_attack_models(
+        create_compile_attack_model,
+        attack_datasets,
+        epochs,
+        batch_size,
+    ):
+        """
+        Train attack models which are based on the given create model function.
+
+        Parameters
+        ----------
+        create_compile_attack_model : function
+            Return compiled TensorFlow Keras model for the attack models.
+        attack_datasets : list
+            List of generated datasets for the attack models.
+        epochs : int
+            Number of training epochs for each shadow model.
+        batch_size : int
+            Size of mini batches used during the training.
+
+        Returns
+        -------
+        list
+            Array of the trained attack models.
+        """
+        attack_models = []
+        number_attack_models = len(attack_datasets)
+        for i in range(number_attack_models):
+            logger.info(
+                f"Progress: Train attack model ({i + 1}/{number_attack_models})."
+            )
+            shadow_model = create_compile_attack_model()
+            shadow_model.fit(
+                attack_datasets[i]["prediction_vectors"],
+                attack_datasets[i]["attack_labels"],
+                epochs=epochs,
+                batch_size=batch_size,
+                verbose=0,
+            )
+            attack_models.append(shadow_model)
+
+        return attack_models
+
     def create_attack_report(self, save_path="mia_report", pdf=False):
         """
         Create an attack report just for the given attack instantiation.
@@ -995,216 +1208,3 @@ class Mia(attack.Attack):
                     "attack models",
                 )
             )
-
-    @staticmethod
-    def _create_shadow_model_datasets(
-        origin_dataset_size, number_shadow_models, shadow_train_size, seed=None
-    ):
-        """
-        Create datasets (containing training and evaluating data) for the shadow models.
-
-        Parameters
-        ----------
-        origin_dataset_size : int
-            Size of the full origin dataset.
-        number_shadow_models : int
-            Amount of shadow models to be trained.
-        shadow_train_size : int
-            Size of each shadow model's training set. The corresponding evaluation sets
-            will have the same size.
-        seed : int
-            Explict seed for the distribution. Can be used to achieve deterministic
-            behavior. If None, no explict seed will be used.
-
-        Returns
-        -------
-        numpy.ndarray
-            Array of shape (n, 2, m) containing m training records and m evaluation
-            records for n shadow models.
-        """
-        rng = np.random.default_rng(seed)
-        shadow_datasets = np.empty(
-            (number_shadow_models, 2, shadow_train_size), dtype=np.uint32
-        )
-        for i in range(number_shadow_models):
-            choice = rng.choice(
-                origin_dataset_size, size=shadow_train_size * 2, replace=False
-            )
-            # Split to training and evaluation set (no overlap)
-            shadow_datasets[i] = np.split(choice, 2)
-
-        return shadow_datasets
-
-    @staticmethod
-    def _train_shadow_models(
-        create_compile_shadow_model,
-        shadow_data_indices,
-        train_data,
-        train_labels,
-        epochs,
-        batch_size,
-    ):
-        """
-        Train shadow models which are based on the given create model function.
-
-        Parameters
-        ----------
-        create_compile_shadow_model : function
-            Return compiled TensorFlow Keras model for the shadow models.
-        shadow_data_indices : numpy.ndarray
-            Provides dataset mappings for the shadow models.
-        train_data : numpy.ndarray
-            Training data for the shadow models.
-        train_labels : numpy.ndarray
-            Training labels for the shadow models.
-        epochs : int
-            Number of training epochs for each shadow model.
-        batch_size : int
-            Size of mini batches used during the training.
-
-        Returns
-        -------
-        list
-            Array of the trained shadow models.
-        """
-        shadow_models = []
-        number_shadow_models = len(shadow_data_indices)
-        for i in range(number_shadow_models):
-            logger.info(
-                f"Progress: Train shadow model ({i + 1}/{number_shadow_models})."
-            )
-            shadow_model = create_compile_shadow_model()
-            shadow_model.fit(
-                train_data[shadow_data_indices[i][0]],
-                train_labels[shadow_data_indices[i][0]],
-                epochs=epochs,
-                batch_size=batch_size,
-                verbose=0,
-            )
-            shadow_models.append(shadow_model)
-
-        return shadow_models
-
-    @staticmethod
-    def _generate_attack_dataset(
-        shadow_models, shadow_data_indices, number_classes, shadow_data, shadow_labels
-    ):
-        """
-        Generate training data for the attack models.
-
-        Parameters
-        ----------
-        shadow_models : list
-            List of trained shadow models.
-        shadow_data_indices : numpy.ndarray
-            Array with train data and evaluation data for every shadow model.
-        number_classes : int
-            Number of different classes in the dataset.
-        shadow_data : numpy.ndarray
-            Array of data records for the shadow models.
-        shadow_labels : numpy.ndarray
-            Array of label records for the shadow models.
-
-        Returns
-        -------
-        list
-            List of dictionaries for every class containing data indices, prediction
-            vectors and attack model labels (in or out).
-        """
-        shadow_data_size = len(shadow_data_indices[0][0]) * 2
-        attack_dataset_size = shadow_data_size * len(shadow_models)
-        # Preallocate
-        attack_train_data = {
-            "indices": np.empty(attack_dataset_size, dtype=np.uint32),
-            "prediction_vectors": np.empty(
-                (attack_dataset_size, number_classes), dtype=np.float32
-            ),
-            "attack_labels": np.empty(attack_dataset_size, dtype=np.bool_),
-        }
-
-        # Populate
-        logger.info(f"Get prediction of shadow models.")
-        in_array = np.full(int(shadow_data_size / 2), True, dtype=np.bool_)
-        out_array = np.full(int(shadow_data_size / 2), False, dtype=np.bool_)
-        for i, shadow_model in enumerate(shadow_models):
-            # Make predictions
-            logger.debug(
-                f"Get prediction of shadow model ({i+1}/{len(shadow_models)})."
-            )
-            in_prediction = shadow_model.predict(shadow_data[shadow_data_indices[i][0]])
-            out_prediction = shadow_model.predict(
-                shadow_data[shadow_data_indices[i][1]]
-            )
-            # Populate unclassified attack dataset
-            start_index = i * shadow_data_size
-            end_index = start_index + shadow_data_size
-            attack_train_data["indices"][start_index:end_index] = np.concatenate(
-                (shadow_data_indices[i][0], shadow_data_indices[i][1])
-            )
-            attack_train_data["prediction_vectors"][
-                start_index:end_index
-            ] = np.concatenate((in_prediction, out_prediction))
-            attack_train_data["attack_labels"][start_index:end_index] = np.concatenate(
-                (in_array, out_array)
-            )
-
-        # Classify attack data
-        logger.debug(f"Classify attack train data.")
-        attack_train_data_classified = []
-        for i in range(number_classes):
-            indices = np.where(shadow_labels[attack_train_data["indices"]] == i)
-            attack_train_data_classified.append(
-                {
-                    "indices": attack_train_data["indices"][indices],
-                    "prediction_vectors": attack_train_data["prediction_vectors"][
-                        indices
-                    ],
-                    "attack_labels": attack_train_data["attack_labels"][indices],
-                }
-            )
-
-        return attack_train_data_classified
-
-    @staticmethod
-    def _train_attack_models(
-        create_compile_attack_model,
-        attack_datasets,
-        epochs,
-        batch_size,
-    ):
-        """
-        Train attack models which are based on the given create model function.
-
-        Parameters
-        ----------
-        create_compile_attack_model : function
-            Return compiled TensorFlow Keras model for the attack models.
-        attack_datasets : list
-            List of generated datasets for the attack models.
-        epochs : int
-            Number of training epochs for each shadow model.
-        batch_size : int
-            Size of mini batches used during the training.
-
-        Returns
-        -------
-        list
-            Array of the trained attack models.
-        """
-        attack_models = []
-        number_attack_models = len(attack_datasets)
-        for i in range(number_attack_models):
-            logger.info(
-                f"Progress: Train attack model ({i + 1}/{number_attack_models})."
-            )
-            shadow_model = create_compile_attack_model()
-            shadow_model.fit(
-                attack_datasets[i]["prediction_vectors"],
-                attack_datasets[i]["attack_labels"],
-                epochs=epochs,
-                batch_size=batch_size,
-                verbose=0,
-            )
-            attack_models.append(shadow_model)
-
-        return attack_models
