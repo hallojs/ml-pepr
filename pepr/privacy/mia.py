@@ -89,37 +89,52 @@ class Mia(attack.Attack):
         Array of all labels used in the given pentesting setting.
     data_conf : dict
         Dictionary describing the data configuration of the given pentesting
-        setting.
+        setting by specifying which record-indices are used to train the shadow
+        models, the target model(s) and which are used for the evaluation of the
+        attack.
+
+        * shadow_indices (list): List of indices describing which of the records
+          from data are used to train the shadow models.
+        * target_indices (list): List of indices describing which of the records
+          from data were used to train the target model(s).
+        * evaluation_indices (list): List of indices describing which of the records
+          from data are used to evaluate the attack.
+        * record_indices_per_target (numpy.ndarray): n*m array describing for all n
+          target models which m indices where used in the training.
+
     target_models : iterable
         List of target models which should be tested.
     attack_results : dict
+        Dictionary storing the attack model results. A list "per attack model and
+        target model" has the shape (attack model, target model) -> First index
+        specifies the attack model, the second index the target model.
 
         * tp_list (numpy.ndarray): True positives per attack model and target model.
         * fp_list (numpy.ndarray): False positives per attack model and target model.
         * fn_list (numpy.ndarray): False negatives per attack model and target model.
         * tn_list (numpy.ndarray): True negatives per attack model and target model.
-        * test_accuracy_list (numpy.ndarray): Evaluation accuracy on evaluation records
+        * eval_accuracy_list (numpy.ndarray): Evaluation accuracy on evaluation records
           per attack model and target model.
         * precision_list (numpy.ndarray): Attack precision per attack model and target
           model.
         * recall_list (numpy.ndarray): Attack recall per attack model and target model.
-        * test_accuracy (numpy.ndarray): Evaluation accuracy averaged over all attack
+        * eval_accuracy (numpy.ndarray): Evaluation accuracy averaged over all attack
           models per target model.
         * precision (numpy.ndarray): Attack precision averaged over all attack models
           per target model.
         * recall (numpy.ndarray): Attack recall averaged over all attack models per
           target model.
-        * overall_test_accuracy (float): Evaluation accuracy averaged over all target
+        * overall_eval_accuracy (float): Evaluation accuracy averaged over all target
           models.
         * overall_precision (float): Attack precision averaged over all target models.
         * overall_recall (float): Attack recall averaged over all target models.
         * shadow_train_accuracy_list (list): Accuracy on training records per shadow
           model and target model.
-        * shadow_test_accuracy_list (list): Accuracy on evaluation records per shadow
+        * shadow_eval_accuracy_list (list): Accuracy on evaluation records per shadow
           model and target model.
         * shadow_train_accuracy (float): Accuracy on train records averaged over all
           shadow models per target model.
-        * shadow_test_accuracy (float): Accuracy on evaluation records averaged over all
+        * shadow_eval_accuracy (float): Accuracy on evaluation records averaged over all
           shadow models per target model.
 
     References
@@ -471,7 +486,7 @@ class Mia(attack.Attack):
             target model" has the shape (attack model, target model) -> First index
             specifies the attack model, the second index the target model.
 
-            * test_accuracy_list (numpy.ndarray): Evaluation accuracy on test data per
+            * eval_accuracy_list (numpy.ndarray): Evaluation accuracy on test data per
               attack model and target model.
             * precision_list (numpy.ndarray): Attack precision per attack model and
               target model.
@@ -483,13 +498,13 @@ class Mia(attack.Attack):
             * fn_list (numpy.ndarray): False negatives per attack model and target
               model.
             * tn_list (numpy.ndarray): True negatives per attack model and target model.
-            * test_accuracy (numpy.ndarray): Evaluation accuracy averaged over all
+            * eval_accuracy (numpy.ndarray): Evaluation accuracy averaged over all
               attack models per target model.
             * precision (numpy.ndarray): Attack precision averaged over all attack
               models per target model.
             * recall (numpy.ndarray): Attack recall averaged over all attack models per
               target model.
-            * overall_test_accuracy (float): Evaluation accuracy averaged over all
+            * overall_eval_accuracy (float): Evaluation accuracy averaged over all
               attack models and target models.
             * overall_precision (float): Attack precision averaged over all attack
               models and target models.
@@ -552,11 +567,11 @@ class Mia(attack.Attack):
             "fp_list": fp_list,
             "precision_list": precision_list,
             "recall_list": recall_list,
-            "test_accuracy_list": test_accuracy_list,
-            "test_accuracy": test_accuracy,
+            "eval_accuracy_list": test_accuracy_list,
+            "eval_accuracy": test_accuracy,
             "precision": precision,
             "recall": recall,
-            "overall_test_accuracy": test_accuracy_all,
+            "overall_eval_accuracy": test_accuracy_all,
             "overall_precision": precision_all,
             "overall_recall": recall_all,
         }
@@ -591,11 +606,11 @@ class Mia(attack.Attack):
 
             * shadow_train_accuracy_list (list): Accuracy on train data per shadow
               model.
-            * shadow_test_accuracy_list (list): Accuracy on evaluation data per shadow
+            * shadow_eval_accuracy_list (list): Accuracy on evaluation data per shadow
               model.
             * shadow_train_accuracy (float): Accuracy on train records averaged over all
               shadow models.
-            * shadow_test_accuracy (float): Accuracy on evaluation records averaged over
+            * shadow_eval_accuracy (float): Accuracy on evaluation records averaged over
               all shadow models.
         """
 
@@ -639,7 +654,7 @@ class Mia(attack.Attack):
         Parameters
         ----------
         save_path : str
-            Path to save the tex and pdf file of the attack report.
+            Path to save the tex, pdf and asset files of the attack report.
         pdf : bool
             If set, generate pdf out of latex file.
         """
@@ -658,7 +673,7 @@ class Mia(attack.Attack):
         Parameters
         ----------
         save_path :
-            Path to save the report assets like figures.
+            Path to save the tex, pdf and asset files of the attack report.
         """
         self._report_attack_configuration()
         self._report_attack_results(save_path)
@@ -760,13 +775,18 @@ class Mia(attack.Attack):
         """
         Create subsubsection describing the most important results of the attack.
 
+        Parameters
+        ----------
+        save_path :
+            Path to save the tex, pdf and asset files of the attack report.
+
         This subsection contains results only for the first target model.
         """
         tm = 0  # Specify target model
         self.report_section.append(Subsubsection("Attack Results"))
         res = self.attack_results
 
-        # ECDF like in paper
+        # ECDF graph (like in paper)
         precision_sorted = np.sort(res["precision_list"], axis=0)[:, tm]
         recall_sorted = np.sort(res["recall_list"], axis=0)[:, tm]
         py = np.arange(1, len(precision_sorted) + 1) / len(precision_sorted)
@@ -1028,7 +1048,7 @@ class Mia(attack.Attack):
         train_data : numpy.ndarray
             Training data for the shadow models.
         train_labels : numpy.ndarray
-            Traininf labels for the shadow models.
+            Training labels for the shadow models.
         epochs : int
             Number of training epochs for each shadow model.
         batch_size : int
@@ -1069,7 +1089,7 @@ class Mia(attack.Attack):
         shadow_models : list
             List of trained shadow models.
         shadow_data_indices : numpy.ndarray
-            Array with train data and evaluation data dor every shadow model.
+            Array with train data and evaluation data for every shadow model.
         number_classes : int
             Number of different classes in the dataset.
         shadow_data : numpy.ndarray
