@@ -1,4 +1,5 @@
 Membership Inference Attack
 ===========================
 
-Coming soon!
+.. autoclass:: pepr.privacy.mia.Mia
+   :members:

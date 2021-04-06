@@ -10,6 +10,12 @@ descriptions = {
         "Vincent and Wang, Lei and Bu, Diyue and Wang, Xiaofeng and Tang, Haixu and "
         "Gunter, Carl A and Chen, Kai (2018). Understanding membership inferences on "
         "well generalized learning models. arXiv preprint arXiv: 1802.04889."
+    ),
+    'mia': (
+        "Implementation of the basic membership inference attack by Reza Shokri, Marco "
+        "Stronati, Congzheng Song and Vitaly Shmatikov. Membership inference attacks "
+        "against machine learning models 2017 IEEE Symposium on Security and Privacy "
+        "(SP). IEEE, 2017."
     )
 }
 
