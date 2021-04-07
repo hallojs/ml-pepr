@@ -88,7 +88,7 @@ Example Notebooks
   single target model with a single attack configuration.
 
 .. |nb0| image:: https://colab.research.google.com/assets/colab-badge.svg
-.. _nb0: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/mia_example.ipynb
+.. _nb0: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/mia_tutorial.ipynb
 
 * |nb1|_ direct_gmia_tutorial: A first really simple example notebook of using the direct membership inference attack on a
   single target model with a single attack configuration.
