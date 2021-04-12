@@ -1053,7 +1053,7 @@ class Mia(attack.Attack):
             recall_row = []
 
             # Average column
-            class_row.append(f"0-{self.attack_pars['number_classes']}")
+            class_row.append(f"0-{self.attack_pars['number_classes']-1}")
             tp_row.append(
                 np.round(np.sum(res["tp_list"], axis=0)[tm] / len(res["tp_list"]), 2)
             )
