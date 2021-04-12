@@ -4,24 +4,27 @@ from pylatex.base_classes.containers import Container
 from pylatex import Document, Command, Section, Subsection
 from pylatex.utils import NoEscape
 
+from itertools import groupby
+
 descriptions = {
-    'gmia': (
+    "gmia": (
         "Implementation of the direct gmia from Long, Yunhui and Bindschaedler, "
         "Vincent and Wang, Lei and Bu, Diyue and Wang, Xiaofeng and Tang, Haixu and "
         "Gunter, Carl A and Chen, Kai (2018). Understanding membership inferences on "
         "well generalized learning models. arXiv preprint arXiv: 1802.04889."
     ),
-    'mia': (
+    "mia": (
         "Implementation of the basic membership inference attack by Reza Shokri, Marco "
         "Stronati, Congzheng Song and Vitaly Shmatikov. Membership inference attacks "
         "against machine learning models 2017 IEEE Symposium on Security and Privacy "
         "(SP). IEEE, 2017."
-    )
+    ),
 }
 
 
 class ReportSection(Container):
     """Attack section for a specific attack instantiation in the attack report."""
+
     _latex_name = "reportsection"
 
     def __init__(self, attack_name, attack_alias, attack_type):
@@ -56,19 +59,19 @@ class ReportSection(Container):
         return s
 
 
-def report_generator(save_path, attack_sections, pdf=False):
+def report_generator(save_path, attack_subsections, pdf=False):
     """Create a report out of multiple attack sections.
 
     Parameters
     ----------
     save_path : str
         Path to save the tex and pdf file of the report.
-    attack_sections : List of AttackSections
-        List containing one attack section per attack in the pentesting setting.
+    attack_subsections : list
+        List containing all attack subsections in the pentesting setting.
     pdf : bool
         If set, generate pdf out of latex file.
     """
-    doc = Document(documentclass='article')
+    doc = Document(documentclass="article")
     doc.preamble.append(Command("usepackage", "graphicx"))
     doc.preamble.append(Command("usepackage", "subcaption"))
     doc.preamble.append(Command("usepackage", "geometry"))
@@ -77,10 +80,19 @@ def report_generator(save_path, attack_sections, pdf=False):
     doc.preamble.append(Command("date", NoEscape(r"\today")))
     doc.append(NoEscape(r"\maketitle"))
 
-    for section in attack_sections:
-        with doc.create(Section(section.attack_name)):
-            doc.append(descriptions[section.attack_type])
-            doc.append(section)
+    # Group by attack type and preserve order
+    order = [elm.attack_type for elm in attack_subsections if elm.attack_type]
+    attack_subsections.sort(key=lambda elm: order.index(elm.attack_type))
+    grouped_sections = [
+        list(arr)
+        for k, arr in groupby(attack_subsections, key=lambda elm: elm.attack_type)
+    ]
+
+    for i, attack in enumerate(grouped_sections):
+        with doc.create(Section(attack[0].attack_name)):
+            doc.append(descriptions[attack[0].attack_type])
+            for subsection in attack:
+                doc.append(subsection)
 
     if pdf:
         doc.generate_pdf(save_path + "/attack_report", clean_tex=False)
