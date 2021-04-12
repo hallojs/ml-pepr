@@ -130,11 +130,11 @@ class Mia(attack.Attack):
         * overall_recall (float): Attack recall averaged over all target models.
         * shadow_train_accuracy_list (list): Accuracy on training records per shadow
           model and target model.
-        * shadow_eval_accuracy_list (list): Accuracy on evaluation records per shadow
-          model and target model.
+        * shadow_test_accuracy_list (list): Accuracy on test records per shadow model
+          and target model.
         * shadow_train_accuracy (float): Accuracy on train records averaged over all
           shadow models per target model.
-        * shadow_eval_accuracy (float): Accuracy on evaluation records averaged over all
+        * shadow_test_accuracy (float): Accuracy on test records averaged over all
           shadow models per target model.
 
     References
@@ -337,7 +337,7 @@ class Mia(attack.Attack):
             f"\n"
             f"\n{'Attack Models:':<30}"
             + f"\n{'Average Test Accuracy:':<30}"
-            + _list_to_formatted_string([self.attack_results["overall_test_accuracy"]])
+            + _list_to_formatted_string([self.attack_results["overall_eval_accuracy"]])
             + f"\n{'Average Precision:':<30}"
             + _list_to_formatted_string([self.attack_results["overall_precision"]])
             + f"\n{'Average Recall:':<30}"
@@ -527,7 +527,7 @@ class Mia(attack.Attack):
         fp_list = np.empty((len(attack_models), target_model_number), dtype=np.int_)
         precision_list = np.empty((len(attack_models), target_model_number))
         recall_list = np.empty((len(attack_models), target_model_number))
-        test_accuracy_list = np.empty((len(attack_models), target_model_number))
+        eval_accuracy_list = np.empty((len(attack_models), target_model_number))
 
         for tm in range(target_model_number):
             for am, attack_model in enumerate(attack_models):
@@ -547,7 +547,7 @@ class Mia(attack.Attack):
                 fp = np.count_nonzero((pred == True) & (true_labels == False))
                 precision = tp / (tp + fp) if (tp + fp) else 1
                 recall = tp / (fn + tp) if (fn + tp) else 0
-                test_accuracy = np.count_nonzero(pred == true_labels) / len(pred)
+                eval_accuracy = np.count_nonzero(pred == true_labels) / len(pred)
 
                 # Store evaluation results to matrices
                 tn_list[am][tm] = tn
@@ -556,17 +556,17 @@ class Mia(attack.Attack):
                 fp_list[am][tm] = fp
                 precision_list[am][tm] = precision
                 recall_list[am][tm] = recall
-                test_accuracy_list[am][tm] = test_accuracy
+                eval_accuracy_list[am][tm] = eval_accuracy
 
         # Average over all attack models per target model
         precision = np.average(precision_list, axis=0)
         recall = np.average(recall_list, axis=0)
-        test_accuracy = np.average(test_accuracy_list, axis=0)
+        eval_accuracy = np.average(eval_accuracy_list, axis=0)
 
         # Average over all attack models and target models
         precision_all = np.average(precision)
         recall_all = np.average(recall)
-        test_accuracy_all = np.average(test_accuracy)
+        eval_accuracy_all = np.average(eval_accuracy)
 
         attack_model_results = {
             "tn_list": tn_list,
@@ -575,11 +575,11 @@ class Mia(attack.Attack):
             "fp_list": fp_list,
             "precision_list": precision_list,
             "recall_list": recall_list,
-            "eval_accuracy_list": test_accuracy_list,
-            "eval_accuracy": test_accuracy,
+            "eval_accuracy_list": eval_accuracy_list,
+            "eval_accuracy": eval_accuracy,
             "precision": precision,
             "recall": recall,
-            "overall_eval_accuracy": test_accuracy_all,
+            "overall_eval_accuracy": eval_accuracy_all,
             "overall_precision": precision_all,
             "overall_recall": recall_all,
         }
@@ -614,12 +614,11 @@ class Mia(attack.Attack):
 
             * shadow_train_accuracy_list (list): Accuracy on train data per shadow
               model.
-            * shadow_eval_accuracy_list (list): Accuracy on evaluation data per shadow
-              model.
+            * shadow_test_accuracy_list (list): Accuracy on test data per shadow model.
             * shadow_train_accuracy (float): Accuracy on train records averaged over all
               shadow models.
-            * shadow_eval_accuracy (float): Accuracy on evaluation records averaged over
-              all shadow models.
+            * shadow_test_accuracy (float): Accuracy on test records averaged over all
+              shadow models.
         """
 
         train_accuracy_list = []
@@ -1069,8 +1068,8 @@ class Mia(attack.Attack):
             )
             accuracy_row.append(
                 np.round(
-                    np.sum(res["test_accuracy_list"], axis=0)[tm]
-                    / len(res["test_accuracy_list"]),
+                    np.sum(res["eval_accuracy_list"], axis=0)[tm]
+                    / len(res["eval_accuracy_list"]),
                     3,
                 )
             )
@@ -1088,24 +1087,24 @@ class Mia(attack.Attack):
             )
 
             # Maximum accuracy class
-            max_class = np.argmax(res["test_accuracy_list"], axis=0)[tm]
+            max_class = np.argmax(res["eval_accuracy_list"], axis=0)[tm]
             class_row.append(max_class)
             tp_row.append(res["tp_list"][max_class][tm])
             fp_row.append(res["fp_list"][max_class][tm])
             tn_row.append(res["tn_list"][max_class][tm])
             fn_row.append(res["fn_list"][max_class][tm])
-            accuracy_row.append(np.round(res["test_accuracy_list"][max_class][tm], 3))
+            accuracy_row.append(np.round(res["eval_accuracy_list"][max_class][tm], 3))
             precision_row.append(np.round(res["precision_list"][max_class][tm], 3))
             recall_row.append(np.round(res["recall_list"][max_class][tm], 3))
 
             # Minimum accuracy class
-            min_class = np.argmin(res["test_accuracy_list"], axis=0)[tm]
+            min_class = np.argmin(res["eval_accuracy_list"], axis=0)[tm]
             class_row.append(min_class)
             tp_row.append(res["tp_list"][min_class][tm])
             fp_row.append(res["fp_list"][min_class][tm])
             tn_row.append(res["tn_list"][min_class][tm])
             fn_row.append(res["fn_list"][min_class][tm])
-            accuracy_row.append(np.round(res["test_accuracy_list"][min_class][tm], 3))
+            accuracy_row.append(np.round(res["eval_accuracy_list"][min_class][tm], 3))
             precision_row.append(np.round(res["precision_list"][min_class][tm], 3))
             recall_row.append(np.round(res["recall_list"][min_class][tm], 3))
 
@@ -1173,7 +1172,7 @@ class Mia(attack.Attack):
 
         # Histograms
         fig, (ax0, ax1, ax2) = plt.subplots(1, 3, sharey=True, figsize=(12, 3))
-        ax0.hist(res["test_accuracy_list"][:, tm], edgecolor="black")
+        ax0.hist(res["eval_accuracy_list"][:, tm], edgecolor="black")
         ax1.hist(res["precision_list"][:, tm], edgecolor="black")
         ax2.hist(res["recall_list"][:, tm], edgecolor="black")
         ax0.set_xlabel("Accuracy")
