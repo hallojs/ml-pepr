@@ -37,6 +37,9 @@ def run_attacks(yaml_path, save_path, pdf, functions):
     with open(yaml_path) as f_stream:
         data = yaml.load(f_stream)
 
+        os.makedirs(save_path + "/fig", exist_ok=True)
+        sections = []
+
         attack_objects = []
         for i, yaml_attack_pars in enumerate(data["attack_pars"]):
             attack_type = yaml_attack_pars["attack_type"]
@@ -76,16 +79,18 @@ def run_attacks(yaml_path, save_path, pdf, functions):
                 }
 
                 # Create attack object
-                attack_objects.append(
-                    mia.Mia(
-                        yaml_attack_pars["attack_alias"],
-                        attack_pars,
-                        np.load(yaml_attack_pars["path_to_dataset_data"]),
-                        np.load(yaml_attack_pars["path_to_dataset_labels"]),
-                        data_conf,
-                        target_models,
-                    )
+                attack = mia.Mia(
+                    yaml_attack_pars["attack_alias"],
+                    attack_pars,
+                    np.load(yaml_attack_pars["path_to_dataset_data"]),
+                    np.load(yaml_attack_pars["path_to_dataset_labels"]),
+                    data_conf,
+                    target_models,
                 )
+
+                attack.run()
+                attack.create_attack_section(save_path)
+                sections.append(attack.report_section)
 
             elif attack_type == "gmia":
                 # Parse MIA configuration
@@ -122,22 +127,17 @@ def run_attacks(yaml_path, save_path, pdf, functions):
                 }
 
                 # Create attack object
-                attack_objects.append(
-                    gmia.DirectGmia(
-                        yaml_attack_pars["attack_alias"],
-                        attack_pars,
-                        np.load(yaml_attack_pars["path_to_dataset_data"]),
-                        np.load(yaml_attack_pars["path_to_dataset_labels"]),
-                        data_conf,
-                        target_models,
-                    )
+                attack = gmia.DirectGmia(
+                    yaml_attack_pars["attack_alias"],
+                    attack_pars,
+                    np.load(yaml_attack_pars["path_to_dataset_data"]),
+                    np.load(yaml_attack_pars["path_to_dataset_labels"]),
+                    data_conf,
+                    target_models,
                 )
 
-        os.makedirs(save_path + "/fig", exist_ok=True)
-        sections = []
-        for attack in attack_objects:
-            attack.run()
-            attack.create_attack_section(save_path)
-            sections.append(attack.report_section)
+                attack.run()
+                attack.create_attack_section(save_path)
+                sections.append(attack.report_section)
 
         report.report_generator(save_path, sections, pdf=pdf)
