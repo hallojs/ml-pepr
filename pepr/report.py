@@ -75,6 +75,7 @@ def report_generator(save_path, attack_subsections, pdf=False):
     doc.preamble.append(Command("usepackage", "graphicx"))
     doc.preamble.append(Command("usepackage", "subcaption"))
     doc.preamble.append(Command("usepackage", "geometry"))
+    doc.preamble.append(Command("usepackage", "float"))
     doc.preamble.append(Command("geometry", "textwidth=180mm, textheight=240mm"))
     doc.preamble.append(Command("title", "Privacy Risk and Robustness Report"))
     doc.preamble.append(Command("date", NoEscape(r"\today")))

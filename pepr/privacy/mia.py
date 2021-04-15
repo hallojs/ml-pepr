@@ -1194,7 +1194,7 @@ class Mia(attack.Attack):
         )
         plt.close(fig)
 
-        with self.report_section.create(Figure()) as fig:
+        with self.report_section.create(Figure(position="H")) as fig:
             fig.add_image(
                 "fig/bar_accuracy_precision_recall.pdf", width=NoEscape(r"\textwidth")
             )

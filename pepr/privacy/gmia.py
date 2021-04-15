@@ -1298,7 +1298,7 @@ class DirectGmia(attack.Attack):
         fig.savefig(save_path + "/fig/hist_selected_records.pdf")
         plt.close(fig)
 
-        with self.report_section.create(Figure()) as fig:
+        with self.report_section.create(Figure(position="H")) as fig:
             fig.add_image(
                 "fig/hist_selected_records.pdf", width=NoEscape(r"0.5\textwidth")
             )
