@@ -59,6 +59,7 @@ def run_attacks(yaml_path, report_save_path, attack_obj_save_path, pdf, function
 
     # Parse YAML
     with open(yaml_path) as f_stream:
+        logger.info(f"Parse attack runner configuration file: {yaml_path}")
         data = yaml.load(f_stream)
         attack_obj_save_path
 
@@ -68,8 +69,13 @@ def run_attacks(yaml_path, report_save_path, attack_obj_save_path, pdf, function
 
         for i, yaml_attack_pars in enumerate(data["attack_pars"]):
             attack_type = yaml_attack_pars["attack_type"]
+            logger.info(
+                f"Attack number: {i+1}\n\n"
+                "######################## Attack Run ########################"
+            )
             if attack_type == "mia":
                 # Parse MIA configuration
+                logger.info("Setup configuration.")
                 shadow_model_function = functions[
                     yaml_attack_pars["create_compile_shadow_model"]
                 ]
@@ -114,6 +120,7 @@ def run_attacks(yaml_path, report_save_path, attack_obj_save_path, pdf, function
                 }
 
                 # Create attack object
+                logger.info(f"Attack: {yaml_attack_pars['attack_alias']}")
                 attack = mia.Mia(
                     yaml_attack_pars["attack_alias"],
                     attack_pars,
@@ -127,9 +134,11 @@ def run_attacks(yaml_path, report_save_path, attack_obj_save_path, pdf, function
                 attack.create_attack_section(report_save_path)
                 sections.append(attack.report_section)
 
+                logger.debug("Serialize attack object.")
                 pickle_attack_obj(attack)
 
             elif attack_type == "gmia":
+                logger.info("Setup configuration.")
                 # Parse MIA configuration
                 model_function = functions[yaml_attack_pars["create_compile_model"]]
 
@@ -174,6 +183,7 @@ def run_attacks(yaml_path, report_save_path, attack_obj_save_path, pdf, function
                 }
 
                 # Create attack object
+                logger.info(f"Attack: {yaml_attack_pars['attack_alias']}")
                 attack = gmia.DirectGmia(
                     yaml_attack_pars["attack_alias"],
                     attack_pars,
@@ -187,8 +197,10 @@ def run_attacks(yaml_path, report_save_path, attack_obj_save_path, pdf, function
                 attack.create_attack_section(report_save_path)
                 sections.append(attack.report_section)
 
+                logger.debug("Serialize attack object.")
                 pickle_attack_obj(attack)
 
+        logger.info("Generate final report.")
         report.report_generator(report_save_path, sections, pdf=pdf)
 
     return attack_object_paths
