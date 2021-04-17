@@ -18,7 +18,9 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-def run_attacks(yaml_path, report_save_path, attack_obj_save_path, pdf, functions):
+def run_attacks(
+    yaml_path, report_save_path, attack_obj_save_path, functions, pdf=False
+):
     """
     Run multtiple attacks configured in a YAML file.
 
