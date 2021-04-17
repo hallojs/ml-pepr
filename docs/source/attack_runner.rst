@@ -4,6 +4,8 @@ Attack Runner
 The attack runner is a script to execute multiple attacks at once. It creates one attack
 report containing the results of all executed attacks.
 
+.. seealso:: An attack runner tutorial notebook is available `here <https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/attack_runner_tutorial/attack_runner_tutorial.ipynb>`_.
+
 Module Documentation
 --------------------
 
