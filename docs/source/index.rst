@@ -9,4 +9,5 @@ Welcome to ML-PePR's documentation!
    quick_start_guide
    privacy_attacks
    robustness_attacks
+   attack_runner
    utilities
