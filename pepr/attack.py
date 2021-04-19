@@ -60,7 +60,7 @@ class Attack(ABC):
         # Load TensorFlow models (unpicklable)
         target_models = []
         for i, target_model_path in enumerate(s["target_models"]):
-            filename = f"{s['attack_alias']}_tm{i}"
+            filename = f"{s['attack_alias']} tm{i}"
             target_models.append(models.load_model(s["obj_save_path"] + "/" + filename))
         s["target_models"] = target_models
         self.__dict__.update(s)
