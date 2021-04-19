@@ -7,10 +7,10 @@ attack_pars:
     path_to_dataset_data: "datasets/cifar100_data.npy"
     path_to_dataset_labels: "datasets/cifar100_labels.npy"
     number_classes: 100
-    create_compile_shadow_model: "create_compile_shadow_model"
+    <fn>create_compile_shadow_model: "create_compile_shadow_model"
     shadow_epochs: 100
     shadow_batch_size: 50
-    create_compile_attack_model: "create_compile_attack_model"
+    <fn>create_compile_attack_model: "create_compile_attack_model"
     attack_epochs: 50
     attack_batch_size: 50
     target_model_paths:
@@ -22,7 +22,7 @@ attack_pars:
     path_to_dataset_data: "datasets/fmnist_data.npy"
     path_to_dataset_labels: "datasets/fmnist_labels.npy"
     number_classes: 10
-    create_compile_model: "create_compile_reference_model"
+    <fn>create_compile_model: "create_compile_reference_model"
     reference_epochs: 50
     reference_batch_size: 50
     hlf_metric: "cosine"
@@ -33,11 +33,11 @@ attack_pars:
 
 # Data Configuration
 data_conf:
-  - shadow_indices_path: "datasets/shadow_ref_indices.npy"
-    target_indices_path: "datasets/target_indices.npy"
-    evaluation_indices_path: "datasets/evaluation_indices.npy"
-    record_indices_per_target_path: "datasets/record_indices_per_target.npy"
-  - reference_indices_path: "datasets/shadow_ref_indices.npy"
-    target_indices_path: "datasets/target_indices.npy"
-    evaluation_indices_path: "datasets/evaluation_indices.npy"
-    record_indices_per_target_path: "datasets/record_indices_per_target.npy"
+  - <np>shadow_indices: "datasets/shadow_ref_indices.npy"
+    <np>target_indices: "datasets/target_indices.npy"
+    <np>evaluation_indices: "datasets/evaluation_indices.npy"
+    <np>record_indices_per_target: "datasets/record_indices_per_target.npy"
+  - <np>reference_indices: "datasets/shadow_ref_indices.npy"
+    <np>target_indices: "datasets/target_indices.npy"
+    <np>evaluation_indices: "datasets/evaluation_indices.npy"
+    <np>record_indices_per_target: "datasets/record_indices_per_target.npy"
