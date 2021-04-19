@@ -9,7 +9,6 @@ import pickle
 import numpy as np
 import tensorflow as tf
 import yaml
-from itertools import groupby
 
 from pepr import report
 from pepr.privacy import mia, gmia
@@ -36,7 +35,7 @@ def run_attacks(yaml_path, attack_obj_save_path, functions):
     -------
     dict
         Dictionary with attack alias and the corresponding path to the serialized attack
-        object.
+        object in the same order as specified in the YAML configuration.
     """
 
     def load_function_pointer(key, f_key) -> dict:
@@ -68,7 +67,7 @@ def run_attacks(yaml_path, attack_obj_save_path, functions):
             attack_obj.obj_save_path = attack_obj_save_path
             pickle.dump(attack_obj, f)
             attack_object_paths[
-                f"{attack_obj.attack_alias}"
+                attack_obj.attack_alias
             ] = f"{attack_obj_save_path}/{attack_obj.attack_alias}.pickle"
 
     # Parse YAML
@@ -138,3 +137,31 @@ def run_attacks(yaml_path, attack_obj_save_path, functions):
             pickle_attack_obj(attack)
 
     return attack_object_paths
+
+
+def create_report(attack_object_paths, save_path, pdf=False):
+    """
+    Create an attack report for all attacks.
+
+    Parameters
+    ----------
+    attack_object_paths : dict
+        Dictionary with attack alias and the corresponding path to the serialized attack
+        object.
+    save_path : str
+        Path where to save the report files.
+    pdf : bool
+        If true, the attack runner will build the LaTex report and save an PDF to the
+        save path.
+    """
+    sections = []
+    for key, attack_obj_path in attack_object_paths.items():
+        with open(attack_obj_path, "rb") as f_obj:
+            attack = pickle.load(f_obj)
+
+            logger.info(f"Create report subsection: {attack.attack_alias}")
+            attack.create_attack_section(save_path)
+            sections.append(attack.report_section)
+
+    logger.info("Generate final report.")
+    report.report_generator(save_path, sections, pdf=pdf)
