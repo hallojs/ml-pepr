@@ -154,6 +154,7 @@ def create_report(attack_object_paths, save_path, pdf=False):
         If true, the attack runner will build the LaTex report and save an PDF to the
         save path.
     """
+    os.makedirs(save_path + "/fig", exist_ok=True)
     sections = []
     for key, attack_obj_path in attack_object_paths.items():
         with open(attack_obj_path, "rb") as f_obj:
