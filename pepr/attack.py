@@ -3,10 +3,12 @@
 from abc import ABC, abstractmethod
 
 import tensorflow as tf
+from tensorflow.keras import models
 
 
 class Attack(ABC):
     """Abstract base class for all attack implementations of pepr."""
+
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
@@ -38,6 +40,30 @@ class Attack(ABC):
         self.data_conf = data_conf
         self.target_models = target_models
         self.attack_results = {}
+
+        # Path of serialized object for tf's Model.save()
+        self.obj_save_path = "attack_objects"
+
+    def __getstate__(self):
+        # Save object state
+        state = self.__dict__.copy()
+        # Save TensorFlow models (unpicklable)
+        state["target_models"] = []
+        for i, target_model in enumerate(self.target_models):
+            filename = f"{self.attack_alias} tm{i}"
+            target_model.save(self.obj_save_path + "/" + filename)
+            state["target_models"].append(filename)
+        return state
+
+    def __setstate__(self, state):
+        s = dict(state)
+        # Load TensorFlow models (unpicklable)
+        target_models = []
+        for i, target_model_path in enumerate(s["target_models"]):
+            filename = f"{s['attack_alias']} tm{i}"
+            target_models.append(models.load_model(s["obj_save_path"] + "/" + filename))
+        s["target_models"] = target_models
+        self.__dict__.update(s)
 
     @abstractmethod
     def run(self):
