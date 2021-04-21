@@ -17,6 +17,10 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 plt.style.use("default")
+# force line grid to be behind bar plots
+plt.rcParams["axes.axisbelow"] = True
+plt.rcParams["axes.grid"] = True
+plt.rcParams["grid.linestyle"] = ":"
 
 
 class Mia(attack.Attack):
@@ -1017,7 +1021,6 @@ class Mia(attack.Attack):
         ax.set_ylabel("Cumulative Fraction of Classes")
         ax.plot(precision_sorted, py, "k-", label="Precision")
         ax.plot(recall_sorted, ry, "k--", label="Recall")
-        ax.grid(linestyle=":")
         ax.legend()
 
         fig.savefig(save_path + "/fig/ecdf.pdf", bbox_inches="tight")
@@ -1178,9 +1181,6 @@ class Mia(attack.Attack):
         ax1.set_xlabel("Precision")
         ax2.set_xlabel("Recall")
         ax0.set_ylabel("Number of Classes")
-        ax0.grid(linestyle=":")
-        ax1.grid(linestyle=":")
-        ax2.grid(linestyle=":")
         ax0.tick_params(axis="x", labelrotation=45)
         ax1.tick_params(axis="x", labelrotation=45)
         ax2.tick_params(axis="x", labelrotation=45)

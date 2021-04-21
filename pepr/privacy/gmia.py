@@ -21,7 +21,11 @@ from pepr import attack, report
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-plt.style.use("seaborn-white")
+plt.style.use("default")
+# force line grid to be behind bar plots
+plt.rcParams["axes.axisbelow"] = True
+plt.rcParams["axes.grid"] = True
+plt.rcParams["grid.linestyle"] = ":"
 
 
 class DirectGmia(attack.Attack):
