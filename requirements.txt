@@ -17,7 +17,7 @@ cffi==1.14.5
 chardet==4.0.0
 click==7.1.2
 coverage==5.5
-cryptography==2.1.4
+cryptography==3.3.2
 cycler==0.10.0
 dataclasses==0.8
 decorator==4.4.2
