@@ -5,11 +5,10 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-from pylatex import Command, NoEscape, Tabular, Figure, MiniPage, MultiColumn
+from pylatex import Command, NoEscape, Tabular, Figure, MiniPage
 from pylatex.section import Subsubsection
 from pylatex.utils import bold
 
-from tensorflow.keras.models import Model
 from tensorflow.keras import models
 
 from pepr import attack, report
