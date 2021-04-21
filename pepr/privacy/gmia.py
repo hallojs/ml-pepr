@@ -1057,7 +1057,7 @@ class DirectGmia(attack.Attack):
         # Create tables for attack parameters and the data configuration.
         ap = self.attack_pars
         dc = self.data_conf
-        neighbor_threshold = str(self.attack_results["neighbor_threshold"])
+        neighbor_threshold = str(round(self.attack_results["neighbor_threshold"], 5))
         probability_threshold = str(self.attack_results["probability_threshold"])
         if "number_target_records" in ap.keys():
             neighbor_threshold += " (auto)"
@@ -1099,7 +1099,8 @@ class DirectGmia(attack.Attack):
                     Command(
                         "captionof",
                         "table",
-                        extra_arguments="Attack parameters",
+                        extra_arguments="Attack parameters (neighbor_threshold is "
+                        "rounded to 5 decimal places)",
                     )
                 )
 
