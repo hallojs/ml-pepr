@@ -171,10 +171,10 @@ def test_gmia_fashion_loaded():
     )
     gmia_attack.run(load_pars=load_pars)
 
-    # Check whether the attack accuracy for the cut-off-p-values 0.01, ..., 0.05 is
+    # Check whether the attack precision for the cut-off-p-values 0.01, ..., 0.05 is
     # greater 0.5 and the recall for at least one cut-off-p-value is greater than 0.
     results = gmia_attack.attack_results
-    accuracy = np.array(results["overall_accuracy"])[1:6]
+    precision = np.array(results["overall_precision"])[1:6]
     recall = np.array(results["overall_recall"])[1:6]
-    assert np.sum(accuracy > 0.5) == 5
+    assert np.sum(precision > 0.5) == 5
     assert np.sum(recall) > 0

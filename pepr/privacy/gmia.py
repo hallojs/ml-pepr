@@ -142,9 +142,9 @@ class DirectGmia(attack.Attack):
         * fp_list (list): False positives per cut-off-p-value and target model.
         * fn_list (list): False negatives per cut-off-p-value and target model.
         * tn_list (list): True negatives per cut-off-p-value and target model.
-        * accuracy_list (list): Attack accuracy per cut-off-p-value and target model.
+        * precision_list (list): Attack precision per cut-off-p-value and target model.
         * recall_list (list): Attack recall per cut-off-p-value and target model.
-        * overall_accuracy (list): Attack accuracy averaged over all target models per
+        * overall_precision (list): Attack precision averaged over all target models per
           cut-off-p-value.
         * overall_recall (list): Attack recall averaged over all target models per
           cut-off-p-value.
@@ -416,8 +416,8 @@ class DirectGmia(attack.Attack):
         self.attack_results = {**self.attack_results, **results}
 
         logger.info(
-            f"Attack accuracy over all target models per cut-off-p-value: "
-            f'{self.attack_results["overall_accuracy"]}'
+            f"Attack precision over all target models per cut-off-p-value: "
+            f'{self.attack_results["overall_precision"]}'
         )
         logger.info(
             f"Attack recall over all target models per cut-off-p-value: "
@@ -451,10 +451,10 @@ class DirectGmia(attack.Attack):
             f"{res['fp_list'][1][0]:>10}"
             f"{res['fp_list'][2][0]:>10}"
             f"{res['fp_list'][5][0]:>10}"
-            f"\n{'Accuracy:':<30}"
-            f"{round(res['accuracy_list'][1][0], 3):>10}"
-            f"{round(res['accuracy_list'][2][0], 3):>10}"
-            f"{round(res['accuracy_list'][5][0], 3):>10}"
+            f"\n{'Precision:':<30}"
+            f"{round(res['precision_list'][1][0], 3):>10}"
+            f"{round(res['precision_list'][2][0], 3):>10}"
+            f"{round(res['precision_list'][5][0], 3):>10}"
             f"\n{'Recall:':<30}"
             f"{round(res['recall_list'][1][0], 3):>10}"
             f"{round(res['recall_list'][2][0], 3):>10}"
@@ -966,9 +966,9 @@ class DirectGmia(attack.Attack):
         fp_list = []
         fn_list = []
         tn_list = []
-        accuracy_list = []
+        precision_list = []
         recall_list = []
-        overall_accuracy = []
+        overall_precision = []
         overall_recall = []
 
         # unpack lists per p-value
@@ -980,7 +980,7 @@ class DirectGmia(attack.Attack):
             fp_list_p = []
             fn_list_p = []
             tn_list_p = []
-            accuracy_list_p = []
+            precision_list_p = []
             recall_list_p = []
 
             # unpack lists per target model
@@ -999,23 +999,23 @@ class DirectGmia(attack.Attack):
                 fn_list_p.append(fn)
                 tn_list_p.append(tn)
 
-                accuracy = tp / (tp + fp) if (tp + fp) else 1
+                precision = tp / (tp + fp) if (tp + fp) else 1
                 recall = tp / (fn + tp) if (fn + tp) else 0
-                accuracy_list_p.append(accuracy)
+                precision_list_p.append(precision)
                 recall_list_p.append(recall)
 
-            # compute accuracy for all target models per cut-off-p-value
+            # compute precision for all target models per cut-off-p-value
             number_of_target_models = len(infered_members_p)
-            overall_accuracy_p = sum(accuracy_list_p) / number_of_target_models
+            overall_precision_p = sum(precision_list_p) / number_of_target_models
             overall_recall_p = sum(recall_list_p) / number_of_target_models
 
             tp_list.append(tp_list_p)
             fp_list.append(fp_list_p)
             fn_list.append(fn_list_p)
             tn_list.append(tn_list_p)
-            accuracy_list.append(accuracy_list_p)
+            precision_list.append(precision_list_p)
             recall_list.append(recall_list_p)
-            overall_accuracy.append(overall_accuracy_p)
+            overall_precision.append(overall_precision_p)
             overall_recall.append(overall_recall_p)
 
         # attack results per cut-off-p-value and target model
@@ -1024,9 +1024,9 @@ class DirectGmia(attack.Attack):
             "fp_list": fp_list,
             "fn_list": fn_list,
             "tn_list": tn_list,
-            "accuracy_list": accuracy_list,
+            "precision_list": precision_list,
             "recall_list": recall_list,
-            "overall_accuracy": overall_accuracy,
+            "overall_precision": overall_precision,
             "overall_recall": overall_recall,
         }
 
@@ -1168,16 +1168,16 @@ class DirectGmia(attack.Attack):
         """
         self.report_section.append(Subsubsection("Attack Results"))
 
-        # Accuracy-Recall Curve of the first target model
-        accuracy = np.array(self.attack_results["accuracy_list"])
+        # Precision-Recall Curve of the first target model
+        precision = np.array(self.attack_results["precision_list"])
         recall = np.array(self.attack_results["recall_list"])
 
         fig = plt.figure()
         ax = plt.axes()
-        ax.plot(accuracy[:, 0], recall[:, 0])
-        ax.set_xlabel("Accuracy")
+        ax.plot(precision[:, 0], recall[:, 0])
+        ax.set_xlabel("Precision")
         ax.set_ylabel("Recall")
-        fig.savefig(save_path + "/fig/accuracy_recall_curve.pdf")
+        fig.savefig(save_path + "/fig/precision_recall_curve.pdf")
         plt.close(fig)
 
         res = self.attack_results
@@ -1188,7 +1188,7 @@ class DirectGmia(attack.Attack):
                 self.report_section.append(
                     Command(
                         "includegraphics",
-                        NoEscape("fig/accuracy_recall_curve.pdf"),
+                        NoEscape("fig/precision_recall_curve.pdf"),
                         "width=8cm",
                     )
                 )
@@ -1197,7 +1197,7 @@ class DirectGmia(attack.Attack):
                     Command(
                         "captionof",
                         "figure",
-                        extra_arguments="Accuracy-Recall Curve (for Selected Target Records)",
+                        extra_arguments="Precision-Recall Curve (for Selected Target Records)",
                     )
                 )
             self.report_section.append(Command("hfill"))
@@ -1243,10 +1243,10 @@ class DirectGmia(attack.Attack):
                     result_tab.add_hline()
                     result_tab.add_row(
                         [
-                            "Accuracy",
-                            round(res["accuracy_list"][1][0], 3),
-                            round(res["accuracy_list"][2][0], 3),
-                            round(res["accuracy_list"][5][0], 3),
+                            "Precision",
+                            round(res["precision_list"][1][0], 3),
+                            round(res["precision_list"][2][0], 3),
+                            round(res["precision_list"][5][0], 3),
                         ]
                     )
                     result_tab.add_hline()
