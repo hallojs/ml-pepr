@@ -1,5 +1,5 @@
-ML-PePR: Pentesting Privacy and Robustness [alpha]
-=====================================================
+ML-PePR: Pentesting Privacy and Robustness (Beta)
+=================================================
 
 |docs_pages_workflow| |black| |python_versions|
 
@@ -9,36 +9,40 @@ ML-PePR: Pentesting Privacy and Robustness [alpha]
 .. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
 
-.. |python_versions| image:: pybadges/python_version.svg
-    :target: https://www.python.org
+.. |python_versions| image:: https://img.shields.io/badge/python-3.6-blue.svg
+    :target: https://www.python.org/downloads/release/python-360/
 
-PePR [ˈpɛpɚ] is a library for pentesting the privacy risk and robustness of machine learning models.
+ML-PePR stands for Machine Learning Pentesting for Privacy and Robustness and is a Python library for evaluating machine
+learning models. PePR is easily extensible and hackable. PePR's attack runner allows structured pentesting, and the
+report generator produces straightforward privacy and robustness reports (LaTeX/PDF) from the attack results.
 
-**Caution, this is a alpha version. Always check the plausibility of your results!**
+`Full documentation :books: including a quick-start guide :runner::dash: <https://hallojs.github.io/ml-pepr/>`_
+
+**Caution, we cannot guarantee the correctness of PePR. Always do check the plausibility of your results!**
 
 Installation
 ------------
+
 We offer various installation options. Follow the instructions below to perform the desired installation. If you want to
-install the latest developer version please use the code-repository of this library. The current release is only tested
-with Python 3.7.9 and only supports TensorFlow.
+install the latest developer version, please use the `code-repository <https://github.com/hallojs/ml-pepr>`_ of this
+library. The current release is only tested with Python 3.6.
 
-Via Repository
-~~~~~~~~~~~~~~
-1. Clone the repository: ``git clone https://github.com/hallojs/ml-pepr.git``
+Repository
+~~~~~~~~~~
+
+1. Clone the repository.
 2. Cd to project directory: ``cd ml-pepr``
-3. Install pepr: ``pip install -e .``
+3. Run in the terminal: ``pip install -e .``
 
-Hint: If you want to use ``pip install -e .`` in Google Colab, you must restart the runtime before you can
-``import pepr``.
+PyPi
+~~~~
 
-Via PyPi
-~~~~~~~~
-Coming soon!
+As usual: ``pip install ml-pepr``
 
+Docker
+~~~~~~
 
-As Docker
-~~~~~~~~~
-To use pepr inside a docker container build a cpu or gpu image. Note that your system must be set up for GPU use:
+To use PePR inside a docker container, build a CPU or GPU image. Note that your system must be set up for GPU use:
 `TensorFlow Docker Requirements <https://www.tensorflow.org/install/docker>`_.
 
 Build the docker image:
@@ -47,66 +51,23 @@ Build the docker image:
 2. Cd to project directory: ``cd ml-pepr``
 3. Build the docker image: ``docker build -t <image name> . -f Dockerfile-tf-<cpu or gpu>``
 
-Basic Usage
------------
-The full API documentation can be found `here <https://hallojs.github.io/ml-pepr/>`_. PePR offers the following options
-to structure privacy and/or robustness pentesting:
-
-1. Run a single attack with a single attack configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-1.1a Run the attack on a single target model
-
-1.1b Or run the attack on multiple target models to get a more general result, that is averaged over multiple target
-model instances and target training data sets (see also ``pepr.utilities.assign_record_ids_to_target_models`` for
-a utility function to generate appropriate training data sets)
-
-1.2a Generate a privacy and robustness report for just this attack configuration and the attacked target model
-
-1.2b Or generate a report section which can later be combined with other report sections to a more extensive report
-containing results of multiple attack types and attack configurations (see ``pepr.report.report_generator``)
-
-2. Run multiple attacks with a single or multiple attack configurations [work in progress]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-2.1 Write an attack configuration (YAML format) for the attack runner
-
-2.2a Run the attacks on a single target model
-
-2.2b Or run the attack on multiple target models to get a more general result, that is averaged over multiple target
-model instances and target training data sets (see also ``pepr.utilities.assign_record_ids_to_target_models`` for
-a utility function for generating appropriate training data sets)
-
-2.3 Generate a privacy and robustness report for all or a selection of the performed attacks
-
-2.4 Optional: Rerun a selection of attacks with a new attack configuration to optimize the attack results
-
-
-Example Notebooks
------------------
-* |nb0|_ mia_tutorial: A simple example notebook of using the basic membership inference attack (MIA) on a
-  single target model with a single attack configuration.
-
-.. |nb0| image:: https://colab.research.google.com/assets/colab-badge.svg
-.. _nb0: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/mia_tutorial.ipynb
-
-* |nb1|_ direct_gmia_tutorial: A first really simple example notebook of using the direct membership inference attack on a
-  single target model with a single attack configuration.
-
-.. |nb1| image:: https://colab.research.google.com/assets/colab-badge.svg
-.. _nb1: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/direct_gmia_tutorial.ipynb
-
 Attack Catalog
 --------------
 PePR offers the following attacks:
 
-+------------------------------------------------------------+---------------------+
-| Attack                                                     | Type                |
-+============================================================+=====================+
-| [1]_ Membership Inference Attack (mia)                     | Privacy (Black Box) |
-+------------------------------------------------------------+---------------------+
-| [2]_ Direct Generalized Membership Inference Attack (gmia) | Privacy (Black Box) |
-+------------------------------------------------------------+---------------------+
++------------------------------------------------------------+---------------------+--------------+
+| Attack                                                     | Type                | Google Colab |
++============================================================+=====================+==============+
+| [1]_ Membership Inference Attack (mia)                     | Privacy (Black Box) | |nb0|_       |
++------------------------------------------------------------+---------------------+--------------+
+| [2]_ Direct Generalized Membership Inference Attack (gmia) | Privacy (Black Box) | |nb1|_       |
++------------------------------------------------------------+---------------------+--------------+
+
+.. |nb0| image:: https://colab.research.google.com/assets/colab-badge.svg
+.. _nb0: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/mia_tutorial.ip
+
+.. |nb1| image:: https://colab.research.google.com/assets/colab-badge.svg
+.. _nb1: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/direct_gmia_tutorial.ipynb
 
 License
 -------

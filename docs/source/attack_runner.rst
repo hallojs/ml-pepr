@@ -1,3 +1,5 @@
+.. _label-attack-runner:
+
 Attack Runner
 =============
 
