@@ -38,7 +38,7 @@ def test_attack_evaluation():
     assert attack_results["fp_list"] == 101 * [[1, 0, 1, 1]]
     assert attack_results["fn_list"] == 101 * [[1, 0, 1, 0]]
     assert attack_results["tn_list"] == 101 * [[1, 3, 1, 2]]
-    assert attack_results["accuracy_list"] == 101 * [[2/3, 1, 2/3, 2/3]]
+    assert attack_results["precision_list"] == 101 * [[2/3, 1, 2/3, 2/3]]
     assert attack_results["recall_list"] == 101 * [[2/3, 1, 2/3, 1]]
 
-    assert attack_results["overall_accuracy"] == pytest.approx(101 * [3/4])
+    assert attack_results["overall_precision"] == pytest.approx(101 * [3/4])
