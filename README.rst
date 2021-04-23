@@ -37,7 +37,7 @@ Repository
 PyPi
 ~~~~
 
-As usual: ``pip install ml-pepr``
+As usual: ``pip install mlpepr``
 
 Docker
 ~~~~~~
