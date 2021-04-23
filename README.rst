@@ -1,10 +1,13 @@
 ML-PePR: Pentesting Privacy and Robustness (Beta)
 =================================================
 
-|docs_pages_workflow| |black| |python_versions|
+|docs_pages_workflow| |publish_pypi_workflow| |black| |python_versions|
 
-.. |docs_pages_workflow| image:: https://github.com/maltfield/rtd-github-pages/workflows/docs_pages_workflow/badge.svg?branch=master
+.. |docs_pages_workflow| image:: https://github.com/hallojs/ml-pepr/workflows/docs_pages_workflow/badge.svg?branch=master
     :target: https://github.com/hallojs/ml-pepr/actions/workflows/docs_pages_workflow.yml
+
+.. |publish_pypi_workflow| image:: https://github.com/hallojs/ml-pepr/workflows/publish_pypi_workflow/badge.svg?branch=master
+    :target: https://github.com/hallojs/ml-pepr/actions/workflows/publish_pypi_workflow.yml
 
 .. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
@@ -37,7 +40,7 @@ Repository
 PyPi
 ~~~~
 
-As usual: ``pip install mlpepr``
+`pypi <https://pypi.org/project/mlpepr/>`_-typical: ``pip install mlpepr``
 
 Docker
 ~~~~~~

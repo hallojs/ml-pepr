@@ -29,13 +29,13 @@ Repository
 ~~~~~~~~~~
 
 1. Clone the repository.
-2. Cd to project directory: ``cd ml-pepr``
+2. Cd to project directory: ``cd mlpepr``
 3. Run in the terminal: ``pip install -e .``
 
 PyPi
 ~~~~
 
-As usual: ``pip install ml-pepr``
+As usual: ``pip install pepr``
 
 Docker
 ~~~~~~
