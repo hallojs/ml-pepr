@@ -67,7 +67,7 @@ PePR offers the following attacks:
 +------------------------------------------------------------+---------------------+--------------+
 
 .. |nb0| image:: https://colab.research.google.com/assets/colab-badge.svg
-.. _nb0: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/mia_tutorial.ip
+.. _nb0: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/mia_tutorial.ipynb
 
 .. |nb1| image:: https://colab.research.google.com/assets/colab-badge.svg
 .. _nb1: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/direct_gmia_tutorial.ipynb
