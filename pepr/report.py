@@ -19,6 +19,9 @@ descriptions = {
         "against machine learning models 2017 IEEE Symposium on Security and Privacy "
         "(SP). IEEE, 2017."
     ),
+    "L2ContrastReductionAttack": (
+        "Reduces the contrast of the input using a perturbation of the given size."
+    ),
 }
 
 
