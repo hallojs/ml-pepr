@@ -161,11 +161,16 @@ class BaseAttack(Attack):
         # Print attack summary
         def _list_to_formatted_string(arr):
             string = ""
-            try:
+            # Short output if needed
+            if len(arr) <= 10:
                 for item in arr:
                     string = string + f"{round(item, 3):>10}"
-            except TypeError:
-                string = f"{round(arr, 3):>10}"
+            else:
+                for i in range(5):
+                    string = string + f"{round(arr[i], 3):>10}"
+                string = string + f"{'...':>10}"
+                for i in range(-5, 0):
+                    string = string + f"{round(arr[i], 3):>10}"
             return string
 
         # Print every epsilon result of attack
@@ -239,9 +244,20 @@ class BaseAttack(Attack):
                 self.report_section.append(Command("centering"))
                 with self.report_section.create(Tabular("|l|c|")) as tab_ap:
                     tab_ap.add_hline()
-                    eps_str = str(self.attack_pars["epsilons"])
-                    eps_str = str.replace(eps_str, "[", "")
-                    eps_str = str.replace(eps_str, "]", "")
+                    # Short epsilon array if needed
+                    eps = self.attack_pars["epsilons"]
+                    if len(eps) > 6:
+                        eps_str = ""
+                        for i in range(3):
+                            eps_str = eps_str + str(eps[i]) + ", "
+                        eps_str = eps_str + "..., "
+                        for i in range(-3, 0):
+                            eps_str = eps_str + str(eps[i]) + ", "
+                        eps_str = eps_str[:-2]
+                    else:
+                        eps_str = str(eps)
+                        eps_str = str.replace(eps_str, "[", "")
+                        eps_str = str.replace(eps_str, "]", "")
                     tab_ap.add_row(["Epsilons", eps_str])
                     self._gen_attack_pars_rows(tab_ap)
                     tab_ap.add_hline()
