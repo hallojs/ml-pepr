@@ -447,3 +447,76 @@ class L2ContrastReductionAttack(BaseAttack):
             self.attack_alias,
             "L2ContrastReductionAttack",
         )
+
+
+class VirtualAdversarialAttack(BaseAttack):
+    """
+    foolbox.attacks.VirtualAdversarialAttack wrapper class.
+
+    Attack description:
+    Second-order gradient-based attack on the logits. The attack calculate an untargeted
+    adversarial perturbation by performing a approximated second order optimization step
+    on the KL divergence between the unperturbed predictions and the predictions for the
+    adversarial perturbation. This attack was originally introduced as the Virtual
+    Adversarial Training method.
+
+    Parameters
+    ----------
+    attack_alias : str
+        Alias for a specific instantiation of the class.
+    attack_pars : dict
+        Dictionary containing all needed attack parameters:
+
+        * steps (int): Number of update steps.
+        * xi (float): (optional) L2 distance between original image and first
+          adversarial proposal.
+        * epsilons (list): List of one or more Epsilons for the attack.
+
+    data : numpy.ndarray
+        Dataset with all input images used to attack the target models.
+    labels : numpy.ndarray
+        Array of all labels used to attack the target models.
+    data_conf : dict
+        Dictionary describing for every target model which record-indices should be used
+        for the attack.
+
+        * attack_indices_per_target (numpy.ndarray): Array of indices of images to
+          attack per target model.
+
+    target_models : iterable
+        List of target models which should be tested.
+    """
+
+    def __init__(
+        self, attack_alias, attack_pars, data, labels, data_conf, target_models
+    ):
+        # Handle specific attack class parameters
+        if "xi" in attack_pars:
+            foolbox_attack = fb.attacks.VirtualAdversarialAttack(
+                attack_pars["steps"],
+                xi=attack_pars["xi"],
+            )
+        else:
+            foolbox_attack = fb.attacks.VirtualAdversarialAttack(attack_pars["steps"])
+
+        pars_descriptors = {
+            "steps": "Update steps",
+            "xi": "First L2 distance",
+        }
+
+        super().__init__(
+            attack_alias,
+            attack_pars,
+            data,
+            labels,
+            data_conf,
+            target_models,
+            foolbox_attack,
+            pars_descriptors,
+        )
+
+        self.report_section = report.ReportSection(
+            "Virtual Adversarial Attack",
+            self.attack_alias,
+            "VirtualAdversarialAttack",
+        )

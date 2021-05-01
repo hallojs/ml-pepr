@@ -22,6 +22,13 @@ descriptions = {
     "L2ContrastReductionAttack": (
         "Reduces the contrast of the input using a perturbation of the given size."
     ),
+    "VirtualAdversarialAttack": (
+        "Second-order gradient-based attack on the logits. The attack calculate an "
+        "untargeted adversarial perturbation by performing a approximated second order "
+        "optimization step on the KL divergence between the unperturbed predictions "
+        "and the predictions for the adversarial perturbation. This attack was "
+        "originally introduced as the Virtual Adversarial Training method."
+    ),
 }
 
 
