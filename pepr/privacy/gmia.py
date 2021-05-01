@@ -15,6 +15,7 @@ from statsmodels.distributions.empirical_distribution import ECDF
 from scipy.interpolate import pchip
 from tensorflow.keras.models import Model
 from tensorflow.keras import models
+import tensorflow as tf
 
 from pepr import attack, report
 
@@ -163,6 +164,11 @@ class DirectGmia(attack.Attack):
         super().__init__(
             attack_alias, attack_pars, data, labels, data_conf, target_models
         )
+
+        self.labels_cat = tf.keras.utils.to_categorical(
+            labels, num_classes=attack_pars["number_classes"]
+        )
+
         self.report_section = report.ReportSection(
             "Generalized Membership Inference Attack (Direct)",
             self.attack_alias,

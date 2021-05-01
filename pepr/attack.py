@@ -34,9 +34,6 @@ class Attack(ABC):
         self.attack_pars = attack_pars
         self.data = data
         self.labels = labels
-        self.labels_cat = tf.keras.utils.to_categorical(
-            labels, num_classes=attack_pars["number_classes"]
-        )
         self.data_conf = data_conf
         self.target_models = target_models
         self.attack_results = {}
