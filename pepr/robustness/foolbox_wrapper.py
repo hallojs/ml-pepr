@@ -111,6 +111,16 @@ class BaseAttack(Attack):
         self.fmodels = [fb.TensorFlowModel(x, bounds=(0, 1)) for x in target_models]
         self.pars_descriptors = pars_descriptors
 
+    def __getstate__(self):
+        del self.__dict__["fmodels"]
+        return super().__getstate__()
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self.fmodels = [
+            fb.TensorFlowModel(x, bounds=(0, 1)) for x in self.target_models
+        ]
+
     def run(self):
         """Run Foolbox attack."""
         # Make sure, epsilons is type list for consistency

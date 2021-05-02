@@ -12,6 +12,7 @@ import yaml
 
 from pepr import report
 from pepr.privacy import mia, gmia
+from pepr.robustness import foolbox_wrapper
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -55,6 +56,8 @@ def run_attacks(yaml_path, attack_obj_save_path, functions):
     attack_constructor_map = {
         "mia": mia.Mia,
         "gmia": gmia.DirectGmia,
+        "L2ContrastReductionAttack": foolbox_wrapper.L2ContrastReductionAttack,
+        "VirtualAdversarialAttack": foolbox_wrapper.VirtualAdversarialAttack,
     }
 
     attack_object_paths = {}
