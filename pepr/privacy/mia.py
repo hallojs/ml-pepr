@@ -1023,7 +1023,8 @@ class Mia(attack.Attack):
         ax.plot(recall_sorted, ry, "k--", label="Recall")
         ax.legend()
 
-        fig.savefig(save_path + "/fig/ecdf.pdf", bbox_inches="tight")
+        alias_no_spaces = str.replace(self.attack_alias, " ", "_")
+        fig.savefig(save_path + f"fig/{alias_no_spaces}-ecdf.pdf", bbox_inches="tight")
         plt.close(fig)
 
         with self.report_section.create(MiniPage()):
@@ -1032,7 +1033,7 @@ class Mia(attack.Attack):
                 self.report_section.append(
                     Command(
                         "includegraphics",
-                        NoEscape("fig/ecdf.pdf"),
+                        NoEscape(f"fig/{alias_no_spaces}-ecdf.pdf"),
                         "width=8cm",
                     )
                 )
@@ -1188,14 +1189,15 @@ class Mia(attack.Attack):
         ax1.set_axisbelow(True)
         ax2.set_axisbelow(True)
 
+        alias_no_spaces = str.replace(self.attack_alias, " ", "_")
         fig.savefig(
-            save_path + "/fig/bar_accuracy_precision_recall.pdf", bbox_inches="tight"
+            save_path + f"/fig/{alias_no_spaces}-accuracy_precision_recall.pdf", bbox_inches="tight"
         )
         plt.close(fig)
 
         with self.report_section.create(Figure(position="H")) as fig:
             fig.add_image(
-                "fig/bar_accuracy_precision_recall.pdf", width=NoEscape(r"\textwidth")
+                f"fig/{alias_no_spaces}-accuracy_precision_recall.pdf", width=NoEscape(r"\textwidth")
             )
             self.report_section.append(Command("captionsetup", "labelformat=empty"))
             self.report_section.append(

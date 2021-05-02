@@ -330,7 +330,8 @@ class BaseAttack(Attack):
         ax.plot(epsilons[sort_idx], misclass[sort_idx])
         ax.set_xlabel("Epsilon")
         ax.set_ylabel("Misclassification Rate")
-        fig.savefig(save_path + "/fig/epsilon_misclass_graph.pdf")
+        alias_no_spaces = str.replace(self.attack_alias, " ", "_")
+        fig.savefig(save_path + f"/fig/{alias_no_spaces}-epsilon_misclass_graph.pdf")
         plt.close(fig)
 
         with self.report_section.create(MiniPage()):
@@ -339,7 +340,7 @@ class BaseAttack(Attack):
                 self.report_section.append(
                     Command(
                         "includegraphics",
-                        NoEscape("fig/epsilon_misclass_graph.pdf"),
+                        NoEscape(f"fig/{alias_no_spaces}-epsilon_misclass_graph.pdf"),
                         "width=8cm",
                     )
                 )

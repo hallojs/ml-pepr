@@ -1183,7 +1183,8 @@ class DirectGmia(attack.Attack):
         ax.plot(precision[:, 0], recall[:, 0])
         ax.set_xlabel("Precision")
         ax.set_ylabel("Recall")
-        fig.savefig(save_path + "/fig/precision_recall_curve.pdf")
+        alias_no_spaces = str.replace(self.attack_alias, " ", "_")
+        fig.savefig(save_path + f"/fig/{alias_no_spaces}-precision_recall_curve.pdf")
         plt.close(fig)
 
         res = self.attack_results
@@ -1194,7 +1195,7 @@ class DirectGmia(attack.Attack):
                 self.report_section.append(
                     Command(
                         "includegraphics",
-                        NoEscape("fig/precision_recall_curve.pdf"),
+                        NoEscape(f"fig/{alias_no_spaces}-precision_recall_curve.pdf"),
                         "width=8cm",
                     )
                 )
@@ -1306,12 +1307,13 @@ class DirectGmia(attack.Attack):
             histtype="step",
             edgecolor="black",
         )
-        fig.savefig(save_path + "/fig/hist_selected_records.pdf")
+        alias_no_spaces = str.replace(self.attack_alias, " ", "_")
+        fig.savefig(save_path + f"/fig/{alias_no_spaces}-hist_selected_records.pdf")
         plt.close(fig)
 
         with self.report_section.create(Figure(position="H")) as fig:
             fig.add_image(
-                "fig/hist_selected_records.pdf", width=NoEscape(r"0.5\textwidth")
+                f"fig/{alias_no_spaces}-hist_selected_records.pdf", width=NoEscape(r"0.5\textwidth")
             )
             self.report_section.append(Command("captionsetup", "labelformat=empty"))
             self.report_section.append(
