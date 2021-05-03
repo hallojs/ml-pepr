@@ -234,17 +234,18 @@ class BaseAttack(Attack):
         self._report_attack_configuration()
         self._report_attack_results(save_path)
 
-    def _gen_attack_pars_rows(self, table):
-        for key in self.pars_descriptors:
-            desc = self.pars_descriptors[key]
-            value = str(self.foolbox_attack.__dict__[key])
-
-            table.add_hline()
-            table.add_row([desc, value])
-
     def _report_attack_configuration(self):
         """Create subsubsection about the attack and data configuration."""
         # Create tables for attack parameters and the data configuration.
+
+        def gen_attack_pars_rows(table):
+            for key in self.pars_descriptors:
+                desc = self.pars_descriptors[key]
+                value = str(self.foolbox_attack.__dict__[key])
+
+                table.add_hline()
+                table.add_row([desc, value])
+
         ap = self.attack_pars
         dc = self.data_conf
         self.report_section.append(Subsubsection("Attack Details"))
@@ -269,7 +270,7 @@ class BaseAttack(Attack):
                         eps_str = str.replace(eps_str, "[", "")
                         eps_str = str.replace(eps_str, "]", "")
                     tab_ap.add_row(["Epsilons", eps_str])
-                    self._gen_attack_pars_rows(tab_ap)
+                    gen_attack_pars_rows(tab_ap)
                     tab_ap.add_hline()
                 self.report_section.append(Command("captionsetup", "labelformat=empty"))
                 self.report_section.append(
