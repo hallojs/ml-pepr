@@ -55,8 +55,10 @@ class BaseAttack(Attack):
     foolbox_attack : foolbox.attack.Attack
         The foolbox attack object which is wrapped in this class.
     pars_descriptors : dict
-            Dictionary of attack parameters and their description shown in the attack
-            report.
+        Dictionary of attack parameters and their description shown in the attack
+        report.
+        Example: {"target": "Contrast reduction target"} for the attribute named
+        "target" of L2ContrastReductionAttack.
 
     Attributes
     ----------
