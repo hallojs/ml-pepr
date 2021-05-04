@@ -34,22 +34,14 @@ class BaseAttack(Attack):
     ----------
     attack_alias : str
         Alias for a specific instantiation of the class.
-    attack_pars : dict
-        Dictionary containing all needed attack parameters:
-
-        * epsilons (list): List of one or more Epsilons for the attack.
-
+    epsilons : iterable
+        List of one or more Epsilons for the attack.
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
     labels : numpy.ndarray
         Array of all labels used to attack the target models.
-    data_conf : dict
-        Dictionary describing for every target model which record-indices should be used
-        for the attack.
-
-        * attack_indices_per_target (numpy.ndarray): Array of indices to
-          attack per target model.
-
+    attack_indices_per_target : numpy.ndarray
+        Array of indices to attack per target model.
     target_models : iterable
         List of target models which should be tested.
     foolbox_attack : foolbox.attack.Attack
@@ -97,18 +89,25 @@ class BaseAttack(Attack):
     def __init__(
         self,
         attack_alias,
-        attack_pars,
+        epsilons,
         data,
         labels,
-        data_conf,
+        attack_indices_per_target,
         target_models,
         foolbox_attack,
         pars_descriptors,
     ):
         super().__init__(
-            attack_alias, attack_pars, data, labels, data_conf, target_models
+            attack_alias,
+            {"epsilons": epsilons},
+            data,
+            labels,
+            {"attack_indices_per_target": attack_indices_per_target},
+            target_models,
         )
 
+        self.epsilons = epsilons
+        self.attack_indices_per_target = attack_indices_per_target
         self.foolbox_attack = foolbox_attack
         self.fmodels = [fb.TensorFlowModel(x, bounds=(0, 1)) for x in target_models]
         self.pars_descriptors = pars_descriptors
@@ -127,11 +126,9 @@ class BaseAttack(Attack):
         """Run Foolbox attack."""
         # Make sure, epsilons is type list for consistency
         try:
-            list(self.attack_pars["epsilons"])
+            list(self.epsilons)
         except TypeError:
-            self.attack_pars["epsilons"] = [self.attack_pars["epsilons"]]
-
-        epsilons = self.attack_pars["epsilons"]
+            self.epsilons = [self.epsilons]
 
         raw_list = []
         clipped_list = []
@@ -142,12 +139,12 @@ class BaseAttack(Attack):
         # Run attack for every target model
         for i, fmodel in enumerate(self.fmodels):
             logger.info(f"Attack target model ({i + 1}/{len(self.fmodels)}).")
-            indices = self.data_conf["attack_indices_per_target"][i]
+            indices = self.attack_indices_per_target[i]
             inputs_t = tf.convert_to_tensor(self.data[indices])
             criterion_t = tf.convert_to_tensor(self.labels[indices])
 
             raw, clipped, is_adv = self.foolbox_attack(
-                fmodel, inputs_t, criterion_t, epsilons=epsilons
+                fmodel, inputs_t, criterion_t, epsilons=self.epsilons
             )
 
             raw_list.append(raw)
@@ -160,7 +157,7 @@ class BaseAttack(Attack):
 
             # Calculate average distance of adversarial examples
             dist_eps = []
-            for i in range(len(epsilons)):
+            for i in range(len(self.epsilons)):
                 dist_eps.append(fb.distances.l2(inputs_t, raw[i]).numpy().mean())
             l2_dist_list.append(dist_eps)
 
@@ -201,7 +198,7 @@ class BaseAttack(Attack):
             f"\n###################### Attack Results ######################"
             f"\n"
             + f"\n{'Epsilons:':<20}"
-            + _list_to_formatted_string(self.attack_pars["epsilons"])
+            + _list_to_formatted_string(self.epsilons)
             + _target_model_rows()
         )
 
@@ -258,17 +255,16 @@ class BaseAttack(Attack):
                 with self.report_section.create(Tabular("|l|c|")) as tab_ap:
                     tab_ap.add_hline()
                     # Short epsilon array if needed
-                    eps = self.attack_pars["epsilons"]
-                    if len(eps) > 6:
+                    if len(self.epsilons) > 6:
                         eps_str = ""
                         for i in range(3):
-                            eps_str = eps_str + str(eps[i]) + ", "
+                            eps_str = eps_str + str(self.epsilons[i]) + ", "
                         eps_str = eps_str + "..., "
                         for i in range(-3, 0):
-                            eps_str = eps_str + str(eps[i]) + ", "
+                            eps_str = eps_str + str(self.epsilons[i]) + ", "
                         eps_str = eps_str[:-2]
                     else:
-                        eps_str = str(eps)
+                        eps_str = str(self.epsilons)
                         eps_str = str.replace(eps_str, "[", "")
                         eps_str = str.replace(eps_str, "]", "")
                     tab_ap.add_row(["Epsilons", eps_str])
@@ -319,11 +315,10 @@ class BaseAttack(Attack):
         """
         tm = 0  # Specify target model
         self.report_section.append(Subsubsection("Attack Results"))
-        ap = self.attack_pars
         res = self.attack_results
 
         # Epsilon-Misclassification graph
-        epsilons = np.array(ap["epsilons"])
+        epsilons = np.array(self.epsilons)
         misclass = np.array(res["success_rate"][tm])
         dist = np.array(res["avg_l2_distance"][tm])
 
@@ -447,10 +442,10 @@ class L2ContrastReductionAttack(BaseAttack):
 
         super().__init__(
             attack_alias,
-            attack_pars,
+            attack_pars["epsilons"],
             data,
             labels,
-            data_conf,
+            data_conf["attack_indices_per_target"],
             target_models,
             foolbox_attack,
             pars_descriptors,
@@ -520,10 +515,10 @@ class VirtualAdversarialAttack(BaseAttack):
 
         super().__init__(
             attack_alias,
-            attack_pars,
+            attack_pars["epsilons"],
             data,
             labels,
-            data_conf,
+            data_conf["attack_indices_per_target"],
             target_models,
             foolbox_attack,
             pars_descriptors,
