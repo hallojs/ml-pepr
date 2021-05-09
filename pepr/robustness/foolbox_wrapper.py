@@ -2871,6 +2871,14 @@ class L0BrendelBethgeAttack(BaseAttack):
             "L0BrendelBethgeAttack",
         )
 
+    def __getstate__(self):
+        del self.foolbox_attack.__dict__["_optimizer"]
+        return super().__getstate__()
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self.foolbox_attack._optimizer = fb.attacks.brendel_bethge.L0Optimizer()
+
 
 class L1BrendelBethgeAttack(BaseAttack):
     """
@@ -2976,6 +2984,14 @@ class L1BrendelBethgeAttack(BaseAttack):
             self.attack_alias,
             "L1BrendelBethgeAttack",
         )
+
+    def __getstate__(self):
+        del self.foolbox_attack.__dict__["_optimizer"]
+        return super().__getstate__()
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self.foolbox_attack._optimizer = fb.attacks.brendel_bethge.L1Optimizer()
 
 
 class L2BrendelBethgeAttack(BaseAttack):
@@ -3083,6 +3099,14 @@ class L2BrendelBethgeAttack(BaseAttack):
             "L2BrendelBethgeAttack",
         )
 
+    def __getstate__(self):
+        del self.foolbox_attack.__dict__["_optimizer"]
+        return super().__getstate__()
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self.foolbox_attack._optimizer = fb.attacks.brendel_bethge.L2Optimizer()
+
 
 class LinfinityBrendelBethgeAttack(BaseAttack):
     """
@@ -3188,6 +3212,14 @@ class LinfinityBrendelBethgeAttack(BaseAttack):
             self.attack_alias,
             "LinfinityBrendelBethgeAttack",
         )
+
+    def __getstate__(self):
+        del self.foolbox_attack.__dict__["_optimizer"]
+        return super().__getstate__()
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self.foolbox_attack._optimizer = fb.attacks.brendel_bethge.LinfOptimizer()
 
 
 FGM = L2FastGradientAttack
