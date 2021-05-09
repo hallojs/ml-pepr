@@ -325,7 +325,10 @@ class BaseAttack(Attack):
         sort_idx = np.argsort(epsilons)
         fig = plt.figure()
         ax = plt.axes()
-        ax.plot(epsilons[sort_idx], misclass[sort_idx])
+        if len(epsilons) > 1:
+            ax.plot(epsilons[sort_idx], misclass[sort_idx])
+        else:
+            ax.plot(epsilons[sort_idx], misclass[sort_idx], "o")
         ax.set_xlabel("Epsilon")
         ax.set_ylabel("Misclassification Rate")
         alias_no_spaces = str.replace(self.attack_alias, " ", "_")
@@ -352,16 +355,16 @@ class BaseAttack(Attack):
                 )
 
             # Result table
-            if len(epsilons) > 1:
-                worst_epsilon = np.argmin(epsilons)
-                best_epsilon = np.argmax(epsilons)
+            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+                self.report_section.append(Command("centering"))
 
-                with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
-                    self.report_section.append(Command("centering"))
+                if len(epsilons) > 1:
+                    worst_epsilon = np.argmin(epsilons)
+                    best_epsilon = np.argmax(epsilons)
                     with self.report_section.create(Tabular("|l|c|c|")) as result_tab:
                         result_tab.add_hline()
                         result_tab.add_row(
-                            list(map(bold, ["", "Worst Rate", "Best Rate"]))
+                            list(map(bold, ["", "Min. Rate", "Max. Rate"]))
                         )
                         result_tab.add_hline()
                         result_tab.add_row(
@@ -384,12 +387,34 @@ class BaseAttack(Attack):
                             ]
                         )
                         result_tab.add_hline()
-                    self.report_section.append(
-                        Command("captionsetup", "labelformat=empty")
-                    )
-                    self.report_section.append(
-                        Command("captionof", "table", extra_arguments="Attack Summary")
-                    )
+                else:
+                    with self.report_section.create(Tabular("|l|c|")) as result_tab:
+                        result_tab.add_hline()
+                        result_tab.add_row(
+                            ["Epsilon", epsilons[0]]
+                        )
+                        result_tab.add_hline()
+                        result_tab.add_row(
+                            [
+                                "Success Rate",
+                                round(misclass[0], 3),
+                            ]
+                        )
+                        result_tab.add_hline()
+                        result_tab.add_row(
+                            [
+                                "Average L2 Distance",
+                                round(dist[0], 3),
+                            ]
+                        )
+                        result_tab.add_hline()
+
+                self.report_section.append(
+                    Command("captionsetup", "labelformat=empty")
+                )
+                self.report_section.append(
+                    Command("captionof", "table", extra_arguments="Attack Summary")
+                )
 
 
 class L2ContrastReductionAttack(BaseAttack):
