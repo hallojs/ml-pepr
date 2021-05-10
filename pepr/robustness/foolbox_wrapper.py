@@ -220,7 +220,7 @@ class BaseAttack(Attack):
             + _target_model_rows()
         )
 
-    def create_attack_report(self, save_path, pdf=False):
+    def create_attack_report(self, save_path="foolbox_report", pdf=False):
         """
         Create an attack report just for the given attack instantiation.
 
@@ -275,16 +275,17 @@ class BaseAttack(Attack):
                 with self.report_section.create(Tabular("|l|c|")) as tab_ap:
                     tab_ap.add_hline()
                     # Short epsilon array if needed
-                    if len(self.epsilons) > 6:
+                    eps = np.round(self.epsilons, decimals=3)
+                    if len(eps) > 6:
                         eps_str = ""
                         for i in range(3):
-                            eps_str = eps_str + str(self.epsilons[i]) + ", "
+                            eps_str = eps_str + str(eps[i]) + ", "
                         eps_str = eps_str + "..., "
                         for i in range(-3, 0):
-                            eps_str = eps_str + str(self.epsilons[i]) + ", "
+                            eps_str = eps_str + str(eps[i]) + ", "
                         eps_str = eps_str[:-2]
                     else:
-                        eps_str = str(self.epsilons)
+                        eps_str = str(eps)
                         eps_str = str.replace(eps_str, "[", "")
                         eps_str = str.replace(eps_str, "]", "")
                     tab_ap.add_row(["Epsilons", eps_str])
