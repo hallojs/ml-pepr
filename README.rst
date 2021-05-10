@@ -58,19 +58,24 @@ Attack Catalog
 --------------
 PePR offers the following attacks:
 
-+------------------------------------------------------------+---------------------+--------------+
-| Attack                                                     | Type                | Google Colab |
-+============================================================+=====================+==============+
-| [1]_ Membership Inference Attack (mia)                     | Privacy (Black Box) | |nb0|_       |
-+------------------------------------------------------------+---------------------+--------------+
-| [2]_ Direct Generalized Membership Inference Attack (gmia) | Privacy (Black Box) | |nb1|_       |
-+------------------------------------------------------------+---------------------+--------------+
++------------------------------------------------------------+------------------------+--------------+
+| Attack                                                     | Type                   | Google Colab |
++============================================================+========================+==============+
+| [1]_ Membership Inference Attack (mia)                     | Privacy (Black Box)    | |nb0|_       |
++------------------------------------------------------------+------------------------+--------------+
+| [2]_ Direct Generalized Membership Inference Attack (gmia) | Privacy (Black Box)    | |nb1|_       |
++------------------------------------------------------------+------------------------+--------------+
+| [3]_ Foolbox Attacks                                       | Robustness (Black Box) | |nb2|_       |
++------------------------------------------------------------+------------------------+--------------+
 
 .. |nb0| image:: https://colab.research.google.com/assets/colab-badge.svg
 .. _nb0: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/mia_tutorial.ip
 
 .. |nb1| image:: https://colab.research.google.com/assets/colab-badge.svg
 .. _nb1: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/direct_gmia_tutorial.ipynb
+
+.. |nb2| image:: https://colab.research.google.com/assets/colab-badge.svg
+.. _nb2: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/foolbox_tutorial.ipynb
 
 License
 -------
@@ -85,3 +90,6 @@ References
 
 .. [2] Long, Yunhui, et al. "Understanding membership inferences on well-generalized learning models." arXiv preprint
    arXiv:1802.04889 (2018).
+
+.. [3] `Foolbox <https://github.com/bethgelab/foolbox>`_: A Python toolbox to create adversarial examples that fool
+    neural networks in PyTorch, TensorFlow, and JAX.
