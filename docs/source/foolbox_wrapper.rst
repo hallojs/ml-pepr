@@ -3,7 +3,7 @@ Foolbox Attacks
 
 .. currentmodule:: pepr.robustness.foolbox_wrapper
 
-You can find a basic example notebook `here <https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/mia_tutorial.ipynb>`_.
+You can find a basic example notebook `here <https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/foolbox_tutorial.ipynb>`_.
 
 .. autosummary::
     :nosignatures:
