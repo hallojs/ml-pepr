@@ -4,7 +4,6 @@ import logging
 import numpy
 import numpy as np
 import os
-from collections import OrderedDict
 
 from pepr.attack import Attack
 from pepr import report
@@ -36,7 +35,7 @@ class BaseAttack(Attack):
     attack_alias : str
         Alias for a specific instantiation of the class.
     epsilons : iterable
-        List of one or more Epsilons for the attack.
+        List of one or more epsilons for the attack.
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
     labels : numpy.ndarray
@@ -136,7 +135,7 @@ class BaseAttack(Attack):
         criterion_t : tensorflow.Tensor
             True labels or criterion.
         epsilons : iterable
-            List of one or more Epsilons for the attack.
+            List of one or more epsilons for the attack.
         """
         return self.foolbox_attack(fmodel, inputs_t, criterion_t, epsilons=epsilons)
 
@@ -265,7 +264,6 @@ class BaseAttack(Attack):
                 table.add_hline()
                 table.add_row([desc, value])
 
-        ap = self.attack_pars
         dc = self.data_conf
         self.report_section.append(Subsubsection("Attack Details"))
         with self.report_section.create(MiniPage()):
@@ -450,7 +448,7 @@ class L2ContrastReductionAttack(BaseAttack):
 
         * target (float): (optional) Target relative to the bounds from 0 (min) to 1
           (max) towards which the contrast is reduced.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -521,7 +519,7 @@ class VirtualAdversarialAttack(BaseAttack):
         * steps (int): Number of update steps.
         * xi (float): (optional) L2 distance between original image and first
           adversarial proposal.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -591,7 +589,7 @@ class DDNAttack(BaseAttack):
         * steps (int): (optional) Number of steps for the optimization.
         * gamma (float): (optional) Factor by which the norm will be modified:
           new_norm = norm * (1 + or - gamma).
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -665,7 +663,7 @@ class L2ProjectedGradientDescentAttack(BaseAttack):
         * steps (int): (optional) Number of update steps to perform.
         * random_start (bool): (optional) Whether the perturbation is initialized
           randomly or starts at zero.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -742,7 +740,7 @@ class LinfProjectedGradientDescentAttack(BaseAttack):
         * steps (int): (optional) Number of update steps to perform.
         * random_start (bool): (optional) Whether the perturbation is initialized
           randomly or starts at zero.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -819,7 +817,7 @@ class L2BasicIterativeAttack(BaseAttack):
         * steps (int): (optional) Number of update steps.
         * random_start (bool): (optional) Controls whether to randomly start within
           allowed epsilon ball.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -896,7 +894,7 @@ class LinfBasicIterativeAttack(BaseAttack):
         * steps (int): (optional) Number of update steps.
         * random_start (bool): (optional) Controls whether to randomly start within
           allowed epsilon ball.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -969,7 +967,7 @@ class L2FastGradientAttack(BaseAttack):
 
         * random_start (bool): (optional) Controls whether to randomly start within
           allowed epsilon ball.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1033,7 +1031,7 @@ class LinfFastGradientAttack(BaseAttack):
 
         * random_start (bool): (optional) Controls whether to randomly start within
           allowed epsilon ball.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1095,7 +1093,7 @@ class L2AdditiveGaussianNoiseAttack(BaseAttack):
     attack_pars : dict
         Dictionary containing all needed attack parameters:
 
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1151,7 +1149,7 @@ class L2AdditiveUniformNoiseAttack(BaseAttack):
     attack_pars : dict
         Dictionary containing all needed attack parameters:
 
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1207,7 +1205,7 @@ class L2ClippingAwareAdditiveGaussianNoiseAttack(BaseAttack):
     attack_pars : dict
         Dictionary containing all needed attack parameters:
 
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1263,7 +1261,7 @@ class L2ClippingAwareAdditiveUniformNoiseAttack(BaseAttack):
     attack_pars : dict
         Dictionary containing all needed attack parameters:
 
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1319,7 +1317,7 @@ class LinfAdditiveUniformNoiseAttack(BaseAttack):
     attack_pars : dict
         Dictionary containing all needed attack parameters:
 
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1378,7 +1376,7 @@ class L2RepeatedAdditiveGaussianNoiseAttack(BaseAttack):
         * repeats (int): (optional) How often to sample random noise.
         * check_trivial (bool): (optional) Check whether original sample is already
           adversarial.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1446,7 +1444,7 @@ class L2RepeatedAdditiveUniformNoiseAttack(BaseAttack):
         * repeats (int): (optional) How often to sample random noise.
         * check_trivial (bool): (optional) Check whether original sample is already
           adversarial.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1514,7 +1512,7 @@ class L2ClippingAwareRepeatedAdditiveGaussianNoiseAttack(BaseAttack):
         * repeats (int): (optional) How often to sample random noise.
         * check_trivial (bool): (optional) Check whether original sample is already
           adversarial.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1584,7 +1582,7 @@ class L2ClippingAwareRepeatedAdditiveUniformNoiseAttack(BaseAttack):
         * repeats (int): (optional) How often to sample random noise.
         * check_trivial (bool): (optional) Check whether original sample is already
           adversarial.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1654,7 +1652,7 @@ class LinfRepeatedAdditiveUniformNoiseAttack(BaseAttack):
         * repeats (int): (optional) How often to sample random noise.
         * check_trivial (bool): (optional) Check whether original sample is already
           adversarial.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1721,7 +1719,7 @@ class InversionAttack(BaseAttack):
 
         * distance (foolbox.distances.Distance): Distance measure for which minimal
           adversarial examples are searched.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1786,7 +1784,7 @@ class BinarySearchContrastReductionAttack(BaseAttack):
           search. This controls the precision of the results.
         * target (float): (optional) Target relative to the bounds from 0 (min) to 1
           (max) towards which the contrast is reduced.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1861,7 +1859,7 @@ class LinearSearchContrastReductionAttack(BaseAttack):
           controls the precision of the results.
         * target (float): (optional) Target relative to the bounds from 0 (min) to 1
           (max) towards which the contrast is reduced.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1940,7 +1938,7 @@ class L2CarliniWagnerAttack(BaseAttack):
           binary search starts.
         * abort_early (bool): (optional) Stop inner search as soon as an adversarial
           example has been found. Does not affect the binary search over the const c.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -2019,7 +2017,7 @@ class NewtonFoolAttack(BaseAttack):
 
         * steps (int): (optional) Number of update steps to perform..
         * stepsize (float): (optional) Size of each update step..
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -2099,7 +2097,7 @@ class EADAttack(BaseAttack):
           distance.
         * abort_early (bool): (optional) Stop inner search as soon as an adversarial
           example has been found. Does not affect the binary search over the const c.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -2189,7 +2187,7 @@ class GaussianBlurAttack(BaseAttack):
           blur.
         * distance (foolbox.distances.Distance): Distance measure for which minimal
           adversarial examples are searched.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -2268,7 +2266,7 @@ class L2DeepFoolAttack(BaseAttack):
         * overshoot (float): (optional) How much to overshoot the boundary.
         * loss ("crossentropy" or "logits"): (optional) Loss function to use inside the
           update function.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -2347,7 +2345,7 @@ class LinfDeepFoolAttack(BaseAttack):
         * overshoot (float): (optional) How much to overshoot the boundary.
         * loss ("crossentropy" or "logits"): (optional) Loss function to use inside the
           update function.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -2424,7 +2422,7 @@ class SaltAndPepperNoiseAttack(BaseAttack):
         * channel_axis (int): (optional) The axis across which the noise should be the
           same (if across_channels is True). If None, will be automatically inferred
           from the model if possible.
-        * epsilons (list): (optional) List of one or more Epsilons for the attack.
+        * epsilons (list): (optional) List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -2498,7 +2496,7 @@ class LinearSearchBlendedUniformNoiseAttack(BaseAttack):
           perturbation is searched.
         * steps (int): (optional) Number of blending steps between the original image
           and the random directions.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -2569,14 +2567,14 @@ class BinarizationRefinementAttack(BaseAttack):
     attack_pars : dict
         Dictionary containing all needed attack parameters:
 
-        * starting_points (list): Adverserial examples to improve.
+        * starting_points (list): Adversarial examples to improve.
         * threshold (float): (optional) The threshold used by the models binarization.
           If none, defaults to (model.bounds()[1] - model.bounds()[0]) / 2.
         * included_in ("lower" or "upper"): (optional) Whether the threshold value
           itself belongs to the lower or upper interval.
         * distance (foolbox.distances.Distance): Distance measure for which minimal
           adversarial examples are searched.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -2644,7 +2642,7 @@ class BinarizationRefinementAttack(BaseAttack):
         criterion_t : tensorflow.Tensor
             True labels or criterion.
         epsilons : iterable
-            List of one or more Epsilons for the attack.
+            List of one or more epsilons for the attack.
         """
         return self.foolbox_attack(
             fmodel,
@@ -2688,7 +2686,7 @@ class BoundaryAttack(BaseAttack):
           (spherical) step.
         * source_step (float): (optional) Initial step size for the step towards the
           target.
-        * source_step_convergance (float): (optional) Sets the threshold of the stop
+        * source_step_convergence (float): (optional) Sets the threshold of the stop
           criterion: if source_step becomes smaller than this value during the attack,
           the attack has converged and will stop.
         * step_adaptation (float): (optional) Factor by which the step sizes are
@@ -2698,7 +2696,7 @@ class BoundaryAttack(BaseAttack):
           will be disabled (default). If None, the logdir will be
           runs/CURRENT_DATETIME_HOSTNAME.
         * update_stats_every_k (int): (optional)
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -2728,8 +2726,8 @@ class BoundaryAttack(BaseAttack):
             params["spherical_step"] = attack_pars["spherical_step"]
         if "source_step" in attack_pars:
             params["source_step"] = attack_pars["source_step"]
-        if "source_step_convergance" in attack_pars:
-            params["source_step_convergance"] = attack_pars["source_step_convergance"]
+        if "source_step_convergence" in attack_pars:
+            params["source_step_convergence"] = attack_pars["source_step_convergence"]
         if "step_adaptation" in attack_pars:
             params["step_adaptation"] = attack_pars["step_adaptation"]
         if "tensorboard" in attack_pars:
@@ -2743,7 +2741,7 @@ class BoundaryAttack(BaseAttack):
             "steps": "Maximum steps",
             "spherical_step": "Orthogonal step",
             "source_step": "Stepn size",
-            "source_step_convergance": "Stop criterion threshold",
+            "source_step_convergence": "Stop criterion threshold",
             "step_adaptation": "Step factor",
             "tensorboard": "TensorBoard summary",
             "update_stats_every_k": "Stats update",
@@ -2801,7 +2799,7 @@ class L0BrendelBethgeAttack(BaseAttack):
           runs/CURRENT_DATETIME_HOSTNAME.
         * binary_search_steps (int): (optional) Number of iterations in the binary
           search. This controls the precision of the results.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -2915,7 +2913,7 @@ class L1BrendelBethgeAttack(BaseAttack):
           runs/CURRENT_DATETIME_HOSTNAME.
         * binary_search_steps (int): (optional) Number of iterations in the binary
           search. This controls the precision of the results.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -3029,7 +3027,7 @@ class L2BrendelBethgeAttack(BaseAttack):
           runs/CURRENT_DATETIME_HOSTNAME.
         * binary_search_steps (int): (optional) Number of iterations in the binary
           search. This controls the precision of the results.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -3143,7 +3141,7 @@ class LinfinityBrendelBethgeAttack(BaseAttack):
           runs/CURRENT_DATETIME_HOSTNAME.
         * binary_search_steps (int): (optional) Number of iterations in the binary
           search. This controls the precision of the results.
-        * epsilons (list): List of one or more Epsilons for the attack.
+        * epsilons (list): List of one or more epsilons for the attack.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
