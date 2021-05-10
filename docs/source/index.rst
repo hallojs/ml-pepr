@@ -30,13 +30,12 @@ Repository
 
 1. Clone the repository.
 2. Cd to project directory: ``cd mlpepr``
-3. Run in the terminal: ``pip install -e .``
+3. Run in the terminal: ``pip install .``
 
 PyPi
 ~~~~
 
 `pypi <https://pypi.org/project/mlpepr/>`_-typical: ``pip install mlpepr``
-
 Docker
 ~~~~~~
 

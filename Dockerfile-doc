@@ -8,5 +8,4 @@ RUN apt update && apt upgrade -y
 RUN apt install -y --no-install-recommends git
 
 RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
-RUN pip install -e .
+RUN pip install .

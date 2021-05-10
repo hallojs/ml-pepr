@@ -35,7 +35,7 @@ Repository
 
 1. Clone the repository.
 2. Cd to project directory: ``cd ml-pepr``
-3. Run in the terminal: ``pip install -e .``
+3. Run in the terminal: ``pip install .``
 
 PyPi
 ~~~~

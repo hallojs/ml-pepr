@@ -8,5 +8,5 @@ RUN apt update && apt upgrade -y
 RUN apt install -y texlive zip
 
 RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
-RUN pip install -e .
+RUN pip install .
+RUN pip install jupyter notebook
