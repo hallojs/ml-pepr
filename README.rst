@@ -65,7 +65,7 @@ PePR offers the following attacks:
 +------------------------------------------------------------+------------------------+--------------+
 | [2]_ Direct Generalized Membership Inference Attack (gmia) | Privacy (Black Box)    | |nb1|_       |
 +------------------------------------------------------------+------------------------+--------------+
-| [3]_ Foolbox Attacks                                       | Robustness (Black Box) | |nb2|_       |
+| [3]_ Foolbox Attacks                                       | Robustness             | |nb2|_       |
 +------------------------------------------------------------+------------------------+--------------+
 
 .. |nb0| image:: https://colab.research.google.com/assets/colab-badge.svg
