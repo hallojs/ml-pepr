@@ -12,7 +12,7 @@ import yaml
 
 from pepr import report
 from pepr.privacy import mia, gmia
-from pepr.robustness import foolbox_wrapper
+from pepr.robustness import foolbox_wrapper, art_wrapper
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -92,6 +92,7 @@ def run_attacks(yaml_path, attack_obj_save_path, functions):
         "L1BrendelBethgeAttack": foolbox_wrapper.L1BrendelBethgeAttack,
         "L2BrendelBethgeAttack": foolbox_wrapper.L2BrendelBethgeAttack,
         "LinfinityBrendelBethgeAttack": foolbox_wrapper.LinfinityBrendelBethgeAttack,
+        "FastGradientMethod": art_wrapper.FastGradientMethod,
     }
 
     attack_object_paths = {}

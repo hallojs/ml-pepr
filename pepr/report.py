@@ -245,6 +245,15 @@ descriptions = {
         "arXiv preprint arXiv:1907.01003. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
+    "FastGradientMethod": (
+        "This attack was originally implemented by Goodfellow et al. (2015) with the "
+        "infinity norm (and is known as the “Fast Gradient Sign Method”). This "
+        "implementation extends the attack to other norms, and is therefore called the "
+        "Fast Gradient Method. "
+        "Reference: Ian J. Goodfellow, Jonathon Shlens, Christian Szegedy, “Explaining "
+        "and Harnessing Adversarial Examples” (2015) arXiv preprint arXiv:1907.01003. "
+        "Attack implementation provided by the Adversarial Robustness Toolbox (ART)."
+    ),
 }
 
 
