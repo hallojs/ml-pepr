@@ -468,17 +468,16 @@ class L2ContrastReductionAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        if "target" in attack_pars:
-            foolbox_attack = fb.attacks.L2ContrastReductionAttack(
-                target=attack_pars["target"]
-            )
-        else:
-            foolbox_attack = fb.attacks.L2ContrastReductionAttack()
-
         pars_descriptors = {
             "target": "Contrast reduction target",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.L2ContrastReductionAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -539,19 +538,17 @@ class VirtualAdversarialAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        if "xi" in attack_pars:
-            foolbox_attack = fb.attacks.VirtualAdversarialAttack(
-                attack_pars["steps"],
-                xi=attack_pars["xi"],
-            )
-        else:
-            foolbox_attack = fb.attacks.VirtualAdversarialAttack(attack_pars["steps"])
-
         pars_descriptors = {
             "steps": "Update steps",
             "xi": "First L2 distance",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.VirtualAdversarialAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -609,21 +606,18 @@ class DDNAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "init_epsilon" in attack_pars:
-            params["init_epsilon"] = attack_pars["init_epsilon"]
-        if "steps" in attack_pars:
-            params["steps"] = attack_pars["steps"]
-        if "gamma" in attack_pars:
-            params["gamma"] = attack_pars["gamma"]
-        foolbox_attack = fb.attacks.DDNAttack(**params)
-
         pars_descriptors = {
             "init_epsilon": "Initial epsilon ball",
             "steps": "Optimization steps",
             "gamma": "Norm factor",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.DDNAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -683,24 +677,19 @@ class L2ProjectedGradientDescentAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "rel_stepsize" in attack_pars:
-            params["rel_stepsize"] = attack_pars["rel_stepsize"]
-        if "abs_stepsize" in attack_pars:
-            params["abs_stepsize"] = attack_pars["abs_stepsize"]
-        if "steps" in attack_pars:
-            params["steps"] = attack_pars["steps"]
-        if "random_start" in attack_pars:
-            params["random_start"] = attack_pars["random_start"]
-        foolbox_attack = fb.attacks.L2ProjectedGradientDescentAttack(**params)
-
         pars_descriptors = {
             "rel_stepsize": "Relative stepsize",
             "abs_stepsize": "Absolut stepsize",
             "steps": "Update steps",
             "random_start": "Random start",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.L2ProjectedGradientDescentAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -760,24 +749,19 @@ class LinfProjectedGradientDescentAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "rel_stepsize" in attack_pars:
-            params["rel_stepsize"] = attack_pars["rel_stepsize"]
-        if "abs_stepsize" in attack_pars:
-            params["abs_stepsize"] = attack_pars["abs_stepsize"]
-        if "steps" in attack_pars:
-            params["steps"] = attack_pars["steps"]
-        if "random_start" in attack_pars:
-            params["random_start"] = attack_pars["random_start"]
-        foolbox_attack = fb.attacks.LinfProjectedGradientDescentAttack(**params)
-
         pars_descriptors = {
             "rel_stepsize": "Relative stepsize",
             "abs_stepsize": "Absolut stepsize",
             "steps": "Update steps",
             "random_start": "Random start",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.LinfProjectedGradientDescentAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -837,24 +821,19 @@ class L2BasicIterativeAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "rel_stepsize" in attack_pars:
-            params["rel_stepsize"] = attack_pars["rel_stepsize"]
-        if "abs_stepsize" in attack_pars:
-            params["abs_stepsize"] = attack_pars["abs_stepsize"]
-        if "steps" in attack_pars:
-            params["steps"] = attack_pars["steps"]
-        if "random_start" in attack_pars:
-            params["random_start"] = attack_pars["random_start"]
-        foolbox_attack = fb.attacks.L2BasicIterativeAttack(**params)
-
         pars_descriptors = {
             "rel_stepsize": "Relative stepsize",
             "abs_stepsize": "Absolut stepsize",
             "steps": "Update steps",
             "random_start": "Random start",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.L2BasicIterativeAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -914,24 +893,19 @@ class LinfBasicIterativeAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "rel_stepsize" in attack_pars:
-            params["rel_stepsize"] = attack_pars["rel_stepsize"]
-        if "abs_stepsize" in attack_pars:
-            params["abs_stepsize"] = attack_pars["abs_stepsize"]
-        if "steps" in attack_pars:
-            params["steps"] = attack_pars["steps"]
-        if "random_start" in attack_pars:
-            params["random_start"] = attack_pars["random_start"]
-        foolbox_attack = fb.attacks.LinfBasicIterativeAttack(**params)
-
         pars_descriptors = {
             "rel_stepsize": "Relative stepsize",
             "abs_stepsize": "Absolut stepsize",
             "steps": "Update steps",
             "random_start": "Random start",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.LinfBasicIterativeAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -987,15 +961,16 @@ class L2FastGradientAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "random_start" in attack_pars:
-            params["random_start"] = attack_pars["random_start"]
-        foolbox_attack = fb.attacks.L2FastGradientAttack(**params)
-
         pars_descriptors = {
             "random_start": "Random start",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.L2FastGradientAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -1051,15 +1026,16 @@ class LinfFastGradientAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "random_start" in attack_pars:
-            params["random_start"] = attack_pars["random_start"]
-        foolbox_attack = fb.attacks.LinfFastGradientAttack(**params)
-
         pars_descriptors = {
             "random_start": "Random start",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.LinfFastGradientAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -1396,18 +1372,17 @@ class L2RepeatedAdditiveGaussianNoiseAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "repeats" in attack_pars:
-            params["repeats"] = attack_pars["repeats"]
-        if "check_trivial" in attack_pars:
-            params["check_trivial"] = attack_pars["check_trivial"]
-        foolbox_attack = fb.attacks.L2RepeatedAdditiveGaussianNoiseAttack(**params)
-
         pars_descriptors = {
             "repeats": "Repeats",
             "check_trivial": "Check adversarial",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.L2RepeatedAdditiveGaussianNoiseAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -1464,18 +1439,17 @@ class L2RepeatedAdditiveUniformNoiseAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "repeats" in attack_pars:
-            params["repeats"] = attack_pars["repeats"]
-        if "check_trivial" in attack_pars:
-            params["check_trivial"] = attack_pars["check_trivial"]
-        foolbox_attack = fb.attacks.L2RepeatedAdditiveUniformNoiseAttack(**params)
-
         pars_descriptors = {
             "repeats": "Repeats",
             "check_trivial": "Check adversarial",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.L2RepeatedAdditiveUniformNoiseAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -1532,20 +1506,19 @@ class L2ClippingAwareRepeatedAdditiveGaussianNoiseAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "repeats" in attack_pars:
-            params["repeats"] = attack_pars["repeats"]
-        if "check_trivial" in attack_pars:
-            params["check_trivial"] = attack_pars["check_trivial"]
-        foolbox_attack = fb.attacks.L2ClippingAwareRepeatedAdditiveGaussianNoiseAttack(
-            **params
-        )
-
         pars_descriptors = {
             "repeats": "Repeats",
             "check_trivial": "Check adversarial",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.L2ClippingAwareRepeatedAdditiveGaussianNoiseAttack(
+            **params
+        )
 
         super().__init__(
             attack_alias,
@@ -1602,20 +1575,19 @@ class L2ClippingAwareRepeatedAdditiveUniformNoiseAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "repeats" in attack_pars:
-            params["repeats"] = attack_pars["repeats"]
-        if "check_trivial" in attack_pars:
-            params["check_trivial"] = attack_pars["check_trivial"]
-        foolbox_attack = fb.attacks.L2ClippingAwareRepeatedAdditiveUniformNoiseAttack(
-            **params
-        )
-
         pars_descriptors = {
             "repeats": "Repeats",
             "check_trivial": "Check adversarial",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.L2ClippingAwareRepeatedAdditiveUniformNoiseAttack(
+            **params
+        )
 
         super().__init__(
             attack_alias,
@@ -1672,18 +1644,17 @@ class LinfRepeatedAdditiveUniformNoiseAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "repeats" in attack_pars:
-            params["repeats"] = attack_pars["repeats"]
-        if "check_trivial" in attack_pars:
-            params["check_trivial"] = attack_pars["check_trivial"]
-        foolbox_attack = fb.attacks.LinfRepeatedAdditiveUniformNoiseAttack(**params)
-
         pars_descriptors = {
             "repeats": "Repeats",
             "check_trivial": "Check adversarial",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.LinfRepeatedAdditiveUniformNoiseAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -1739,11 +1710,11 @@ class InversionAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        foolbox_attack = fb.attacks.InversionAttack(distance=attack_pars["distance"])
-
         pars_descriptors = {
             "distance": "Distance",
         }
+
+        foolbox_attack = fb.attacks.InversionAttack(distance=attack_pars["distance"])
 
         super().__init__(
             attack_alias,
@@ -1804,21 +1775,18 @@ class BinarySearchContrastReductionAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "binary_search_steps" in attack_pars:
-            params["binary_search_steps"] = attack_pars["binary_search_steps"]
-        if "target" in attack_pars:
-            params["target"] = attack_pars["target"]
-        foolbox_attack = fb.attacks.BinarySearchContrastReductionAttack(
-            distance=attack_pars["distance"], **params
-        )
-
         pars_descriptors = {
             "distance": "Distance",
             "binary_search_steps": "Binary search iterations",
             "target": "Contrast target",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.BinarySearchContrastReductionAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -1879,21 +1847,18 @@ class LinearSearchContrastReductionAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "steps" in attack_pars:
-            params["steps"] = attack_pars["steps"]
-        if "target" in attack_pars:
-            params["target"] = attack_pars["target"]
-        foolbox_attack = fb.attacks.LinearSearchContrastReductionAttack(
-            distance=attack_pars["distance"], **params
-        )
-
         pars_descriptors = {
             "distance": "Distance",
             "steps": "Linear search iterations",
             "target": "Contrast target",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.LinearSearchContrastReductionAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -1958,22 +1923,6 @@ class L2CarliniWagnerAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "binary_search_steps" in attack_pars:
-            params["binary_search_steps"] = attack_pars["binary_search_steps"]
-        if "steps" in attack_pars:
-            params["steps"] = attack_pars["steps"]
-        if "stepsize" in attack_pars:
-            params["stepsize"] = attack_pars["stepsize"]
-        if "confidence" in attack_pars:
-            params["confidence"] = attack_pars["confidence"]
-        if "initial_const" in attack_pars:
-            params["initial_const"] = attack_pars["initial_const"]
-        if "abort_early" in attack_pars:
-            params["abort_early"] = attack_pars["abort_early"]
-        foolbox_attack = fb.attacks.L2CarliniWagnerAttack(**params)
-
         pars_descriptors = {
             "binary_search_steps": "Binary search iterations",
             "steps": "Optimization steps",
@@ -1982,6 +1931,13 @@ class L2CarliniWagnerAttack(BaseAttack):
             "initial_const": "Initial cost value",
             "abort_early": "Stop early",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.L2CarliniWagnerAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -2037,18 +1993,17 @@ class NewtonFoolAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "steps" in attack_pars:
-            params["steps"] = attack_pars["steps"]
-        if "stepsize" in attack_pars:
-            params["stepsize"] = attack_pars["stepsize"]
-        foolbox_attack = fb.attacks.NewtonFoolAttack(**params)
-
         pars_descriptors = {
             "steps": "Update steps",
             "stepsize": "Stepsize",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.NewtonFoolAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -2117,26 +2072,6 @@ class EADAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "binary_search_steps" in attack_pars:
-            params["binary_search_steps"] = attack_pars["binary_search_steps"]
-        if "steps" in attack_pars:
-            params["steps"] = attack_pars["steps"]
-        if "initial_stepsize" in attack_pars:
-            params["initial_stepsize"] = attack_pars["initial_stepsize"]
-        if "confidence" in attack_pars:
-            params["confidence"] = attack_pars["confidence"]
-        if "initial_const" in attack_pars:
-            params["initial_const"] = attack_pars["initial_const"]
-        if "regularization" in attack_pars:
-            params["regularization"] = attack_pars["regularization"]
-        if "decision_rule" in attack_pars:
-            params["decision_rule"] = attack_pars["decision_rule"]
-        if "abort_early" in attack_pars:
-            params["abort_early"] = attack_pars["abort_early"]
-        foolbox_attack = fb.attacks.EADAttack(**params)
-
         pars_descriptors = {
             "binary_search_steps": "Binary search iterations",
             "steps": "Optimization steps",
@@ -2147,6 +2082,13 @@ class EADAttack(BaseAttack):
             "decision_rule": "Decision Rule",
             "abort_early": "Stop early",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.EADAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -2207,24 +2149,19 @@ class GaussianBlurAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "steps" in attack_pars:
-            params["steps"] = attack_pars["steps"]
-        if "channel_axis" in attack_pars:
-            params["channel_axis"] = attack_pars["channel_axis"]
-        if "max_sigma" in attack_pars:
-            params["max_sigma"] = attack_pars["max_sigma"]
-        foolbox_attack = fb.attacks.GaussianBlurAttack(
-            distance=attack_pars["distance"], **params
-        )
-
         pars_descriptors = {
             "steps": "Number sigma values",
             "channel_axis": "Channel Axis",
             "max_sigma": "Max. sigma",
             "distance": "Distance",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.GaussianBlurAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -2286,24 +2223,19 @@ class L2DeepFoolAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "steps" in attack_pars:
-            params["steps"] = attack_pars["steps"]
-        if "candidates" in attack_pars:
-            params["candidates"] = attack_pars["candidates"]
-        if "overshoot" in attack_pars:
-            params["overshoot"] = attack_pars["overshoot"]
-        if "loss" in attack_pars:
-            params["loss"] = attack_pars["loss"]
-        foolbox_attack = fb.attacks.L2DeepFoolAttack(**params)
-
         pars_descriptors = {
             "steps": "Maximum steps",
             "candidates": "Max. candidates",
             "overshoot": "Overshoot",
             "loss": "Loss function",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.L2DeepFoolAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -2365,24 +2297,19 @@ class LinfDeepFoolAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "steps" in attack_pars:
-            params["steps"] = attack_pars["steps"]
-        if "candidates" in attack_pars:
-            params["candidates"] = attack_pars["candidates"]
-        if "overshoot" in attack_pars:
-            params["overshoot"] = attack_pars["overshoot"]
-        if "loss" in attack_pars:
-            params["loss"] = attack_pars["loss"]
-        foolbox_attack = fb.attacks.LinfDeepFoolAttack(**params)
-
         pars_descriptors = {
             "steps": "Maximum steps",
             "candidates": "Max. candidates",
             "overshoot": "Overshoot",
             "loss": "Loss function",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.LinfDeepFoolAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -2442,21 +2369,18 @@ class SaltAndPepperNoiseAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "steps" in attack_pars:
-            params["steps"] = attack_pars["steps"]
-        if "across_channels" in attack_pars:
-            params["across_channels"] = attack_pars["across_channels"]
-        if "channel_axis" in attack_pars:
-            params["channel_axis"] = attack_pars["channel_axis"]
-        foolbox_attack = fb.attacks.SaltAndPepperNoiseAttack(**params)
-
         pars_descriptors = {
             "steps": "Steps",
             "across_channels": "Same noise",
             "channel_axis": "Same noise channel",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.SaltAndPepperNoiseAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -2516,21 +2440,18 @@ class LinearSearchBlendedUniformNoiseAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "directions" in attack_pars:
-            params["directions"] = attack_pars["directions"]
-        if "steps" in attack_pars:
-            params["steps"] = attack_pars["steps"]
-        foolbox_attack = fb.attacks.LinearSearchBlendedUniformNoiseAttack(
-            distance=attack_pars["distance"], **params
-        )
-
         pars_descriptors = {
             "distance": "Distance",
             "directions": "Random directions",
             "steps": "Steps",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.LinearSearchBlendedUniformNoiseAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -2594,21 +2515,18 @@ class BinarizationRefinementAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "threshold" in attack_pars:
-            params["threshold"] = attack_pars["threshold"]
-        if "included_in" in attack_pars:
-            params["included_in"] = attack_pars["included_in"]
-        foolbox_attack = fb.attacks.BinarizationRefinementAttack(
-            distance=attack_pars["distance"], **params
-        )
-
         pars_descriptors = {
             "threshold": "Threshold",
             "included_in": "Threshold belonging",
             "distance": "Distance",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.BinarizationRefinementAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -2716,26 +2634,6 @@ class BoundaryAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "init_attack" in attack_pars:
-            params["init_attack"] = attack_pars["init_attack"]
-        if "steps" in attack_pars:
-            params["steps"] = attack_pars["steps"]
-        if "spherical_step" in attack_pars:
-            params["spherical_step"] = attack_pars["spherical_step"]
-        if "source_step" in attack_pars:
-            params["source_step"] = attack_pars["source_step"]
-        if "source_step_convergence" in attack_pars:
-            params["source_step_convergence"] = attack_pars["source_step_convergence"]
-        if "step_adaptation" in attack_pars:
-            params["step_adaptation"] = attack_pars["step_adaptation"]
-        if "tensorboard" in attack_pars:
-            params["tensorboard"] = attack_pars["tensorboard"]
-        if "update_stats_every_k" in attack_pars:
-            params["update_stats_every_k"] = attack_pars["update_stats_every_k"]
-        foolbox_attack = fb.attacks.BoundaryAttack(**params)
-
         pars_descriptors = {
             "init_attack": "Starting attack",
             "steps": "Maximum steps",
@@ -2746,6 +2644,13 @@ class BoundaryAttack(BaseAttack):
             "tensorboard": "TensorBoard summary",
             "update_stats_every_k": "Stats update",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.BoundaryAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -2819,28 +2724,6 @@ class L0BrendelBethgeAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "init_attack" in attack_pars:
-            params["init_attack"] = attack_pars["init_attack"]
-        if "overshoot" in attack_pars:
-            params["overshoot"] = attack_pars["overshoot"]
-        if "steps" in attack_pars:
-            params["steps"] = attack_pars["steps"]
-        if "lr" in attack_pars:
-            params["lr"] = attack_pars["lr"]
-        if "lr_decay" in attack_pars:
-            params["lr_decay"] = attack_pars["lr_decay"]
-        if "lr_num_decay" in attack_pars:
-            params["lr_num_decay"] = attack_pars["lr_num_decay"]
-        if "momentum" in attack_pars:
-            params["momentum"] = attack_pars["momentum"]
-        if "tensorboard" in attack_pars:
-            params["tensorboard"] = attack_pars["tensorboard"]
-        if "binary_search_steps" in attack_pars:
-            params["binary_search_steps"] = attack_pars["binary_search_steps"]
-        foolbox_attack = fb.attacks.L0BrendelBethgeAttack(**params)
-
         pars_descriptors = {
             "init_attack": "Starting attack",
             "overshoot": "overshoot",
@@ -2852,6 +2735,13 @@ class L0BrendelBethgeAttack(BaseAttack):
             "tensorboard": "TensorBoard summary",
             "binary_search_steps": "Binary search iterations",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.L0BrendelBethgeAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -2933,28 +2823,6 @@ class L1BrendelBethgeAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "init_attack" in attack_pars:
-            params["init_attack"] = attack_pars["init_attack"]
-        if "overshoot" in attack_pars:
-            params["overshoot"] = attack_pars["overshoot"]
-        if "steps" in attack_pars:
-            params["steps"] = attack_pars["steps"]
-        if "lr" in attack_pars:
-            params["lr"] = attack_pars["lr"]
-        if "lr_decay" in attack_pars:
-            params["lr_decay"] = attack_pars["lr_decay"]
-        if "lr_num_decay" in attack_pars:
-            params["lr_num_decay"] = attack_pars["lr_num_decay"]
-        if "momentum" in attack_pars:
-            params["momentum"] = attack_pars["momentum"]
-        if "tensorboard" in attack_pars:
-            params["tensorboard"] = attack_pars["tensorboard"]
-        if "binary_search_steps" in attack_pars:
-            params["binary_search_steps"] = attack_pars["binary_search_steps"]
-        foolbox_attack = fb.attacks.L1BrendelBethgeAttack(**params)
-
         pars_descriptors = {
             "init_attack": "Starting attack",
             "overshoot": "overshoot",
@@ -2966,6 +2834,13 @@ class L1BrendelBethgeAttack(BaseAttack):
             "tensorboard": "TensorBoard summary",
             "binary_search_steps": "Binary search iterations",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.L1BrendelBethgeAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -3047,28 +2922,6 @@ class L2BrendelBethgeAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "init_attack" in attack_pars:
-            params["init_attack"] = attack_pars["init_attack"]
-        if "overshoot" in attack_pars:
-            params["overshoot"] = attack_pars["overshoot"]
-        if "steps" in attack_pars:
-            params["steps"] = attack_pars["steps"]
-        if "lr" in attack_pars:
-            params["lr"] = attack_pars["lr"]
-        if "lr_decay" in attack_pars:
-            params["lr_decay"] = attack_pars["lr_decay"]
-        if "lr_num_decay" in attack_pars:
-            params["lr_num_decay"] = attack_pars["lr_num_decay"]
-        if "momentum" in attack_pars:
-            params["momentum"] = attack_pars["momentum"]
-        if "tensorboard" in attack_pars:
-            params["tensorboard"] = attack_pars["tensorboard"]
-        if "binary_search_steps" in attack_pars:
-            params["binary_search_steps"] = attack_pars["binary_search_steps"]
-        foolbox_attack = fb.attacks.L2BrendelBethgeAttack(**params)
-
         pars_descriptors = {
             "init_attack": "Starting attack",
             "overshoot": "overshoot",
@@ -3080,6 +2933,13 @@ class L2BrendelBethgeAttack(BaseAttack):
             "tensorboard": "TensorBoard summary",
             "binary_search_steps": "Binary search iterations",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.L2BrendelBethgeAttack(**params)
 
         super().__init__(
             attack_alias,
@@ -3161,28 +3021,6 @@ class LinfinityBrendelBethgeAttack(BaseAttack):
     def __init__(
         self, attack_alias, attack_pars, data, labels, data_conf, target_models
     ):
-        # Handle specific attack class parameters
-        params = {}
-        if "init_attack" in attack_pars:
-            params["init_attack"] = attack_pars["init_attack"]
-        if "overshoot" in attack_pars:
-            params["overshoot"] = attack_pars["overshoot"]
-        if "steps" in attack_pars:
-            params["steps"] = attack_pars["steps"]
-        if "lr" in attack_pars:
-            params["lr"] = attack_pars["lr"]
-        if "lr_decay" in attack_pars:
-            params["lr_decay"] = attack_pars["lr_decay"]
-        if "lr_num_decay" in attack_pars:
-            params["lr_num_decay"] = attack_pars["lr_num_decay"]
-        if "momentum" in attack_pars:
-            params["momentum"] = attack_pars["momentum"]
-        if "tensorboard" in attack_pars:
-            params["tensorboard"] = attack_pars["tensorboard"]
-        if "binary_search_steps" in attack_pars:
-            params["binary_search_steps"] = attack_pars["binary_search_steps"]
-        foolbox_attack = fb.attacks.LinfinityBrendelBethgeAttack(**params)
-
         pars_descriptors = {
             "init_attack": "Starting attack",
             "overshoot": "overshoot",
@@ -3194,6 +3032,13 @@ class LinfinityBrendelBethgeAttack(BaseAttack):
             "tensorboard": "TensorBoard summary",
             "binary_search_steps": "Binary search iterations",
         }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+        foolbox_attack = fb.attacks.LinfinityBrendelBethgeAttack(**params)
 
         super().__init__(
             attack_alias,
