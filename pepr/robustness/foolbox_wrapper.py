@@ -122,7 +122,7 @@ class BaseAttack(Attack):
             fb.TensorFlowModel(x, bounds=(0, 1)) for x in self.target_models
         ]
 
-    def foolbox_run(self, fmodel, inputs_t, criterion_t, epsilons):
+    def foolbox_run(self, fmodel, inputs_t, criterion_t, epsilons, **kwargs):
         """
         Foolbox attack run function.
 
@@ -136,11 +136,22 @@ class BaseAttack(Attack):
             True labels or criterion.
         epsilons : iterable
             List of one or more epsilons for the attack.
+        kwargs :
+            Additional parameters for the `generate` function of the attack.
         """
-        return self.foolbox_attack(fmodel, inputs_t, criterion_t, epsilons=epsilons)
+        return self.foolbox_attack(
+            fmodel, inputs_t, criterion_t, epsilons=epsilons, **kwargs
+        )
 
-    def run(self):
-        """Run Foolbox attack."""
+    def run(self, **kwargs):
+        """
+        Run the Foolbox attack.
+
+        Parameters
+        ----------
+        kwargs :
+            Additional parameters for the `generate` function of the attack.
+        """
         # Make sure, epsilons is type list for consistency
         try:
             list(self.epsilons)
@@ -161,7 +172,7 @@ class BaseAttack(Attack):
             criterion_t = tf.convert_to_tensor(self.labels[indices])
 
             raw, clipped, is_adv = self.foolbox_run(
-                fmodel, inputs_t, criterion_t, epsilons=self.epsilons
+                fmodel, inputs_t, criterion_t, epsilons=self.epsilons, **kwargs
             )
 
             raw_list.append(raw)
