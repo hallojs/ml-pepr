@@ -493,7 +493,7 @@ class L2ContrastReductionAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "L2 Contrast Reduction Attack",
             self.attack_alias,
-            "L2ContrastReductionAttack",
+            "FB_L2ContrastReductionAttack",
         )
 
 
@@ -564,7 +564,7 @@ class VirtualAdversarialAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "Virtual Adversarial Attack",
             self.attack_alias,
-            "VirtualAdversarialAttack",
+            "FB_VirtualAdversarialAttack",
         )
 
 
@@ -633,7 +633,7 @@ class DDNAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "DDN Attack",
             self.attack_alias,
-            "DDNAttack",
+            "FB_DDNAttack",
         )
 
 
@@ -705,7 +705,7 @@ class L2ProjectedGradientDescentAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "L2 Projected Gradient Descent Attack",
             self.attack_alias,
-            "L2ProjectedGradientDescentAttack",
+            "FB_L2ProjectedGradientDescentAttack",
         )
 
 
@@ -777,7 +777,7 @@ class LinfProjectedGradientDescentAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "Linf Projected Gradient Descent Attack",
             self.attack_alias,
-            "LinfProjectedGradientDescentAttack",
+            "FB_LinfProjectedGradientDescentAttack",
         )
 
 
@@ -849,7 +849,7 @@ class L2BasicIterativeAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "L2 Basic Iterative Attack",
             self.attack_alias,
-            "L2BasicIterativeAttack",
+            "FB_L2BasicIterativeAttack",
         )
 
 
@@ -921,7 +921,7 @@ class LinfBasicIterativeAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "Linf Basic Iterative Attack",
             self.attack_alias,
-            "LinfBasicIterativeAttack",
+            "FB_LinfBasicIterativeAttack",
         )
 
 
@@ -986,7 +986,7 @@ class L2FastGradientAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "L2 Fast Gradient Attack",
             self.attack_alias,
-            "L2FastGradientAttack",
+            "FB_L2FastGradientAttack",
         )
 
 
@@ -1051,7 +1051,7 @@ class LinfFastGradientAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "Linf Fast Gradient Attack",
             self.attack_alias,
-            "LinfFastGradientAttack",
+            "FB_LinfFastGradientAttack",
         )
 
 
@@ -1107,7 +1107,7 @@ class L2AdditiveGaussianNoiseAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "L2 Additive Gaussian Noise Attack",
             self.attack_alias,
-            "L2AdditiveGaussianNoiseAttack",
+            "FB_L2AdditiveGaussianNoiseAttack",
         )
 
 
@@ -1163,7 +1163,7 @@ class L2AdditiveUniformNoiseAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "L2 Additive Uniform Noise Attack",
             self.attack_alias,
-            "L2AdditiveUniformNoiseAttack",
+            "FB_L2AdditiveUniformNoiseAttack",
         )
 
 
@@ -1219,7 +1219,7 @@ class L2ClippingAwareAdditiveGaussianNoiseAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "L2 Clipping Aware Additive Gaussian Noise Attack",
             self.attack_alias,
-            "L2ClippingAwareAdditiveGaussianNoiseAttack",
+            "FB_L2ClippingAwareAdditiveGaussianNoiseAttack",
         )
 
 
@@ -1275,7 +1275,7 @@ class L2ClippingAwareAdditiveUniformNoiseAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "L2 Clipping Aware Additive Uniform Noise Attack",
             self.attack_alias,
-            "L2ClippingAwareAdditiveUniformNoiseAttack",
+            "FB_L2ClippingAwareAdditiveUniformNoiseAttack",
         )
 
 
@@ -1331,7 +1331,7 @@ class LinfAdditiveUniformNoiseAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "Linf Additive Uniform Noise Attack",
             self.attack_alias,
-            "LinfAdditiveUniformNoiseAttack",
+            "FB_LinfAdditiveUniformNoiseAttack",
         )
 
 
@@ -1398,7 +1398,7 @@ class L2RepeatedAdditiveGaussianNoiseAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "L2 Repeated Additive Gaussian Noise Attack",
             self.attack_alias,
-            "L2RepeatedAdditiveGaussianNoiseAttack",
+            "FB_L2RepeatedAdditiveGaussianNoiseAttack",
         )
 
 
@@ -1465,7 +1465,7 @@ class L2RepeatedAdditiveUniformNoiseAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "L2 Repeated Additive Uniform Noise Attack",
             self.attack_alias,
-            "L2RepeatedAdditiveUniformNoiseAttack",
+            "FB_L2RepeatedAdditiveUniformNoiseAttack",
         )
 
 
@@ -1534,7 +1534,7 @@ class L2ClippingAwareRepeatedAdditiveGaussianNoiseAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "L2 Clipping Aware Repeated Additive Gaussian Noise Attack",
             self.attack_alias,
-            "L2ClippingAwareRepeatedAdditiveGaussianNoiseAttack",
+            "FB_L2ClippingAwareRepeatedAdditiveGaussianNoiseAttack",
         )
 
 
@@ -1603,7 +1603,7 @@ class L2ClippingAwareRepeatedAdditiveUniformNoiseAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "L2 Clipping Aware Repeated Additive Uniform Noise Attack",
             self.attack_alias,
-            "L2ClippingAwareRepeatedAdditiveUniformNoiseAttack",
+            "FB_L2ClippingAwareRepeatedAdditiveUniformNoiseAttack",
         )
 
 
@@ -1670,7 +1670,7 @@ class LinfRepeatedAdditiveUniformNoiseAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "Linf Repeated Additive Uniform Noise Attack",
             self.attack_alias,
-            "LinfRepeatedAdditiveUniformNoiseAttack",
+            "FB_LinfRepeatedAdditiveUniformNoiseAttack",
         )
 
 
@@ -1730,7 +1730,7 @@ class InversionAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "Inversion Attack",
             self.attack_alias,
-            "InversionAttack",
+            "FB_InversionAttack",
         )
 
 
@@ -1802,7 +1802,7 @@ class BinarySearchContrastReductionAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "Binary Search Contrast Reduction Attack",
             self.attack_alias,
-            "BinarySearchContrastReductionAttack",
+            "FB_BinarySearchContrastReductionAttack",
         )
 
 
@@ -1874,7 +1874,7 @@ class LinearSearchContrastReductionAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "Linear Search Contrast Reduction Attack",
             self.attack_alias,
-            "LinearSearchContrastReductionAttack",
+            "FB_LinearSearchContrastReductionAttack",
         )
 
 
@@ -1953,7 +1953,7 @@ class L2CarliniWagnerAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "L2 Carlini Wagner Attack",
             self.attack_alias,
-            "L2CarliniWagnerAttack",
+            "FB_L2CarliniWagnerAttack",
         )
 
 
@@ -2019,7 +2019,7 @@ class NewtonFoolAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "Newton Fool Attack",
             self.attack_alias,
-            "NewtonFoolAttack",
+            "FB_NewtonFoolAttack",
         )
 
 
@@ -2104,7 +2104,7 @@ class EADAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "EAD Attack",
             self.attack_alias,
-            "EADAttack",
+            "FB_EADAttack",
         )
 
 
@@ -2177,7 +2177,7 @@ class GaussianBlurAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "Gaussian Blur Attack",
             self.attack_alias,
-            "GaussianBlurAttack",
+            "FB_GaussianBlurAttack",
         )
 
 
@@ -2251,7 +2251,7 @@ class L2DeepFoolAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "L2 Deep Fool Attack",
             self.attack_alias,
-            "L2DeepFoolAttack",
+            "FB_L2DeepFoolAttack",
         )
 
 
@@ -2325,7 +2325,7 @@ class LinfDeepFoolAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "Linf Deep Fool Attack",
             self.attack_alias,
-            "LinfDeepFoolAttack",
+            "FB_LinfDeepFoolAttack",
         )
 
 
@@ -2396,7 +2396,7 @@ class SaltAndPepperNoiseAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "Salt And Pepper Noise Attack",
             self.attack_alias,
-            "SaltAndPepperNoiseAttack",
+            "FB_SaltAndPepperNoiseAttack",
         )
 
 
@@ -2467,7 +2467,7 @@ class LinearSearchBlendedUniformNoiseAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "Linear Search Blended Uniform Noise Attack",
             self.attack_alias,
-            "LinearSearchBlendedUniformNoiseAttack",
+            "FB_LinearSearchBlendedUniformNoiseAttack",
         )
 
 
@@ -2542,7 +2542,7 @@ class BinarizationRefinementAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "Binarization Refinement Attack",
             self.attack_alias,
-            "BinarizationRefinementAttack",
+            "FB_BinarizationRefinementAttack",
         )
 
         self.starting_points = attack_pars["starting_points"]
@@ -2666,7 +2666,7 @@ class BoundaryAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "Boundary Attack",
             self.attack_alias,
-            "BoundaryAttack",
+            "FB_BoundaryAttack",
         )
 
 
@@ -2757,7 +2757,7 @@ class L0BrendelBethgeAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "L0 Brendel Bethge Attack",
             self.attack_alias,
-            "L0BrendelBethgeAttack",
+            "FB_L0BrendelBethgeAttack",
         )
 
     def __getstate__(self):
@@ -2856,7 +2856,7 @@ class L1BrendelBethgeAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "L1 Brendel Bethge Attack",
             self.attack_alias,
-            "L1BrendelBethgeAttack",
+            "FB_L1BrendelBethgeAttack",
         )
 
     def __getstate__(self):
@@ -2955,7 +2955,7 @@ class L2BrendelBethgeAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "L2 Brendel Bethge Attack",
             self.attack_alias,
-            "L2BrendelBethgeAttack",
+            "FB_L2BrendelBethgeAttack",
         )
 
     def __getstate__(self):
@@ -3054,7 +3054,7 @@ class LinfinityBrendelBethgeAttack(BaseAttack):
         self.report_section = report.ReportSection(
             "L-infinity Brendel Bethge Attack",
             self.attack_alias,
-            "LinfinityBrendelBethgeAttack",
+            "FB_LinfinityBrendelBethgeAttack",
         )
 
     def __getstate__(self):
