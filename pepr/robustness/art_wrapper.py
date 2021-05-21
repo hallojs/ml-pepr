@@ -107,7 +107,7 @@ class BaseEvasionAttack(Attack):
         self.classifiers = [x.estimator for x in art_attacks]
         self.use_labels = use_labels
 
-    def art_run(self, attack_index, data, labels=None):
+    def art_run(self, attack_index, data, labels=None, **kwargs):
         """
         ART attack run function.
 
@@ -119,14 +119,23 @@ class BaseEvasionAttack(Attack):
             Dataset slice containing images to attack the corresponding target model.
         labels : numpy.ndarray
             Dataset slice with true labels to attack the corresponding target model.
+        kwargs :
+            Additional parameters for the `generate` function of the attack.
         """
         if labels is not None:
-            return self.art_attacks[attack_index].generate(data, labels)
+            return self.art_attacks[attack_index].generate(data, labels, **kwargs)
 
-        return self.art_attacks[attack_index].generate(data)
+        return self.art_attacks[attack_index].generate(data, **kwargs)
 
-    def run(self):
-        """Run the ART attack."""
+    def run(self, **kwargs):
+        """
+        Run the ART attack.
+
+        Parameters
+        ----------
+        kwargs :
+            Additional parameters for the `generate` function of the attack.
+        """
         adv_list = []
         misclass_list = []
         l2_dist_list = []
@@ -138,9 +147,9 @@ class BaseEvasionAttack(Attack):
             labels = self.labels[self.attack_indices_per_target[i]]
 
             if self.use_labels:
-                adv = self.art_run(i, data, labels)
+                adv = self.art_run(i, data, labels, **kwargs)
             else:
-                adv = self.art_run(i, data)
+                adv = self.art_run(i, data, **kwargs)
             adv_list.append(adv)
 
             # Calculate accuracy on adversarial examples
@@ -822,6 +831,7 @@ class BrendelBethgeAttack(BaseEvasionAttack):
             L2Optimizer,
             LinfOptimizer,
         )
+
         for art_attack in self.art_attacks:
             if art_attack.norm == 0:
                 art_attack._optimizer = L0Optimizer()

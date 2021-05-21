@@ -39,7 +39,7 @@ Attack Parameters (``attack_pars``)
 Attack Independent Keys
 """""""""""""""""""""""
 ``attack_pars`` is a list of attack parameters for every attack to run. **Every** list
-entry must have the following not attack dependent keys:
+entry **must have** the following not attack dependent keys:
 
 - ``attack_type``
 - ``attack_alias``
@@ -67,6 +67,50 @@ Example:
       target_model_paths:
       - "data/target_model_mia0"
       - "data/target_model_mia1"
+      # ... attack dependent keys
+
+Special key ``run_args``
+""""""""""""""""""""""""
+For passing additional parameters to the run-function of the attack, add them to
+``run_args`` like in the following example:
+
+.. code-block:: yaml
+    :linenos:
+
+    run_args:
+    - param1: 1
+      param2: "example"
+      param3: "You got it!"
+
+This is equivalent to:
+
+.. code-block:: python
+    :linenos:
+
+    attack = PeprAttackPlaceholder(...)
+    attack.run(param1=1, param2="example", param3="You got it!")
+
+``run_args`` is optional and available for every attack. The arguments that can be
+passed depend on the chosen attack, please read its documentation.
+In the Adversarial Robustness Toolbox (ART) for example, the maximum number of
+iterations of the ``PixelAttack`` is passed as an argument to the ``generate()``
+function. Below is an example configuration of the ``PixelAttack`` using
+``run_args``.
+
+Example 2:
+
+.. code-block:: yaml
+    :linenos:
+
+    attack_pars:
+    - attack_type: "ART_PixelAttack"
+      attack_alias: "PixelAttack"
+      path_to_dataset_data: "datasets/mnist_data.npy"
+      path_to_dataset_labels: "datasets/mnist_labels.npy"
+      target_model_paths:
+      - "data/target_model"
+      run_args:
+      - max_iter: 20
       # ... attack dependent keys
 
 Attack Dependent Keys

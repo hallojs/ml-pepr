@@ -177,6 +177,11 @@ def run_attacks(yaml_path, attack_obj_save_path, functions):
             attack_alias = yaml_attack_pars["attack_alias"]
             del yaml_attack_pars_rem["attack_alias"]
 
+            # Handle run arguments
+            kwargs = {}
+            if "run_args" in yaml_attack_pars_rem:
+                kwargs = yaml_attack_pars_rem["run_args"][0]
+
             # Add remaining plaintext parameters
             del yaml_attack_pars_rem["attack_type"]
             attack_pars.update(yaml_attack_pars_rem)
@@ -195,12 +200,12 @@ def run_attacks(yaml_path, attack_obj_save_path, functions):
                 )
 
                 logger.info("Running attack.")
-                attack.run()
+                attack.run(**kwargs)
                 logger.debug("Serialize attack object.")
                 pickle_attack_obj(attack)
             except Exception as e:
                 logger.error(e)
-                #traceback.print_exception(type(e), e, e.__traceback__)
+                # traceback.print_exception(type(e), e, e.__traceback__)
 
     return attack_object_paths
 
