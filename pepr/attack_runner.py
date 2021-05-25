@@ -117,6 +117,7 @@ def run_attacks(yaml_path, attack_obj_save_path, functions):
         "ART_UniversalPerturbation": art_wrapper.UniversalPerturbation,
         "ART_VirtualAdversarialMethod": art_wrapper.VirtualAdversarialMethod,
         "ART_ZooAttack": art_wrapper.ZooAttack,
+        "ART_AdversarialPatch": art_wrapper.AdversarialPatch,
     }
 
     attack_object_paths = {}

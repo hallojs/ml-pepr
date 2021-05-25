@@ -453,6 +453,13 @@ descriptions = {
         "arXiv:1708.03999. "
         "Attack implementation provided by the Adversarial Robustness Toolbox (ART)."
     ),
+    "ART_AdversarialPatch": (
+        "Implementation of the adversarial patch attack for square and rectangular "
+        "images and videos. "
+        "Reference: Tom B. Brown, Dandelion Mané, Aurko Roy, Martín Abadi, Justin "
+        "Gilmer, “Adversarial Patch” (2018). arXiv preprint arXiv:1712.09665. "
+        "Attack implementation provided by the Adversarial Robustness Toolbox (ART)."
+    ),
 }
 
 

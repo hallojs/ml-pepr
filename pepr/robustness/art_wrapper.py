@@ -7,7 +7,7 @@ import os
 from pepr.attack import Attack
 from pepr import report
 import matplotlib.pyplot as plt
-from pylatex import Command, Tabular, MiniPage
+from pylatex import Command, Tabular, MiniPage, NoEscape
 from pylatex.section import Subsubsection
 
 import art
@@ -121,6 +121,10 @@ class BaseEvasionAttack(Attack):
             Dataset slice with true labels to attack the corresponding target model.
         kwargs :
             Additional parameters for the `generate` function of the attack.
+
+        Returns
+        -------
+        An array holding the adversarial examples.
         """
         if labels is not None:
             return self.art_attacks[attack_index].generate(data, labels, **kwargs)
@@ -315,6 +319,456 @@ class BaseEvasionAttack(Attack):
                 self.report_section.append(
                     Command("captionof", "table", extra_arguments="Attack Summary")
                 )
+
+
+class BasePatchAttack(Attack):
+    """
+    Base ART attack class implementing the logic for creating an adversarial patch,
+    applying them to generate adversarial examples and generating a report.
+
+    Parameters
+    ----------
+    attack_alias : str
+        Alias for a specific instantiation of the class.
+    data : numpy.ndarray
+        Dataset with all input images used to attack the target models.
+    labels : numpy.ndarray
+        Array of all labels used to attack the target models.
+    attack_indices_per_target : numpy.ndarray
+        Array of indices to attack per target model.
+    target_models : iterable
+        List of target models which should be tested.
+    art_attacks : list(art.attacks.Attack)
+        List of ART attack objects per target model which are wrapped in this class.
+    pars_descriptors : dict
+        Dictionary of attack parameters and their description shown in the attack
+        report.
+        Example: {"norm": "Adversarial perturbation norm"} for the attribute named
+        "norm" of FastGradientMethod.
+
+    Attributes
+    ----------
+    attack_alias : str
+        Alias for a specific instantiation of the class.
+    data : numpy.ndarray
+        Dataset with all training samples used in the given pentesting setting.
+    labels : numpy.ndarray
+        Array of all labels used in the given pentesting setting.
+    target_models : iterable
+        List of target models which should be tested.
+    attack_indices_per_target : numpy.ndarray
+        Array of indices to attack per target model.
+    art_attacks : list(art.attacks.Attack)
+        List of ART attack objects per target model which are wrapped in this class.
+    pars_descriptors : dict
+        Dictionary of attack parameters and their description shown in the attack
+        report.
+        Example: {"norm": "Adversarial perturbation norm"} for the attribute named
+        "norm" of FastGradientMethod.
+    attack_results : dict
+        Dictionary storing the attack model results.
+
+        * adversarial_examples (list): Array of adversarial examples per target model.
+        * success_rate (list): Percentage of misclassified adversarial examples
+          per target model.
+        * l2_distance (list): Euclidean distance (L2 norm) between original and
+          perturbed images per target model.
+    """
+
+    def __init__(
+        self,
+        attack_alias,
+        data,
+        labels,
+        attack_indices_per_target,
+        target_models,
+        art_attacks,
+        pars_descriptors,
+    ):
+        super().__init__(
+            attack_alias,
+            {},
+            data,
+            labels,
+            {"attack_indices_per_target": attack_indices_per_target},
+            target_models,
+        )
+
+        self.attack_indices_per_target = attack_indices_per_target
+        self.art_attacks = art_attacks
+        self.pars_descriptors = pars_descriptors
+        self.classifiers = [x.estimator for x in art_attacks]
+
+    def art_run(self, attack_index, data, labels, kwargs_gen, kwargs_apply):
+        """
+        Generate patches and apply them to the given images.
+
+        Parameters
+        ----------
+        attack_index : int
+            Index of the corresponding target model.
+        data : numpy.ndarray
+            Dataset slice containing images to attack the corresponding target model.
+        labels : numpy.ndarray
+            Dataset slice with true labels to attack the corresponding target model.
+        kwargs_gen :
+            Additional parameters for the `generate` function of the attack.
+        kwargs_apply :
+            Additional parameters for the `apply_patch` function of the attack.
+
+        Returns
+        -------
+        An array holding the adversarial examples.
+        """
+        if kwargs_gen is None:
+            patch, p_mask = self.art_attacks[attack_index].generate(data, labels)
+        else:
+            patch, p_mask = self.art_attacks[attack_index].generate(
+                data, labels, **kwargs_gen
+            )
+        self.attack_results["patch"].append(patch)
+        self.attack_results["mask"].append(p_mask)
+
+        if kwargs_apply is None:
+            return self.art_attacks[attack_index].apply_patch(data)
+        else:
+            return self.art_attacks[attack_index].apply_patch(data, **kwargs_apply)
+
+    def run(self, kwargs_gen=None, kwargs_apply=None):
+        """
+        Run the ART attack.
+
+        Parameters
+        ----------
+        kwargs_gen :
+            Additional parameters for the `generate` function of the attack.
+        kwargs_apply :
+            Additional parameters for the `apply_patch` function of the attack.
+        """
+        adv_list = []
+        misclass_list = []
+        l2_dist_list = []
+
+        self.attack_results["patch"] = []
+        self.attack_results["mask"] = []
+
+        if kwargs_gen is not None:
+            self.kwargs_gen.update(kwargs_gen)
+        if kwargs_apply is not None:
+            self.kwargs_apply.update(kwargs_apply)
+
+        # Run attack for every target model
+        for i, art_attack in enumerate(self.art_attacks):
+            logger.info(f"Attack target model ({i + 1}/{len(self.art_attacks)}).")
+            data = self.data[self.attack_indices_per_target[i]]
+            labels = self.labels[self.attack_indices_per_target[i]]
+
+            adv = self.art_run(i, data, labels, self.kwargs_gen, self.kwargs_apply)
+            adv_list.append(adv)
+
+            # Calculate accuracy on adversarial examples
+            _, accuracy = self.target_models[i].evaluate(adv, labels)
+
+            # Calculate L2 distance of adversarial examples
+            l2_dist = np.linalg.norm(adv - data)
+
+            misclass_list.append(1 - accuracy)
+            l2_dist_list.append(l2_dist)
+
+        self.attack_results["adversarial_examples"] = adv_list
+        self.attack_results["success_rate"] = misclass_list
+        self.attack_results["l2_distance"] = l2_dist_list
+
+        # Print every epsilon result of attack
+        def _target_model_rows():
+            string = ""
+            for tm_i in range(len(self.target_models)):
+                string = string + f"\n{f'Target Model {tm_i + 1}:':<20}"
+                string = (
+                    string
+                    + f"{str(round(self.attack_results['success_rate'][tm_i], 3)):>10}"
+                    + f"{str(round(self.attack_results['l2_distance'][tm_i], 3)):>10}"
+                )
+            return string
+
+        logger.info(
+            "Attack Summary"
+            f"\n"
+            f"\n###################### Attack Results ######################"
+            f"\n"
+            + f"\n{'Target Models':<20}{'Success':>10}{'Distance':>10}"
+            + _target_model_rows()
+        )
+
+    def create_attack_report(self, save_path="art_report", pdf=False):
+        """
+        Create an attack report just for the given attack instantiation.
+
+        Parameters
+        ----------
+        save_path : str
+            Path to save the tex, pdf and asset files of the attack report.
+        pdf : bool
+            If set, generate pdf out of latex file.
+        """
+
+        # Create directory structure for the attack report, including the figure
+        # directory for the figures of the results subsubsection.
+        os.makedirs(save_path + "/fig", exist_ok=True)
+
+        self.create_attack_section(save_path)
+        report.report_generator(save_path, [self.report_section], pdf)
+
+    def create_attack_section(self, save_path):
+        """
+        Create an attack section for the given attack instantiation.
+
+        Parameters
+        ----------
+        save_path : str
+            Path to save the tex, pdf and asset files of the attack report.
+        """
+        self._report_attack_configuration()
+        self._report_attack_results(save_path)
+
+    def _report_attack_configuration(self):
+        """Create subsubsection about the attack and data configuration."""
+        # Create tables for attack parameters and the data configuration.
+        tm = 0  # Specify target model
+
+        def gen_attack_pars_rows(table):
+            for key in self.pars_descriptors:
+                desc = self.pars_descriptors[key]
+                if key == "targeted":
+                    key = "_targeted"
+                elif key == "verbose":
+                    continue
+                elif key.startswith("gen_"):
+                    key = key.replace("gen_", "", 1)
+                elif key.startswith("apply_"):
+                    key = key.replace("apply_", "", 1)
+                try:
+                    value = str(self.art_attacks[tm].__dict__[key])
+                except KeyError:
+                    value = str(self.art_attacks[tm]._attack.__dict__[key])
+
+                table.add_hline()
+                table.add_row([desc, value])
+
+        dc = self.data_conf
+        self.report_section.append(Subsubsection("Attack Details"))
+        with self.report_section.create(MiniPage()):
+            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+                # -- Create table for the attack parameters.
+                self.report_section.append(Command("centering"))
+                with self.report_section.create(Tabular("|l|c|")) as tab_ap:
+                    gen_attack_pars_rows(tab_ap)
+                    tab_ap.add_hline()
+                self.report_section.append(Command("captionsetup", "labelformat=empty"))
+                self.report_section.append(
+                    Command(
+                        "captionof",
+                        "table",
+                        extra_arguments="Attack parameters",
+                    )
+                )
+
+            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+                # -- Create table for the data configuration
+                self.report_section.append(Command("centering"))
+                nr_targets, target_attack_set_size = dc[
+                    "attack_indices_per_target"
+                ].shape
+                with self.report_section.create(Tabular("|l|c|")) as tab_dc:
+                    tab_dc.add_hline()
+                    tab_dc.add_row(["Attacked target models", nr_targets])
+                    tab_dc.add_hline()
+                    tab_dc.add_row(
+                        ["Target model's attack sets size", target_attack_set_size]
+                    )
+                    tab_dc.add_hline()
+                self.report_section.append(Command("captionsetup", "labelformat=empty"))
+                self.report_section.append(
+                    Command(
+                        "captionof",
+                        "table",
+                        extra_arguments="Target and Data Configuration",
+                    )
+                )
+
+    def _report_attack_results(self, save_path):
+        """
+        Create subsubsection describing the most important results of the attack.
+
+        Parameters
+        ----------
+        save_path :
+            Path to save the tex, pdf and asset files of the attack report.
+
+        This subsection contains results only for the first target model.
+        """
+        tm = 0  # Specify target model
+        self.report_section.append(Subsubsection("Attack Results"))
+        res = self.attack_results
+
+        fig = plt.figure()
+        plt.imshow(self.attack_results["patch"][tm][:, :, 0])
+        alias_no_spaces = str.replace(self.attack_alias, " ", "_")
+        fig.savefig(save_path + f"/fig/{alias_no_spaces}-patch.pdf")
+        plt.close(fig)
+
+        with self.report_section.create(MiniPage()):
+            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+                self.report_section.append(Command("centering"))
+                self.report_section.append(
+                    Command(
+                        "includegraphics",
+                        NoEscape(f"fig/{alias_no_spaces}-patch.pdf"),
+                        "width=8cm",
+                    )
+                )
+                self.report_section.append(Command("captionsetup", "labelformat=empty"))
+                self.report_section.append(
+                    Command(
+                        "captionof",
+                        "figure",
+                        extra_arguments="Epsilon-Misclassification-Rate Graph",
+                    )
+                )
+
+            # Result table
+            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+                self.report_section.append(Command("centering"))
+
+                with self.report_section.create(Tabular("|l|c|")) as result_tab:
+                    result_tab.add_hline()
+                    result_tab.add_row(
+                        ["Success Rate", round(res["success_rate"][tm], 3)]
+                    )
+                    result_tab.add_hline()
+                    result_tab.add_row(
+                        ["L2 Distance", round(res["l2_distance"][tm], 3)]
+                    )
+                    result_tab.add_hline()
+
+                self.report_section.append(Command("captionsetup", "labelformat=empty"))
+                self.report_section.append(
+                    Command("captionof", "table", extra_arguments="Attack Summary")
+                )
+
+
+class AdversarialPatch(BasePatchAttack):
+    """
+    art.attacks.evasion.AdversarialPatch wrapper class.
+
+    Attack description:
+    Implementation of the adversarial patch attack for square and rectangular images and
+    videos.
+
+    Paper link: https://arxiv.org/abs/1712.09665
+
+    Parameters
+    ----------
+    attack_alias : str
+        Alias for a specific instantiation of the class.
+    attack_pars : dict
+        Dictionary containing all needed attack parameters:
+
+        * rotation_max (float): (optional) The maximum rotation applied to random
+          patches. The value is expected to be in the range [0, 180].
+        * scale_min (float): (optional) The minimum scaling applied to random patches.
+          The value should be in the range [0, 1], but less than scale_max.
+        * scale_max (float): (optional) The maximum scaling applied to random patches.
+          The value should be in the range [0, 1], but larger than scale_min.
+        * learning_rate (float): (optional) The learning rate of the optimization.
+        * max_iter (int): (optional) The number of optimization steps.
+        * batch_size (int): (optional) The size of the training batch.
+        * patch_shape: (optional) The shape of the adversarial patch as a tuple of shape
+          (width, height, nb_channels). Currently only supported for
+          TensorFlowV2Classifier. For classifiers of other frameworks the patch_shape is
+          set to the shape of the input samples.
+        * verbose (bool): (optional) Show progress bars.
+        * gen_mask (numpy.ndarray): (optional) A boolean array of shape equal to the
+          shape of a single samples (1, H, W) or the shape of x (N, H, W) without their
+          channel dimensions. Any features for which the mask is True can be the center
+          location of the patch during sampling.
+        * gen_reset_patch (bool): (optional) If True reset patch to initial values of
+          mean of minimal and maximal clip value, else if False (default) restart from
+          previous patch values created by previous call to generate or mean of minimal
+          and maximal clip value if first call to generate.
+        * apply_scale (float): Scale of the applied patch in relation to the classifier
+          input shape.
+        * apply_patch_external: (optional) External patch to apply to the images.
+
+    data : numpy.ndarray
+        Dataset with all input images used to attack the target models.
+    labels : numpy.ndarray
+        Array of all labels used to attack the target models.
+    data_conf : dict
+        Dictionary describing for every target model which record-indices should be used
+        for the attack.
+
+        * attack_indices_per_target (numpy.ndarray): Array of indices of images to
+          attack per target model.
+
+    target_models : iterable
+        List of target models which should be tested.
+    """
+
+    def __init__(
+        self, attack_alias, attack_pars, data, labels, data_conf, target_models
+    ):
+        pars_descriptors = {
+            "rotation_max": "Max. rotation",
+            "scale_min": "Min. scaling",
+            "scale_max": "Max. scaling",
+            "learning_rate": "Learning rate",
+            "max_iter": "Max. iterations",
+            "batch_size": "Batch size",
+            "patch_shape": "Patch shape",
+            "verbose": "Verbose output",
+        }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+
+        self.kwargs_gen = {}
+        gp = ["gen_mask", "gen_reset_patch"]
+        for p in gp:
+            if p in attack_pars:
+                short_p = p.replace("gen_", "", 1)
+                self.kwargs_gen[short_p] = attack_pars[p]
+
+        self.kwargs_apply = {}
+        ap = ["apply_scale", "apply_patch_external"]
+        for p in ap:
+            if p in attack_pars:
+                short_p = p.replace("apply_", "", 1)
+                self.kwargs_apply[short_p] = attack_pars[p]
+
+        art_attacks = []
+        for target_model in target_models:
+            est = KerasClassifier(target_model, clip_values=(0, 1))
+            art_attacks.append(art.attacks.evasion.AdversarialPatch(est, **params))
+
+        super().__init__(
+            attack_alias,
+            data,
+            labels,
+            data_conf["attack_indices_per_target"],
+            target_models,
+            art_attacks,
+            pars_descriptors,
+        )
+
+        self.report_section = report.ReportSection(
+            "Adversarial Patch",
+            self.attack_alias,
+            "ART_AdversarialPatch",
+        )
 
 
 class FastGradientMethod(BaseEvasionAttack):
