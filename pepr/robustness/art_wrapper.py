@@ -632,7 +632,7 @@ class BasePatchAttack(Attack):
                     Command(
                         "captionof",
                         "figure",
-                        extra_arguments="Epsilon-Misclassification-Rate Graph",
+                        extra_arguments="Adversarial Patch",
                     )
                 )
 
