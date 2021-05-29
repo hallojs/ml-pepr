@@ -1169,6 +1169,7 @@ class BrendelBethgeAttack(BaseEvasionAttack):
     https://github.com/bethgelab/foolbox/blob/master/foolbox/attacks/brendel_bethge.py.
 
     Implementation differs from the attack used in the paper in two ways:
+
     * The initial binary search is always using the full 10 steps (for ease of
       implementation).
     * The adaptation of the trust region over the course of optimisation is less
@@ -2833,8 +2834,8 @@ class UniversalPerturbation(BaseEvasionAttack):
         Dictionary containing all needed attack parameters:
 
         * attacker (str): (optional) Adversarial attack name. Adversarial attack name.
-        Default is 'deepfool'. Supported names: 'carlini', 'carlini_inf', 'deepfool',
-        'fgsm', 'bim', 'pgd', 'margin', 'ead', 'newtonfool', 'jsma', 'vat', 'simba'.
+          Default is 'deepfool'. Supported names: 'carlini', 'carlini_inf', 'deepfool',
+          'fgsm', 'bim', 'pgd', 'margin', 'ead', 'newtonfool', 'jsma', 'vat', 'simba'.
         * attacker_params: (optional) Parameters specific to the adversarial attack. If
           this parameter is not specified, the default parameters of the chosen attack
           will be used.

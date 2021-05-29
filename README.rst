@@ -67,6 +67,8 @@ PePR offers the following attacks:
 +------------------------------------------------------------+------------------------+--------------+
 | [3]_ Foolbox Attacks                                       | Robustness             | |nb2|_       |
 +------------------------------------------------------------+------------------------+--------------+
+| [4]_ Adversarial Robustness Toolbox (ART) Attacks          | Robustness             | |nb3|_       |
++------------------------------------------------------------+------------------------+--------------+
 
 .. |nb0| image:: https://colab.research.google.com/assets/colab-badge.svg
 .. _nb0: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/mia_tutorial.ipynb
@@ -76,6 +78,9 @@ PePR offers the following attacks:
 
 .. |nb2| image:: https://colab.research.google.com/assets/colab-badge.svg
 .. _nb2: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/foolbox_tutorial.ipynb
+
+.. |nb3| image:: https://colab.research.google.com/assets/colab-badge.svg
+.. _nb3: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/art_tutorial.ipynb
 
 License
 -------
@@ -93,3 +98,6 @@ References
 
 .. [3] `Foolbox <https://github.com/bethgelab/foolbox>`_: A Python toolbox to create adversarial examples that fool
     neural networks in PyTorch, TensorFlow, and JAX.
+
+.. [4] `ART <https://github.com/Trusted-AI/adversarial-robustness-toolbox>`_: Adversarial Robustness Toolbox (ART)
+    - Python Library for Machine Learning Security - Evasion, Poisoning, Extraction, Inference - Red and Blue Teams

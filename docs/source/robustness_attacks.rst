@@ -6,3 +6,4 @@ Robustness Attacks
    :caption: Contents:
 
    foolbox_wrapper
+   art_wrapper
