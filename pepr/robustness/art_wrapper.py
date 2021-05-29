@@ -33,7 +33,8 @@ class BaseEvasionAttack(Attack):
     attack_alias : str
         Alias for a specific instantiation of the class.
     use_labels : bool
-        If true, the true labels are used as targets.
+        If true, the true labels are passed to the generate function. Set true if
+        `targeted` is true for a targeted attack.
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
     labels : numpy.ndarray
@@ -55,7 +56,8 @@ class BaseEvasionAttack(Attack):
     attack_alias : str
         Alias for a specific instantiation of the class.
     use_labels : bool
-        If true, the true labels are used as targets.
+        If true, the true labels are passed to the generate function. Set true if
+        `targeted` is true for a targeted attack.
     data : numpy.ndarray
         Dataset with all training samples used in the given pentesting setting.
     labels : numpy.ndarray
@@ -801,7 +803,8 @@ class FastGradientMethod(BaseEvasionAttack):
         * minimal (bool): (optional) Indicates if computing the minimal perturbation
           (True). If True, also define eps_step for the step size and eps for the
           maximum perturbation.
-        * use_labels (bool): (optional) If true, the true labels are used as targets.
+        * use_labels (bool): (optional) If true, the true labels are passed to the
+          attack as target labels.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -894,7 +897,8 @@ class AutoAttack(BaseEvasionAttack):
         * attacks (bool): (optional) The list of art.attacks.EvasionAttack attacks to be
           used for AutoAttack. If it is None or empty the standard attacks (PGD,
           APGD-ce, APGD-dlr, DeepFool, Square) will be used.
-        * use_labels (bool): (optional) If true, the true labels are used as targets.
+        * use_labels (bool): (optional) If true, the true labels are passed to the
+          attack as target labels.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -988,7 +992,8 @@ class AutoProjectedGradientDescent(BaseEvasionAttack):
         * loss_type: Defines the loss to attack. Available options: None (Use loss
           defined by estimator), "cross_entropy", or "difference_logits_ratio".
         * verbose (bool): (optional) Show progress bars.
-        * use_labels (bool): (optional) If true, the true labels are used as targets.
+        * use_labels (bool): (optional) If true, the true labels are passed to the
+          attack as target labels.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1087,7 +1092,8 @@ class BoundaryAttack(BaseEvasionAttack):
         * min_epsilon (float): (optional) Stop attack if perturbation is smaller than
           min_epsilon.
         * verbose (bool): (optional) Show progress bars.
-        * use_labels (bool): (optional) If true, the true labels are used as targets.
+        * use_labels (bool): (optional) If true, the true labels are passed to the
+          attack as target labels.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1207,7 +1213,8 @@ class BrendelBethgeAttack(BaseEvasionAttack):
           predictions and gradients.
         * init_size (int): (optional) Maximum number of random search steps to find
           initial adversarial example.
-        * use_labels (bool): (optional) If true, the true labels are used as targets.
+        * use_labels (bool): (optional) If true, the true labels are passed to the
+          attack as target labels.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1341,7 +1348,8 @@ class CarliniL2Method(BaseEvasionAttack):
         * batch_size (int): (optional) Size of the batch on which adversarial samples
           are generated.
         * verbose (bool): (optional) Show progress bars.
-        * use_labels (bool): (optional) If true, the true labels are used as targets.
+        * use_labels (bool): (optional) If true, the true labels are passed to the
+          attack as target labels.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1438,7 +1446,8 @@ class CarliniLInfMethod(BaseEvasionAttack):
         * batch_size (int): (optional) Size of the batch on which adversarial samples
           are generated.
         * verbose (bool): (optional) Show progress bars.
-        * use_labels (bool): (optional) If true, the true labels are used as targets.
+        * use_labels (bool): (optional) If true, the true labels are passed to the
+          attack as target labels.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1526,7 +1535,8 @@ class DeepFool(BaseEvasionAttack):
           speeding up the computation.
         * batch_size (int): (optional) Batch size
         * verbose (bool): (optional) Show progress bars.
-        * use_labels (bool): (optional) If true, the true labels are used as targets.
+        * use_labels (bool): (optional) If true, the true labels are passed to the
+          attack as target labels.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1623,7 +1633,8 @@ class ElasticNet(BaseEvasionAttack):
         * decision_rule (str): (optional) Decision rule. ‘EN’ means Elastic Net rule,
           'L1' means L1 rule, 'L2' means L2 rule.
         * verbose (bool): (optional) Show progress bars.
-        * use_labels (bool): (optional) If true, the true labels are used as targets.
+        * use_labels (bool): (optional) If true, the true labels are passed to the
+          attack as target labels.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1708,7 +1719,8 @@ class FeatureAdversaries(BaseEvasionAttack):
         * delta: (optional) The maximum deviation between source and guide images.
         * layer: (optional) Index of the representation layer.
         * batch_size (int): (optional) Batch size.
-        * use_labels (bool): (optional) If true, the true labels are used as targets.
+        * use_labels (bool): (optional) If true, the true labels are passed to the
+          attack as target labels.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1885,7 +1897,8 @@ class HopSkipJump(BaseEvasionAttack):
         * init_size (int): (optional) Maximum number of trials for initial generation of
           adversarial examples.
         * verbose (bool): (optional) Show progress bars.
-        * use_labels (bool): (optional) If true, the true labels are used as targets.
+        * use_labels (bool): (optional) If true, the true labels are passed to the
+          attack as target labels.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -1972,7 +1985,8 @@ class BasicIterativeMethod(BaseEvasionAttack):
           untargeted (False).
         * batch_size (int): (optional) Size of the batch on which adversarial samples
           are generated.
-        * use_labels (bool): (optional) If true, the true labels are used as targets.
+        * use_labels (bool): (optional) If true, the true labels are passed to the
+          attack as target labels.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -2070,7 +2084,8 @@ class ProjectedGradientDescent(BaseEvasionAttack):
         * batch_size (int): (optional) Size of the batch on which adversarial samples
           are generated.
         * verbose (bool): (optional) Show progress bars.
-        * use_labels (bool): (optional) If true, the true labels are used as targets.
+        * use_labels (bool): (optional) If true, the true labels are passed to the
+          attack as target labels.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -2242,7 +2257,8 @@ class PixelAttack(BaseEvasionAttack):
           untargeted (False).
         * verbose (bool): (optional) Indicates whether to print verbose messages of ES
           used.
-        * use_labels (bool): (optional) If true, the true labels are used as targets.
+        * use_labels (bool): (optional) If true, the true labels are passed to the
+          attack as target labels.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -2326,7 +2342,8 @@ class ThresholdAttack(BaseEvasionAttack):
           untargeted (False).
         * verbose (bool): (optional) Indicates whether to print verbose messages of ES
           used.
-        * use_labels (bool): (optional) If true, the true labels are used as targets.
+        * use_labels (bool): (optional) If true, the true labels are passed to the
+          attack as target labels.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -2409,7 +2426,8 @@ class SaliencyMapMethod(BaseEvasionAttack):
         * batch_size (int): (optional) Size of the batch on which adversarial samples
           are generated.
         * verbose (bool): (optional) Show progress bars.
-        * use_labels (bool): (optional) If true, the true labels are used as targets.
+        * use_labels (bool): (optional) If true, the true labels are passed to the
+          attack as target labels.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -2663,7 +2681,8 @@ class SquareAttack(BaseEvasionAttack):
         * nb_restarts (int): (optional) Number of restarts.
         * batch_size (int): (optional) Batch size for estimator evaluations.
         * verbose (bool): (optional) Show progress bars.
-        * use_labels (bool): (optional) If true, the true labels are used as targets.
+        * use_labels (bool): (optional) If true, the true labels are passed to the
+          attack as target labels.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -3038,7 +3057,8 @@ class ZooAttack(BaseEvasionAttack):
         * variable_h (float): (optional) Step size for numerical estimation of
           derivatives.
         * verbose (bool): (optional) Show progress bars.
-        * use_labels (bool): (optional) If true, the true labels are used as targets.
+        * use_labels (bool): (optional) If true, the true labels are passed to the
+          attack as target labels.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
