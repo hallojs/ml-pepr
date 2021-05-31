@@ -145,7 +145,7 @@ class BaseEvasionAttack(Attack):
             Additional parameters for the `generate` function of the attack.
         """
         adv_list = []
-        missclass = []
+        misclass = []
         l2_dist_list = []
 
         # Run attack for every target model
@@ -161,27 +161,27 @@ class BaseEvasionAttack(Attack):
             adv_list.append(adv)
 
             # Calculate accuracy on adversarial examples for every class separately
-            missclass_list = []
+            misclass_list = []
             for j in range(np.max(labels) + 1):
                 indices = np.where(labels == j)
                 if indices[0].size == 0:  # numpy 1.19.5 specific
-                    missclass_list.append(np.NaN)
+                    misclass_list.append(np.NaN)
                 else:
                     _, accuracy = self.target_models[i].evaluate(
                         adv[indices], labels[indices]
                     )
-                    missclass_list.append(1 - accuracy)
+                    misclass_list.append(1 - accuracy)
 
             # Calculate L2 distance of adversarial examples
             l2_dist = np.linalg.norm(adv - data)
 
-            missclass.append(missclass_list)
+            misclass.append(misclass_list)
             l2_dist_list.append(l2_dist)
 
         self.attack_results["adversarial_examples"] = adv_list
-        self.attack_results["success_rate"] = np.nanmean(missclass, axis=1)
+        self.attack_results["success_rate"] = np.nanmean(misclass, axis=1)
         self.attack_results["l2_distance"] = l2_dist_list
-        self.attack_results["success_rate_list"] = missclass
+        self.attack_results["success_rate_list"] = misclass
 
         # Print every epsilon result of attack
         def _target_model_rows():
@@ -489,7 +489,7 @@ class BasePatchAttack(Attack):
             Additional parameters for the `apply_patch` function of the attack.
         """
         adv_list = []
-        missclass = []
+        misclass = []
         l2_dist_list = []
 
         self.attack_results["patch"] = []
@@ -510,27 +510,27 @@ class BasePatchAttack(Attack):
             adv_list.append(adv)
 
             # Calculate accuracy on adversarial examples for every class separately
-            missclass_list = []
+            misclass_list = []
             for j in range(np.max(labels) + 1):
                 indices = np.where(labels == j)
                 if indices[0].size == 0:  # numpy 1.19.5 specific
-                    missclass_list.append(np.NaN)
+                    misclass_list.append(np.NaN)
                 else:
                     _, accuracy = self.target_models[i].evaluate(
                         adv[indices], labels[indices]
                     )
-                    missclass_list.append(1 - accuracy)
+                    misclass_list.append(1 - accuracy)
 
             # Calculate L2 distance of adversarial examples
             l2_dist = np.linalg.norm(adv - data)
 
-            missclass.append(missclass_list)
+            misclass.append(misclass_list)
             l2_dist_list.append(l2_dist)
 
         self.attack_results["adversarial_examples"] = adv_list
-        self.attack_results["success_rate"] = np.mean(missclass, axis=1)
+        self.attack_results["success_rate"] = np.mean(misclass, axis=1)
         self.attack_results["l2_distance"] = l2_dist_list
-        self.attack_results["success_rate_list"] = missclass
+        self.attack_results["success_rate_list"] = misclass
 
         # Print every epsilon result of attack
         def _target_model_rows():
