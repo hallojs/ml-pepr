@@ -81,6 +81,8 @@ class BaseEvasionAttack(Attack):
           per target model.
         * l2_distance (list): Euclidean distance (L2 norm) between original and
           perturbed images per target model.
+        * success_rate_list (list): Percentage of misclassified adversarial examples
+          per target model and per class.
     """
 
     def __init__(
@@ -143,7 +145,7 @@ class BaseEvasionAttack(Attack):
             Additional parameters for the `generate` function of the attack.
         """
         adv_list = []
-        misclass_list = []
+        missclass = []
         l2_dist_list = []
 
         # Run attack for every target model
@@ -158,18 +160,28 @@ class BaseEvasionAttack(Attack):
                 adv = self.art_run(i, data, **kwargs)
             adv_list.append(adv)
 
-            # Calculate accuracy on adversarial examples
-            _, accuracy = self.target_models[i].evaluate(adv, labels)
+            # Calculate accuracy on adversarial examples for every class separately
+            missclass_list = []
+            for j in range(np.max(labels) + 1):
+                indices = np.where(labels == j)
+                if indices[0].size == 0:  # numpy 1.19.5 specific
+                    missclass_list.append(np.NaN)
+                else:
+                    _, accuracy = self.target_models[i].evaluate(
+                        adv[indices], labels[indices]
+                    )
+                    missclass_list.append(1 - accuracy)
 
             # Calculate L2 distance of adversarial examples
             l2_dist = np.linalg.norm(adv - data)
 
-            misclass_list.append(1 - accuracy)
+            missclass.append(missclass_list)
             l2_dist_list.append(l2_dist)
 
         self.attack_results["adversarial_examples"] = adv_list
-        self.attack_results["success_rate"] = misclass_list
+        self.attack_results["success_rate"] = np.nanmean(missclass, axis=1)
         self.attack_results["l2_distance"] = l2_dist_list
+        self.attack_results["success_rate_list"] = missclass
 
         # Print every epsilon result of attack
         def _target_model_rows():
@@ -298,9 +310,36 @@ class BaseEvasionAttack(Attack):
         self.report_section.append(Subsubsection("Attack Results"))
         res = self.attack_results
 
+        # Histogram
+        fig = plt.figure()
+        ax = plt.axes()
+        ax.hist(res["success_rate_list"][tm], edgecolor="black")
+        ax.set_xlabel("Accuracy")
+        ax.set_ylabel("Number of Classes")
+        ax.set_axisbelow(True)
+
+        alias_no_spaces = str.replace(self.attack_alias, " ", "_")
+        fig.savefig(save_path + f"/fig/{alias_no_spaces}-hist.pdf")
+        plt.close(fig)
+
         with self.report_section.create(MiniPage()):
             with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
-                pass  # TODO: Graph or other visualization
+                self.report_section.append(Command("centering"))
+                self.report_section.append(
+                    Command(
+                        "includegraphics",
+                        NoEscape(f"fig/{alias_no_spaces}-hist.pdf"),
+                        "width=8cm",
+                    )
+                )
+                self.report_section.append(Command("captionsetup", "labelformat=empty"))
+                self.report_section.append(
+                    Command(
+                        "captionof",
+                        "figure",
+                        extra_arguments="Success Rate Distribution",
+                    )
+                )
 
             # Result table
             with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
@@ -375,6 +414,8 @@ class BasePatchAttack(Attack):
           per target model.
         * l2_distance (list): Euclidean distance (L2 norm) between original and
           perturbed images per target model.
+        * success_rate_list (list): Percentage of misclassified adversarial examples
+          per target model and per class.
     """
 
     def __init__(
@@ -448,7 +489,7 @@ class BasePatchAttack(Attack):
             Additional parameters for the `apply_patch` function of the attack.
         """
         adv_list = []
-        misclass_list = []
+        missclass = []
         l2_dist_list = []
 
         self.attack_results["patch"] = []
@@ -468,18 +509,28 @@ class BasePatchAttack(Attack):
             adv = self.art_run(i, data, labels, self.kwargs_gen, self.kwargs_apply)
             adv_list.append(adv)
 
-            # Calculate accuracy on adversarial examples
-            _, accuracy = self.target_models[i].evaluate(adv, labels)
+            # Calculate accuracy on adversarial examples for every class separately
+            missclass_list = []
+            for j in range(np.max(labels) + 1):
+                indices = np.where(labels == j)
+                if indices[0].size == 0:  # numpy 1.19.5 specific
+                    missclass_list.append(np.NaN)
+                else:
+                    _, accuracy = self.target_models[i].evaluate(
+                        adv[indices], labels[indices]
+                    )
+                    missclass_list.append(1 - accuracy)
 
             # Calculate L2 distance of adversarial examples
             l2_dist = np.linalg.norm(adv - data)
 
-            misclass_list.append(1 - accuracy)
+            missclass.append(missclass_list)
             l2_dist_list.append(l2_dist)
 
         self.attack_results["adversarial_examples"] = adv_list
-        self.attack_results["success_rate"] = misclass_list
+        self.attack_results["success_rate"] = np.mean(missclass, axis=1)
         self.attack_results["l2_distance"] = l2_dist_list
+        self.attack_results["success_rate_list"] = missclass
 
         # Print every epsilon result of attack
         def _target_model_rows():
@@ -613,10 +664,16 @@ class BasePatchAttack(Attack):
         self.report_section.append(Subsubsection("Attack Results"))
         res = self.attack_results
 
+        # Histogram
         fig = plt.figure()
-        plt.imshow(self.attack_results["patch"][tm][:, :, 0])
+        ax = plt.axes()
+        ax.hist(res["success_rate_list"][tm], edgecolor="black")
+        ax.set_xlabel("Accuracy")
+        ax.set_ylabel("Number of Classes")
+        ax.set_axisbelow(True)
+
         alias_no_spaces = str.replace(self.attack_alias, " ", "_")
-        fig.savefig(save_path + f"/fig/{alias_no_spaces}-patch.pdf")
+        fig.savefig(save_path + f"/fig/{alias_no_spaces}-hist.pdf")
         plt.close(fig)
 
         with self.report_section.create(MiniPage()):
@@ -625,7 +682,7 @@ class BasePatchAttack(Attack):
                 self.report_section.append(
                     Command(
                         "includegraphics",
-                        NoEscape(f"fig/{alias_no_spaces}-patch.pdf"),
+                        NoEscape(f"fig/{alias_no_spaces}-hist.pdf"),
                         "width=8cm",
                     )
                 )
@@ -634,7 +691,7 @@ class BasePatchAttack(Attack):
                     Command(
                         "captionof",
                         "figure",
-                        extra_arguments="Adversarial Patch",
+                        extra_arguments="Success Rate Distribution",
                     )
                 )
 
