@@ -79,8 +79,8 @@ class BaseEvasionAttack(Attack):
         * adversarial_examples (list): Array of adversarial examples per target model.
         * success_rate (list): Percentage of misclassified adversarial examples
           per target model.
-        * l2_distance (list): Euclidean distance (L2 norm) between original and
-          perturbed images per target model.
+        * avg_l2_distance (list): Average euclidean distance (L2 norm) between original
+          and perturbed images per target model.
         * success_rate_list (list): Percentage of misclassified adversarial examples
           per target model and per class.
     """
@@ -173,14 +173,18 @@ class BaseEvasionAttack(Attack):
                     misclass_list.append(1 - accuracy)
 
             # Calculate L2 distance of adversarial examples
-            l2_dist = np.linalg.norm(adv - data)
+            raw_diff = adv - data
+            raw_diff = raw_diff.reshape(
+                raw_diff.shape[0], raw_diff.shape[1] * raw_diff.shape[2]
+            )
+            l2_dist = np.mean(np.linalg.norm(raw_diff, axis=-1))
 
             misclass.append(misclass_list)
             l2_dist_list.append(l2_dist)
 
         self.attack_results["adversarial_examples"] = adv_list
         self.attack_results["success_rate"] = np.nanmean(misclass, axis=1)
-        self.attack_results["l2_distance"] = l2_dist_list
+        self.attack_results["avg_l2_distance"] = l2_dist_list
         self.attack_results["success_rate_list"] = misclass
 
         # Print every epsilon result of attack
@@ -191,7 +195,7 @@ class BaseEvasionAttack(Attack):
                 string = (
                     string
                     + f"{str(round(self.attack_results['success_rate'][tm_i], 3)):>10}"
-                    + f"{str(round(self.attack_results['l2_distance'][tm_i], 3)):>10}"
+                    + f"{str(round(self.attack_results['avg_l2_distance'][tm_i], 3)):>10}"
                 )
             return string
 
@@ -352,7 +356,7 @@ class BaseEvasionAttack(Attack):
                     )
                     result_tab.add_hline()
                     result_tab.add_row(
-                        ["L2 Distance", round(res["l2_distance"][tm], 3)]
+                        ["L2 Distance", round(res["avg_l2_distance"][tm], 3)]
                     )
                     result_tab.add_hline()
 
@@ -412,8 +416,8 @@ class BasePatchAttack(Attack):
         * adversarial_examples (list): Array of adversarial examples per target model.
         * success_rate (list): Percentage of misclassified adversarial examples
           per target model.
-        * l2_distance (list): Euclidean distance (L2 norm) between original and
-          perturbed images per target model.
+        * avg_l2_distance (list): Average euclidean distance (L2 norm) between original
+          and perturbed images per target model.
         * success_rate_list (list): Percentage of misclassified adversarial examples
           per target model and per class.
     """
@@ -522,14 +526,18 @@ class BasePatchAttack(Attack):
                     misclass_list.append(1 - accuracy)
 
             # Calculate L2 distance of adversarial examples
-            l2_dist = np.linalg.norm(adv - data)
+            raw_diff = adv - data
+            raw_diff = raw_diff.reshape(
+                raw_diff.shape[0], raw_diff.shape[1] * raw_diff.shape[2]
+            )
+            l2_dist = np.mean(np.linalg.norm(raw_diff, axis=-1))
 
             misclass.append(misclass_list)
             l2_dist_list.append(l2_dist)
 
         self.attack_results["adversarial_examples"] = adv_list
         self.attack_results["success_rate"] = np.mean(misclass, axis=1)
-        self.attack_results["l2_distance"] = l2_dist_list
+        self.attack_results["avg_l2_distance"] = l2_dist_list
         self.attack_results["success_rate_list"] = misclass
 
         # Print every epsilon result of attack
@@ -540,7 +548,7 @@ class BasePatchAttack(Attack):
                 string = (
                     string
                     + f"{str(round(self.attack_results['success_rate'][tm_i], 3)):>10}"
-                    + f"{str(round(self.attack_results['l2_distance'][tm_i], 3)):>10}"
+                    + f"{str(round(self.attack_results['avg_l2_distance'][tm_i], 3)):>10}"
                 )
             return string
 
@@ -706,7 +714,7 @@ class BasePatchAttack(Attack):
                     )
                     result_tab.add_hline()
                     result_tab.add_row(
-                        ["L2 Distance", round(res["l2_distance"][tm], 3)]
+                        ["L2 Distance", round(res["avg_l2_distance"][tm], 3)]
                     )
                     result_tab.add_hline()
 
