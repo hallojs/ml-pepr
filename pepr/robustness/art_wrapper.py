@@ -1,13 +1,14 @@
 """PePR wrapper classes for ART attack classes."""
 
 import logging
+
 import numpy as np
 import os
 
 from pepr.attack import Attack
 from pepr import report
 import matplotlib.pyplot as plt
-from pylatex import Command, Tabular, MiniPage, NoEscape
+from pylatex import Command, Tabular, MiniPage, NoEscape, Figure
 from pylatex.section import Subsubsection
 
 import art
@@ -83,6 +84,8 @@ class BaseEvasionAttack(Attack):
           and perturbed images per target model.
         * success_rate_list (list): Percentage of misclassified adversarial examples
           per target model and per class.
+        * l2_distance (list): Euclidean distance (L2 norm) between original
+          and perturbed images for every image per target model.
     """
 
     def __init__(
@@ -146,7 +149,8 @@ class BaseEvasionAttack(Attack):
         """
         adv_list = []
         misclass = []
-        l2_dist_list = []
+        l2_dist = []
+        l2_dist_avg = []
 
         # Run attack for every target model
         for i, art_attack in enumerate(self.art_attacks):
@@ -160,10 +164,14 @@ class BaseEvasionAttack(Attack):
                 adv = self.art_run(i, data, **kwargs)
             adv_list.append(adv)
 
-            # Calculate accuracy on adversarial examples for every class separately
             misclass_list = []
+            l2_dist_list = []
+            raw_diff = adv - data
+            raw_diff = raw_diff.reshape(raw_diff.shape[0], -1)
             for j in range(np.max(labels) + 1):
                 indices = np.where(labels == j)
+
+                # Calculate accuracy on adversarial examples for every class separately
                 if indices[0].size == 0:  # numpy 1.19.5 specific
                     misclass_list.append(np.NaN)
                 else:
@@ -172,20 +180,23 @@ class BaseEvasionAttack(Attack):
                     )
                     misclass_list.append(1 - accuracy)
 
-            # Calculate L2 distance of adversarial examples
-            raw_diff = adv - data
-            raw_diff = raw_diff.reshape(
-                raw_diff.shape[0], raw_diff.shape[1] * raw_diff.shape[2]
-            )
-            l2_dist = np.mean(np.linalg.norm(raw_diff, axis=-1))
+                # Calculate L2 distance of adversarial examples
+                if indices[0].size == 0:  # numpy 1.19.5 specific
+                    l2_dist_list.append(np.NaN)
+                else:
+                    l2_dist_list.append(np.linalg.norm(raw_diff[indices], axis=-1))
+
+            l2_dist_avg_list = np.mean(np.linalg.norm(raw_diff, axis=-1))
 
             misclass.append(misclass_list)
-            l2_dist_list.append(l2_dist)
+            l2_dist_avg.append(l2_dist_avg_list)
+            l2_dist.append(l2_dist_list)
 
         self.attack_results["adversarial_examples"] = adv_list
         self.attack_results["success_rate"] = np.nanmean(misclass, axis=1)
-        self.attack_results["avg_l2_distance"] = l2_dist_list
+        self.attack_results["avg_l2_distance"] = l2_dist_avg
         self.attack_results["success_rate_list"] = misclass
+        self.attack_results["l2_distance"] = l2_dist
 
         # Print every epsilon result of attack
         def _target_model_rows():
@@ -365,6 +376,122 @@ class BaseEvasionAttack(Attack):
                     Command("captionof", "table", extra_arguments="Attack Summary")
                 )
 
+        self._plot_most_vulnerable_aes(save_path, tm, 10)
+        with self.report_section.create(Figure(position="H")) as fig:
+            fig.add_image(
+                f"fig/{alias_no_spaces}-examples.pdf",
+                width=NoEscape(r"\textwidth")
+            )
+            self.report_section.append(Command("captionsetup", "labelformat=empty"))
+            self.report_section.append(
+                Command(
+                    "captionof",
+                    "figure",
+                    extra_arguments="Adversarial Examples",
+                )
+            )
+
+    def _plot_most_vulnerable_aes(self, save_path, target_model_index, count):
+        """
+        Plot most vulnerable adversarial examples.
+
+        Parameters
+        ----------
+        target_model_index : int
+            Index of the target model of the adversarial examples.
+        count : int
+            Number of adversarial examples to display. If `count` lower or equal than
+            the number of classes, the most vulnerable images of the most vulnerable
+            classes are plotted (0-1 per class). If `count` greater than the number of
+            classes, starting by the class with the most vulnerable image one image is
+            plotted until `count` images were plotted (`count/nb_classes` to
+            `count/nb_classes + 1` per class).
+        """
+
+        def argsort_by_nth_element(arr, n):
+            nth = []
+            nan_count = 0
+            for i in range(len(arr)):
+                if arr[i] is np.NaN or len(arr[i]) <= n:
+                    nth.append(np.NaN)
+                    nan_count = nan_count + 1
+                else:
+                    nth.append(arr[i][n])
+
+            if nan_count == 0:
+                return np.argsort(nth)
+            else:
+                return np.argsort(nth)[:-nan_count]
+
+        adv_data = self.attack_results["adversarial_examples"][target_model_index]
+        labels = self.labels[self.attack_indices_per_target[target_model_index]]
+        nb_classes = np.max(labels) + 1
+
+        adv = []
+        dists = []
+        true_labels = []
+        predicted_labels = []
+
+        for l in range(nb_classes):
+            indices = np.where(labels == l)
+            if indices[0].size == 0:  # numpy 1.19.5 specific
+                adv.append(np.NaN)
+                dists.append(np.NaN)
+                true_labels.append(np.NaN)
+                predicted_labels.append(np.NaN)
+                continue
+            class_data = adv_data[indices]
+            class_labels = labels[indices]
+            class_dist = self.attack_results["l2_distance"][target_model_index][l]
+            sort_idxs = np.argsort(class_dist)
+
+            pred = self.target_models[target_model_index].predict(class_data)
+
+            adv.append(class_data[sort_idxs])
+            dists.append(class_dist[sort_idxs])
+            true_labels.append(class_labels[sort_idxs])
+            predicted_labels.append(pred[sort_idxs])
+
+        idx = 0
+        plot_count = 0
+        fig, axes = plt.subplots(ncols=min(count, len(labels)), figsize=(15, 5))
+        while plot_count < count:
+            cls = argsort_by_nth_element(dists, idx)
+            if len(cls) == 0:
+                break
+            for c in cls:
+                if len(adv[c]) > idx:
+                    image = adv[c][idx]
+                    logger.debug(f"Image: {plot_count}")
+                    logger.debug(f"True Label: {true_labels[c][idx]}")
+                    logger.debug(
+                        f"Prediction Label: {np.argmax(predicted_labels[c][idx])}"
+                    )
+                    logger.debug(f"Distance: {dists[c][idx]}")
+                    ax = axes[plot_count]
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+                    # ax.axis("off")
+                    ax.set_xlabel(
+                        f"Original: {true_labels[c][idx]}\n" +
+                        f"Predicted: {np.argmax(predicted_labels[c][idx])}\n" +
+                        f"Dist.: {str(round(dists[c][idx], 3))}"
+                    )
+                    if image.shape[-1] == 1:
+                        ax.imshow(image[:, :, 0])
+                    else:
+                        ax.imshow(image)
+                    plot_count = plot_count + 1
+                    if plot_count >= count:
+                        break
+            idx = idx + 1
+
+        alias_no_spaces = str.replace(self.attack_alias, " ", "_")
+        fig.savefig(
+            save_path + f"/fig/{alias_no_spaces}-examples.pdf", bbox_inches="tight"
+        )
+        plt.close(fig)
+
 
 class BasePatchAttack(Attack):
     """
@@ -420,6 +547,8 @@ class BasePatchAttack(Attack):
           and perturbed images per target model.
         * success_rate_list (list): Percentage of misclassified adversarial examples
           per target model and per class.
+        * l2_distance (list): Euclidean distance (L2 norm) between original
+          and perturbed images for every image per target model.
     """
 
     def __init__(
@@ -494,7 +623,8 @@ class BasePatchAttack(Attack):
         """
         adv_list = []
         misclass = []
-        l2_dist_list = []
+        l2_dist = []
+        l2_dist_avg = []
 
         self.attack_results["patch"] = []
         self.attack_results["mask"] = []
@@ -513,10 +643,14 @@ class BasePatchAttack(Attack):
             adv = self.art_run(i, data, labels, self.kwargs_gen, self.kwargs_apply)
             adv_list.append(adv)
 
-            # Calculate accuracy on adversarial examples for every class separately
             misclass_list = []
+            l2_dist_list = []
+            raw_diff = adv - data
+            raw_diff = raw_diff.reshape(raw_diff.shape[0], -1)
             for j in range(np.max(labels) + 1):
                 indices = np.where(labels == j)
+
+                # Calculate accuracy on adversarial examples for every class separately
                 if indices[0].size == 0:  # numpy 1.19.5 specific
                     misclass_list.append(np.NaN)
                 else:
@@ -525,20 +659,23 @@ class BasePatchAttack(Attack):
                     )
                     misclass_list.append(1 - accuracy)
 
-            # Calculate L2 distance of adversarial examples
-            raw_diff = adv - data
-            raw_diff = raw_diff.reshape(
-                raw_diff.shape[0], raw_diff.shape[1] * raw_diff.shape[2]
-            )
-            l2_dist = np.mean(np.linalg.norm(raw_diff, axis=-1))
+                # Calculate L2 distance of adversarial examples
+                if indices[0].size == 0:  # numpy 1.19.5 specific
+                    l2_dist_list.append(np.NaN)
+                else:
+                    l2_dist_list.append(np.linalg.norm(raw_diff[indices], axis=-1))
+
+            l2_dist_avg_list = np.mean(np.linalg.norm(raw_diff, axis=-1))
 
             misclass.append(misclass_list)
-            l2_dist_list.append(l2_dist)
+            l2_dist_avg.append(l2_dist_avg_list)
+            l2_dist.append(l2_dist_list)
 
         self.attack_results["adversarial_examples"] = adv_list
-        self.attack_results["success_rate"] = np.mean(misclass, axis=1)
-        self.attack_results["avg_l2_distance"] = l2_dist_list
+        self.attack_results["success_rate"] = np.nanmean(misclass, axis=1)
+        self.attack_results["avg_l2_distance"] = l2_dist_avg
         self.attack_results["success_rate_list"] = misclass
+        self.attack_results["l2_distance"] = l2_dist
 
         # Print every epsilon result of attack
         def _target_model_rows():
@@ -722,6 +859,122 @@ class BasePatchAttack(Attack):
                 self.report_section.append(
                     Command("captionof", "table", extra_arguments="Attack Summary")
                 )
+        self._plot_most_vulnerable_aes(save_path, tm, 10)
+        with self.report_section.create(Figure(position="H")) as fig:
+            fig.add_image(
+                f"fig/{alias_no_spaces}-examples.pdf",
+                width=NoEscape(r"\textwidth")
+            )
+            self.report_section.append(Command("captionsetup", "labelformat=empty"))
+            self.report_section.append(
+                Command(
+                    "captionof",
+                    "figure",
+                    extra_arguments="Adversarial Examples",
+                )
+            )
+
+    def _plot_most_vulnerable_aes(self, save_path, target_model_index, count):
+        """
+        Plot most vulnerable adversarial examples.
+
+        Parameters
+        ----------
+        target_model_index : int
+            Index of the target model of the adversarial examples.
+        count : int
+            Number of adversarial examples to display. If `count` lower or equal than
+            the number of classes, the most vulnerable images of the most vulnerable
+            classes are plotted (0-1 per class). If `count` greater than the number of
+            classes, starting by the class with the most vulnerable image one image is
+            plotted until `count` images were plotted (`count/nb_classes` to
+            `count/nb_classes + 1` per class).
+        """
+
+        def argsort_by_nth_element(arr, n):
+            nth = []
+            nan_count = 0
+            for i in range(len(arr)):
+                if arr[i] is np.NaN or len(arr[i]) <= n:
+                    nth.append(np.NaN)
+                    nan_count = nan_count + 1
+                else:
+                    nth.append(arr[i][n])
+
+            if nan_count == 0:
+                return np.argsort(nth)
+            else:
+                return np.argsort(nth)[:-nan_count]
+
+        adv_data = self.attack_results["adversarial_examples"][target_model_index]
+        labels = self.labels[self.attack_indices_per_target[target_model_index]]
+        nb_classes = np.max(labels) + 1
+
+        adv = []
+        dists = []
+        true_labels = []
+        predicted_labels = []
+
+        for l in range(nb_classes):
+            indices = np.where(labels == l)
+            if indices[0].size == 0:  # numpy 1.19.5 specific
+                adv.append(np.NaN)
+                dists.append(np.NaN)
+                true_labels.append(np.NaN)
+                predicted_labels.append(np.NaN)
+                continue
+            class_data = adv_data[indices]
+            class_labels = labels[indices]
+            class_dist = self.attack_results["l2_distance"][target_model_index][l]
+            sort_idxs = np.argsort(class_dist)
+
+            pred = self.target_models[target_model_index].predict(class_data)
+
+            adv.append(class_data[sort_idxs])
+            dists.append(class_dist[sort_idxs])
+            true_labels.append(class_labels[sort_idxs])
+            predicted_labels.append(pred[sort_idxs])
+
+        idx = 0
+        plot_count = 0
+        fig, axes = plt.subplots(ncols=min(count, len(labels)), figsize=(15, 5))
+        while plot_count < count:
+            cls = argsort_by_nth_element(dists, idx)
+            if len(cls) == 0:
+                break
+            for c in cls:
+                if len(adv[c]) > idx:
+                    image = adv[c][idx]
+                    logger.debug(f"Image: {plot_count}")
+                    logger.debug(f"True Label: {true_labels[c][idx]}")
+                    logger.debug(
+                        f"Prediction Label: {np.argmax(predicted_labels[c][idx])}"
+                    )
+                    logger.debug(f"Distance: {dists[c][idx]}")
+                    ax = axes[plot_count]
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+                    # ax.axis("off")
+                    ax.set_xlabel(
+                        f"Original: {true_labels[c][idx]}\n" +
+                        f"Predicted: {np.argmax(predicted_labels[c][idx])}\n" +
+                        f"Dist.: {str(round(dists[c][idx], 3))}"
+                    )
+                    if image.shape[-1] == 1:
+                        ax.imshow(image[:, :, 0])
+                    else:
+                        ax.imshow(image)
+                    plot_count = plot_count + 1
+                    if plot_count >= count:
+                        break
+            idx = idx + 1
+
+        alias_no_spaces = str.replace(self.attack_alias, " ", "_")
+        fig.savefig(
+            save_path + f"/fig/{alias_no_spaces}-examples.pdf", bbox_inches="tight"
+        )
+        plt.close(fig)
+
 
 
 class AdversarialPatch(BasePatchAttack):
