@@ -1,7 +1,6 @@
 """PePR wrapper classes for ART attack classes."""
 
 import logging
-
 import numpy as np
 import os
 
@@ -22,6 +21,242 @@ plt.style.use("default")
 plt.rcParams["axes.axisbelow"] = True
 plt.rcParams["axes.grid"] = True
 plt.rcParams["grid.linestyle"] = ":"
+
+
+def _plot_most_vulnerable_aes(self, save_path, target_model_index, count):
+    """
+    Plot most vulnerable adversarial examples.
+
+    Parameters
+    ----------
+    self : BaseEvasionAttack or BasePatchAttack
+        Base attack object.
+    target_model_index : int
+        Index of the target model of the adversarial examples.
+    count : int
+        Number of adversarial examples to display. If `count` lower or equal than
+        the number of classes, the most vulnerable images of the most vulnerable
+        classes are plotted (0-1 per class). If `count` greater than the number of
+        classes, starting by the class with the most vulnerable image one image is
+        plotted until `count` images were plotted (`count/nb_classes` to
+        `count/nb_classes + 1` per class).
+    """
+
+    def argsort_by_nth_element(arr, n):
+        nth = []
+        nan_count = 0
+        for i in range(len(arr)):
+            if arr[i] is np.NaN or len(arr[i]) <= n:
+                nth.append(np.NaN)
+                nan_count = nan_count + 1
+            else:
+                nth.append(arr[i][n])
+
+        if nan_count == 0:
+            return np.argsort(nth)
+        else:
+            return np.argsort(nth)[:-nan_count]
+
+    adv_data = self.attack_results["adversarial_examples"][target_model_index]
+    labels = self.labels[self.attack_indices_per_target[target_model_index]]
+    nb_classes = np.max(labels) + 1
+
+    adv = []
+    dists = []
+    true_labels = []
+    predicted_labels = []
+
+    for l in range(nb_classes):
+        indices = np.where(labels == l)
+        if indices[0].size == 0:  # numpy 1.19.5 specific
+            adv.append(np.NaN)
+            dists.append(np.NaN)
+            true_labels.append(np.NaN)
+            predicted_labels.append(np.NaN)
+            continue
+        class_data = adv_data[indices]
+        class_labels = labels[indices]
+        class_dist = self.attack_results["l2_distance"][target_model_index][l]
+        sort_idxs = np.argsort(class_dist)
+
+        pred = self.target_models[target_model_index].predict(class_data)
+
+        adv.append(class_data[sort_idxs])
+        dists.append(class_dist[sort_idxs])
+        true_labels.append(class_labels[sort_idxs])
+        predicted_labels.append(pred[sort_idxs])
+
+    idx = 0
+    plot_count = 0
+    fig, axes = plt.subplots(ncols=min(count, len(labels)), figsize=(15, 5))
+    while plot_count < count:
+        cls = argsort_by_nth_element(dists, idx)
+        if len(cls) == 0:
+            break
+        for c in cls:
+            if len(adv[c]) > idx:
+                image = adv[c][idx]
+                logger.debug(f"Image: {plot_count}")
+                logger.debug(f"True Label: {true_labels[c][idx]}")
+                logger.debug(f"Prediction Label: {np.argmax(predicted_labels[c][idx])}")
+                logger.debug(f"Distance: {dists[c][idx]}")
+                ax = axes[plot_count]
+                ax.set_xticks([])
+                ax.set_yticks([])
+                # ax.axis("off")
+                ax.set_xlabel(
+                    f"Original: {true_labels[c][idx]}\n"
+                    + f"Predicted: {np.argmax(predicted_labels[c][idx])}\n"
+                    + f"Dist.: {str(round(dists[c][idx], 3))}"
+                )
+                if image.shape[-1] == 1:
+                    ax.imshow(image[:, :, 0])
+                else:
+                    ax.imshow(image)
+                plot_count = plot_count + 1
+                if plot_count >= count:
+                    break
+        idx = idx + 1
+
+    alias_no_spaces = str.replace(self.attack_alias, " ", "_")
+    fig.savefig(save_path + f"/fig/{alias_no_spaces}-examples.pdf", bbox_inches="tight")
+    plt.close(fig)
+
+
+def _report_attack_results(self, save_path):
+    """
+    Create subsubsection describing the most important results of the attack.
+
+    Parameters
+    ----------
+    self : BaseEvasionAttack or BasePatchAttack
+        Base attack object.
+    save_path :
+        Path to save the tex, pdf and asset files of the attack report.
+
+    This subsection contains results only for the first target model.
+    """
+    tm = 0  # Specify target model
+    self.report_section.append(Subsubsection("Attack Results"))
+    res = self.attack_results
+
+    # Histogram
+    fig = plt.figure()
+    ax = plt.axes()
+    ax.hist(res["success_rate_list"][tm], edgecolor="black")
+    ax.set_xlabel("Accuracy")
+    ax.set_ylabel("Number of Classes")
+    ax.set_axisbelow(True)
+
+    alias_no_spaces = str.replace(self.attack_alias, " ", "_")
+    fig.savefig(save_path + f"/fig/{alias_no_spaces}-hist.pdf")
+    plt.close(fig)
+
+    with self.report_section.create(MiniPage()):
+        with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+            self.report_section.append(Command("centering"))
+            self.report_section.append(
+                Command(
+                    "includegraphics",
+                    NoEscape(f"fig/{alias_no_spaces}-hist.pdf"),
+                    "width=8cm",
+                )
+            )
+            self.report_section.append(Command("captionsetup", "labelformat=empty"))
+            self.report_section.append(
+                Command(
+                    "captionof",
+                    "figure",
+                    extra_arguments="Success Rate Distribution",
+                )
+            )
+
+        # Result table
+        with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+            self.report_section.append(Command("centering"))
+
+            with self.report_section.create(Tabular("|l|c|")) as result_tab:
+                result_tab.add_hline()
+                result_tab.add_row(["Success Rate", round(res["success_rate"][tm], 3)])
+                result_tab.add_hline()
+                result_tab.add_row(
+                    ["L2 Distance", round(res["avg_l2_distance"][tm], 3)]
+                )
+                result_tab.add_hline()
+
+            self.report_section.append(Command("captionsetup", "labelformat=empty"))
+            self.report_section.append(
+                Command("captionof", "table", extra_arguments="Attack Summary")
+            )
+
+    _plot_most_vulnerable_aes(self, save_path, tm, 10)
+    with self.report_section.create(Figure(position="H")) as fig:
+        fig.add_image(
+            f"fig/{alias_no_spaces}-examples.pdf", width=NoEscape(r"\textwidth")
+        )
+        self.report_section.append(Command("captionsetup", "labelformat=empty"))
+        self.report_section.append(
+            Command(
+                "captionof",
+                "figure",
+                extra_arguments="Adversarial Examples",
+            )
+        )
+
+
+def _report_attack_configuration(self):
+    """
+    Create subsubsection about the attack and data configuration.
+
+    Parameters
+    ----------
+    self : BaseEvasionAttack or BasePatchAttack
+        Base attack object.
+    """
+    # Create tables for attack parameters and the data configuration.
+    tm = 0  # Specify target model
+
+    dc = self.data_conf
+    self.report_section.append(Subsubsection("Attack Details"))
+    with self.report_section.create(MiniPage()):
+        with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+            # -- Create table for the attack parameters.
+            self.report_section.append(Command("centering"))
+            with self.report_section.create(Tabular("|l|c|")) as tab_ap:
+                if hasattr(self, "use_labels"):
+                    tab_ap.add_hline()
+                    tab_ap.add_row(["Use true labels", self.use_labels])
+                self._gen_attack_pars_rows(tm, tab_ap)
+                tab_ap.add_hline()
+            self.report_section.append(Command("captionsetup", "labelformat=empty"))
+            self.report_section.append(
+                Command(
+                    "captionof",
+                    "table",
+                    extra_arguments="Attack parameters",
+                )
+            )
+
+        with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+            # -- Create table for the data configuration
+            self.report_section.append(Command("centering"))
+            nr_targets, target_attack_set_size = dc["attack_indices_per_target"].shape
+            with self.report_section.create(Tabular("|l|c|")) as tab_dc:
+                tab_dc.add_hline()
+                tab_dc.add_row(["Attacked target models", nr_targets])
+                tab_dc.add_hline()
+                tab_dc.add_row(
+                    ["Target model's attack sets size", target_attack_set_size]
+                )
+                tab_dc.add_hline()
+            self.report_section.append(Command("captionsetup", "labelformat=empty"))
+            self.report_section.append(
+                Command(
+                    "captionof",
+                    "table",
+                    extra_arguments="Target and Data Configuration",
+                )
+            )
 
 
 class BaseEvasionAttack(Attack):
@@ -247,250 +482,30 @@ class BaseEvasionAttack(Attack):
         save_path : str
             Path to save the tex, pdf and asset files of the attack report.
         """
-        self._report_attack_configuration()
-        self._report_attack_results(save_path)
+        _report_attack_configuration(self)
+        _report_attack_results(self, save_path)
 
-    def _report_attack_configuration(self):
-        """Create subsubsection about the attack and data configuration."""
-        # Create tables for attack parameters and the data configuration.
-        tm = 0  # Specify target model
-
-        def gen_attack_pars_rows(table):
-            for key in self.pars_descriptors:
-                desc = self.pars_descriptors[key]
-                if key == "targeted":
-                    key = "_targeted"
-                elif key == "verbose":
-                    continue
-                value = str(self.art_attacks[tm].__dict__[key])
-
-                table.add_hline()
-                table.add_row([desc, value])
-
-        dc = self.data_conf
-        self.report_section.append(Subsubsection("Attack Details"))
-        with self.report_section.create(MiniPage()):
-            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
-                # -- Create table for the attack parameters.
-                self.report_section.append(Command("centering"))
-                with self.report_section.create(Tabular("|l|c|")) as tab_ap:
-                    tab_ap.add_hline()
-                    tab_ap.add_row(["Use true labels", self.use_labels])
-                    gen_attack_pars_rows(tab_ap)
-                    tab_ap.add_hline()
-                self.report_section.append(Command("captionsetup", "labelformat=empty"))
-                self.report_section.append(
-                    Command(
-                        "captionof",
-                        "table",
-                        extra_arguments="Attack parameters",
-                    )
-                )
-
-            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
-                # -- Create table for the data configuration
-                self.report_section.append(Command("centering"))
-                nr_targets, target_attack_set_size = dc[
-                    "attack_indices_per_target"
-                ].shape
-                with self.report_section.create(Tabular("|l|c|")) as tab_dc:
-                    tab_dc.add_hline()
-                    tab_dc.add_row(["Attacked target models", nr_targets])
-                    tab_dc.add_hline()
-                    tab_dc.add_row(
-                        ["Target model's attack sets size", target_attack_set_size]
-                    )
-                    tab_dc.add_hline()
-                self.report_section.append(Command("captionsetup", "labelformat=empty"))
-                self.report_section.append(
-                    Command(
-                        "captionof",
-                        "table",
-                        extra_arguments="Target and Data Configuration",
-                    )
-                )
-
-    def _report_attack_results(self, save_path):
+    def _gen_attack_pars_rows(self, tm, table):
         """
-        Create subsubsection describing the most important results of the attack.
+        Generate LaTex table rows with fancy parameter descriptions.
 
         Parameters
         ----------
-        save_path :
-            Path to save the tex, pdf and asset files of the attack report.
-
-        This subsection contains results only for the first target model.
+        tm : int
+            Target model index.
+        table : pylatex.Tabular
+            Pylatex table in which the rows are append.
         """
-        tm = 0  # Specify target model
-        self.report_section.append(Subsubsection("Attack Results"))
-        res = self.attack_results
-
-        # Histogram
-        fig = plt.figure()
-        ax = plt.axes()
-        ax.hist(res["success_rate_list"][tm], edgecolor="black")
-        ax.set_xlabel("Accuracy")
-        ax.set_ylabel("Number of Classes")
-        ax.set_axisbelow(True)
-
-        alias_no_spaces = str.replace(self.attack_alias, " ", "_")
-        fig.savefig(save_path + f"/fig/{alias_no_spaces}-hist.pdf")
-        plt.close(fig)
-
-        with self.report_section.create(MiniPage()):
-            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
-                self.report_section.append(Command("centering"))
-                self.report_section.append(
-                    Command(
-                        "includegraphics",
-                        NoEscape(f"fig/{alias_no_spaces}-hist.pdf"),
-                        "width=8cm",
-                    )
-                )
-                self.report_section.append(Command("captionsetup", "labelformat=empty"))
-                self.report_section.append(
-                    Command(
-                        "captionof",
-                        "figure",
-                        extra_arguments="Success Rate Distribution",
-                    )
-                )
-
-            # Result table
-            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
-                self.report_section.append(Command("centering"))
-
-                with self.report_section.create(Tabular("|l|c|")) as result_tab:
-                    result_tab.add_hline()
-                    result_tab.add_row(
-                        ["Success Rate", round(res["success_rate"][tm], 3)]
-                    )
-                    result_tab.add_hline()
-                    result_tab.add_row(
-                        ["L2 Distance", round(res["avg_l2_distance"][tm], 3)]
-                    )
-                    result_tab.add_hline()
-
-                self.report_section.append(Command("captionsetup", "labelformat=empty"))
-                self.report_section.append(
-                    Command("captionof", "table", extra_arguments="Attack Summary")
-                )
-
-        self._plot_most_vulnerable_aes(save_path, tm, 10)
-        with self.report_section.create(Figure(position="H")) as fig:
-            fig.add_image(
-                f"fig/{alias_no_spaces}-examples.pdf",
-                width=NoEscape(r"\textwidth")
-            )
-            self.report_section.append(Command("captionsetup", "labelformat=empty"))
-            self.report_section.append(
-                Command(
-                    "captionof",
-                    "figure",
-                    extra_arguments="Adversarial Examples",
-                )
-            )
-
-    def _plot_most_vulnerable_aes(self, save_path, target_model_index, count):
-        """
-        Plot most vulnerable adversarial examples.
-
-        Parameters
-        ----------
-        target_model_index : int
-            Index of the target model of the adversarial examples.
-        count : int
-            Number of adversarial examples to display. If `count` lower or equal than
-            the number of classes, the most vulnerable images of the most vulnerable
-            classes are plotted (0-1 per class). If `count` greater than the number of
-            classes, starting by the class with the most vulnerable image one image is
-            plotted until `count` images were plotted (`count/nb_classes` to
-            `count/nb_classes + 1` per class).
-        """
-
-        def argsort_by_nth_element(arr, n):
-            nth = []
-            nan_count = 0
-            for i in range(len(arr)):
-                if arr[i] is np.NaN or len(arr[i]) <= n:
-                    nth.append(np.NaN)
-                    nan_count = nan_count + 1
-                else:
-                    nth.append(arr[i][n])
-
-            if nan_count == 0:
-                return np.argsort(nth)
-            else:
-                return np.argsort(nth)[:-nan_count]
-
-        adv_data = self.attack_results["adversarial_examples"][target_model_index]
-        labels = self.labels[self.attack_indices_per_target[target_model_index]]
-        nb_classes = np.max(labels) + 1
-
-        adv = []
-        dists = []
-        true_labels = []
-        predicted_labels = []
-
-        for l in range(nb_classes):
-            indices = np.where(labels == l)
-            if indices[0].size == 0:  # numpy 1.19.5 specific
-                adv.append(np.NaN)
-                dists.append(np.NaN)
-                true_labels.append(np.NaN)
-                predicted_labels.append(np.NaN)
+        for key in self.pars_descriptors:
+            desc = self.pars_descriptors[key]
+            if key == "targeted":
+                key = "_targeted"
+            elif key == "verbose":
                 continue
-            class_data = adv_data[indices]
-            class_labels = labels[indices]
-            class_dist = self.attack_results["l2_distance"][target_model_index][l]
-            sort_idxs = np.argsort(class_dist)
+            value = str(self.art_attacks[tm].__dict__[key])
 
-            pred = self.target_models[target_model_index].predict(class_data)
-
-            adv.append(class_data[sort_idxs])
-            dists.append(class_dist[sort_idxs])
-            true_labels.append(class_labels[sort_idxs])
-            predicted_labels.append(pred[sort_idxs])
-
-        idx = 0
-        plot_count = 0
-        fig, axes = plt.subplots(ncols=min(count, len(labels)), figsize=(15, 5))
-        while plot_count < count:
-            cls = argsort_by_nth_element(dists, idx)
-            if len(cls) == 0:
-                break
-            for c in cls:
-                if len(adv[c]) > idx:
-                    image = adv[c][idx]
-                    logger.debug(f"Image: {plot_count}")
-                    logger.debug(f"True Label: {true_labels[c][idx]}")
-                    logger.debug(
-                        f"Prediction Label: {np.argmax(predicted_labels[c][idx])}"
-                    )
-                    logger.debug(f"Distance: {dists[c][idx]}")
-                    ax = axes[plot_count]
-                    ax.set_xticks([])
-                    ax.set_yticks([])
-                    # ax.axis("off")
-                    ax.set_xlabel(
-                        f"Original: {true_labels[c][idx]}\n" +
-                        f"Predicted: {np.argmax(predicted_labels[c][idx])}\n" +
-                        f"Dist.: {str(round(dists[c][idx], 3))}"
-                    )
-                    if image.shape[-1] == 1:
-                        ax.imshow(image[:, :, 0])
-                    else:
-                        ax.imshow(image)
-                    plot_count = plot_count + 1
-                    if plot_count >= count:
-                        break
-            idx = idx + 1
-
-        alias_no_spaces = str.replace(self.attack_alias, " ", "_")
-        fig.savefig(
-            save_path + f"/fig/{alias_no_spaces}-examples.pdf", bbox_inches="tight"
-        )
-        plt.close(fig)
+            table.add_hline()
+            table.add_row([desc, value])
 
 
 class BasePatchAttack(Attack):
@@ -726,255 +741,37 @@ class BasePatchAttack(Attack):
         save_path : str
             Path to save the tex, pdf and asset files of the attack report.
         """
-        self._report_attack_configuration()
-        self._report_attack_results(save_path)
+        _report_attack_configuration(self)
+        _report_attack_results(self, save_path)
 
-    def _report_attack_configuration(self):
-        """Create subsubsection about the attack and data configuration."""
-        # Create tables for attack parameters and the data configuration.
-        tm = 0  # Specify target model
-
-        def gen_attack_pars_rows(table):
-            for key in self.pars_descriptors:
-                desc = self.pars_descriptors[key]
-                if key == "targeted":
-                    key = "_targeted"
-                elif key == "verbose":
-                    continue
-                elif key.startswith("gen_"):
-                    key = key.replace("gen_", "", 1)
-                elif key.startswith("apply_"):
-                    key = key.replace("apply_", "", 1)
-                try:
-                    value = str(self.art_attacks[tm].__dict__[key])
-                except KeyError:
-                    value = str(self.art_attacks[tm]._attack.__dict__[key])
-
-                table.add_hline()
-                table.add_row([desc, value])
-
-        dc = self.data_conf
-        self.report_section.append(Subsubsection("Attack Details"))
-        with self.report_section.create(MiniPage()):
-            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
-                # -- Create table for the attack parameters.
-                self.report_section.append(Command("centering"))
-                with self.report_section.create(Tabular("|l|c|")) as tab_ap:
-                    gen_attack_pars_rows(tab_ap)
-                    tab_ap.add_hline()
-                self.report_section.append(Command("captionsetup", "labelformat=empty"))
-                self.report_section.append(
-                    Command(
-                        "captionof",
-                        "table",
-                        extra_arguments="Attack parameters",
-                    )
-                )
-
-            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
-                # -- Create table for the data configuration
-                self.report_section.append(Command("centering"))
-                nr_targets, target_attack_set_size = dc[
-                    "attack_indices_per_target"
-                ].shape
-                with self.report_section.create(Tabular("|l|c|")) as tab_dc:
-                    tab_dc.add_hline()
-                    tab_dc.add_row(["Attacked target models", nr_targets])
-                    tab_dc.add_hline()
-                    tab_dc.add_row(
-                        ["Target model's attack sets size", target_attack_set_size]
-                    )
-                    tab_dc.add_hline()
-                self.report_section.append(Command("captionsetup", "labelformat=empty"))
-                self.report_section.append(
-                    Command(
-                        "captionof",
-                        "table",
-                        extra_arguments="Target and Data Configuration",
-                    )
-                )
-
-    def _report_attack_results(self, save_path):
+    def _gen_attack_pars_rows(self, tm, table):
         """
-        Create subsubsection describing the most important results of the attack.
+        Generate LaTex table rows with fancy parameter descriptions.
 
         Parameters
         ----------
-        save_path :
-            Path to save the tex, pdf and asset files of the attack report.
-
-        This subsection contains results only for the first target model.
+        tm : int
+            Target model index.
+        table : pylatex.Tabular
+            Pylatex table in which the rows are append.
         """
-        tm = 0  # Specify target model
-        self.report_section.append(Subsubsection("Attack Results"))
-        res = self.attack_results
-
-        # Histogram
-        fig = plt.figure()
-        ax = plt.axes()
-        ax.hist(res["success_rate_list"][tm], edgecolor="black")
-        ax.set_xlabel("Accuracy")
-        ax.set_ylabel("Number of Classes")
-        ax.set_axisbelow(True)
-
-        alias_no_spaces = str.replace(self.attack_alias, " ", "_")
-        fig.savefig(save_path + f"/fig/{alias_no_spaces}-hist.pdf")
-        plt.close(fig)
-
-        with self.report_section.create(MiniPage()):
-            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
-                self.report_section.append(Command("centering"))
-                self.report_section.append(
-                    Command(
-                        "includegraphics",
-                        NoEscape(f"fig/{alias_no_spaces}-hist.pdf"),
-                        "width=8cm",
-                    )
-                )
-                self.report_section.append(Command("captionsetup", "labelformat=empty"))
-                self.report_section.append(
-                    Command(
-                        "captionof",
-                        "figure",
-                        extra_arguments="Success Rate Distribution",
-                    )
-                )
-
-            # Result table
-            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
-                self.report_section.append(Command("centering"))
-
-                with self.report_section.create(Tabular("|l|c|")) as result_tab:
-                    result_tab.add_hline()
-                    result_tab.add_row(
-                        ["Success Rate", round(res["success_rate"][tm], 3)]
-                    )
-                    result_tab.add_hline()
-                    result_tab.add_row(
-                        ["L2 Distance", round(res["avg_l2_distance"][tm], 3)]
-                    )
-                    result_tab.add_hline()
-
-                self.report_section.append(Command("captionsetup", "labelformat=empty"))
-                self.report_section.append(
-                    Command("captionof", "table", extra_arguments="Attack Summary")
-                )
-        self._plot_most_vulnerable_aes(save_path, tm, 10)
-        with self.report_section.create(Figure(position="H")) as fig:
-            fig.add_image(
-                f"fig/{alias_no_spaces}-examples.pdf",
-                width=NoEscape(r"\textwidth")
-            )
-            self.report_section.append(Command("captionsetup", "labelformat=empty"))
-            self.report_section.append(
-                Command(
-                    "captionof",
-                    "figure",
-                    extra_arguments="Adversarial Examples",
-                )
-            )
-
-    def _plot_most_vulnerable_aes(self, save_path, target_model_index, count):
-        """
-        Plot most vulnerable adversarial examples.
-
-        Parameters
-        ----------
-        target_model_index : int
-            Index of the target model of the adversarial examples.
-        count : int
-            Number of adversarial examples to display. If `count` lower or equal than
-            the number of classes, the most vulnerable images of the most vulnerable
-            classes are plotted (0-1 per class). If `count` greater than the number of
-            classes, starting by the class with the most vulnerable image one image is
-            plotted until `count` images were plotted (`count/nb_classes` to
-            `count/nb_classes + 1` per class).
-        """
-
-        def argsort_by_nth_element(arr, n):
-            nth = []
-            nan_count = 0
-            for i in range(len(arr)):
-                if arr[i] is np.NaN or len(arr[i]) <= n:
-                    nth.append(np.NaN)
-                    nan_count = nan_count + 1
-                else:
-                    nth.append(arr[i][n])
-
-            if nan_count == 0:
-                return np.argsort(nth)
-            else:
-                return np.argsort(nth)[:-nan_count]
-
-        adv_data = self.attack_results["adversarial_examples"][target_model_index]
-        labels = self.labels[self.attack_indices_per_target[target_model_index]]
-        nb_classes = np.max(labels) + 1
-
-        adv = []
-        dists = []
-        true_labels = []
-        predicted_labels = []
-
-        for l in range(nb_classes):
-            indices = np.where(labels == l)
-            if indices[0].size == 0:  # numpy 1.19.5 specific
-                adv.append(np.NaN)
-                dists.append(np.NaN)
-                true_labels.append(np.NaN)
-                predicted_labels.append(np.NaN)
+        for key in self.pars_descriptors:
+            desc = self.pars_descriptors[key]
+            if key == "targeted":
+                key = "_targeted"
+            elif key == "verbose":
                 continue
-            class_data = adv_data[indices]
-            class_labels = labels[indices]
-            class_dist = self.attack_results["l2_distance"][target_model_index][l]
-            sort_idxs = np.argsort(class_dist)
+            elif key.startswith("gen_"):
+                key = key.replace("gen_", "", 1)
+            elif key.startswith("apply_"):
+                key = key.replace("apply_", "", 1)
+            try:
+                value = str(self.art_attacks[tm].__dict__[key])
+            except KeyError:
+                value = str(self.art_attacks[tm]._attack.__dict__[key])
 
-            pred = self.target_models[target_model_index].predict(class_data)
-
-            adv.append(class_data[sort_idxs])
-            dists.append(class_dist[sort_idxs])
-            true_labels.append(class_labels[sort_idxs])
-            predicted_labels.append(pred[sort_idxs])
-
-        idx = 0
-        plot_count = 0
-        fig, axes = plt.subplots(ncols=min(count, len(labels)), figsize=(15, 5))
-        while plot_count < count:
-            cls = argsort_by_nth_element(dists, idx)
-            if len(cls) == 0:
-                break
-            for c in cls:
-                if len(adv[c]) > idx:
-                    image = adv[c][idx]
-                    logger.debug(f"Image: {plot_count}")
-                    logger.debug(f"True Label: {true_labels[c][idx]}")
-                    logger.debug(
-                        f"Prediction Label: {np.argmax(predicted_labels[c][idx])}"
-                    )
-                    logger.debug(f"Distance: {dists[c][idx]}")
-                    ax = axes[plot_count]
-                    ax.set_xticks([])
-                    ax.set_yticks([])
-                    # ax.axis("off")
-                    ax.set_xlabel(
-                        f"Original: {true_labels[c][idx]}\n" +
-                        f"Predicted: {np.argmax(predicted_labels[c][idx])}\n" +
-                        f"Dist.: {str(round(dists[c][idx], 3))}"
-                    )
-                    if image.shape[-1] == 1:
-                        ax.imshow(image[:, :, 0])
-                    else:
-                        ax.imshow(image)
-                    plot_count = plot_count + 1
-                    if plot_count >= count:
-                        break
-            idx = idx + 1
-
-        alias_no_spaces = str.replace(self.attack_alias, " ", "_")
-        fig.savefig(
-            save_path + f"/fig/{alias_no_spaces}-examples.pdf", bbox_inches="tight"
-        )
-        plt.close(fig)
-
+            table.add_hline()
+            table.add_row([desc, value])
 
 
 class AdversarialPatch(BasePatchAttack):
