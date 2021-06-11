@@ -204,7 +204,11 @@ def _report_attack_results(self, save_path):
             Command(
                 "captionof",
                 "figure",
-                extra_arguments="Adversarial Examples",
+                extra_arguments="This is a small selection the of most vulnerable "
+                "adversarial examples per class. They were sorted per class by"
+                "lowest distance which changes the targets prediction. Sorting per "
+                "class for every n-th image may not give the absolut most "
+                "vulnerable records but provides the highest diversity.",
             )
         )
 
