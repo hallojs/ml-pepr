@@ -9,6 +9,7 @@ from pepr import report
 import matplotlib.pyplot as plt
 from pylatex import Command, Tabular, MiniPage, NoEscape, Figure
 from pylatex.section import Subsubsection
+from pylatex.utils import italic
 
 import art
 from art.estimators.classification import KerasClassifier
@@ -57,12 +58,14 @@ def _plot_most_vulnerable_aes(self, save_path, target_model_index, count):
         else:
             return np.argsort(nth)[:-nan_count]
 
+    org_data = self.data[self.attack_indices_per_target[target_model_index]]
     adv_data = self.attack_results["adversarial_examples"][target_model_index]
     labels = self.labels[self.attack_indices_per_target[target_model_index]]
     is_adv = self.attack_results["is_adv"][target_model_index]
     nb_classes = np.max(labels) + 1
     nb_adv = 0
 
+    data = []
     adv = []
     dists = []
     true_labels = []
@@ -76,16 +79,18 @@ def _plot_most_vulnerable_aes(self, save_path, target_model_index, count):
             predicted_labels.append(np.NaN)
             continue
         indices = np.extract(is_adv[l], np.where(labels == l))
-        class_data = adv_data[indices]
+        class_data = org_data[indices]
+        class_adv_data = adv_data[indices]
         class_labels = labels[indices]
         class_dist = np.extract(
             is_adv[l], self.attack_results["l2_distance"][target_model_index][l]
         )
         sort_idxs = np.argsort(class_dist)
 
-        pred = self.target_models[target_model_index].predict(class_data)
+        pred = self.target_models[target_model_index].predict(class_adv_data)
 
-        adv.append(class_data[sort_idxs])
+        data.append(class_data[sort_idxs])
+        adv.append(class_adv_data[sort_idxs])
         dists.append(class_dist[sort_idxs])
         true_labels.append(class_labels[sort_idxs])
         predicted_labels.append(pred[sort_idxs])
@@ -93,31 +98,41 @@ def _plot_most_vulnerable_aes(self, save_path, target_model_index, count):
 
     idx = 0
     plot_count = 0
-    fig, axes = plt.subplots(ncols=min(count, nb_adv), figsize=(15, 5))
+    ncols = min(count, nb_adv)
+    fig, axes = plt.subplots(nrows=2, ncols=ncols, figsize=(15, 5))
     while plot_count < count:
         cls = argsort_by_nth_element(dists, idx)
         if len(cls) == 0:
             break
         for c in cls:
             if len(adv[c]) > idx:
-                image = adv[c][idx]
+                image_org = data[c][idx]
+                image_adv = adv[c][idx]
                 logger.debug(f"Image: {plot_count}")
                 logger.debug(f"True Label: {true_labels[c][idx]}")
                 logger.debug(f"Prediction Label: {np.argmax(predicted_labels[c][idx])}")
                 logger.debug(f"Distance: {dists[c][idx]}")
-                ax = axes[plot_count]
+                # Plot original
+                ax = axes[0][plot_count]
                 ax.set_xticks([])
                 ax.set_yticks([])
-                # ax.axis("off")
+                ax.set_xlabel(f"Original: {true_labels[c][idx]}")
+                if image_org.shape[-1] == 1:
+                    ax.imshow(image_org[:, :, 0])
+                else:
+                    ax.imshow(image_org)
+                # Plot adversarial
+                ax = axes[1][plot_count]
+                ax.set_xticks([])
+                ax.set_yticks([])
                 ax.set_xlabel(
-                    f"Original: {true_labels[c][idx]}\n"
-                    + f"Predicted: {np.argmax(predicted_labels[c][idx])}\n"
+                    f"Predicted: {np.argmax(predicted_labels[c][idx])}\n"
                     + f"Dist.: {str(round(dists[c][idx], 3))}"
                 )
-                if image.shape[-1] == 1:
-                    ax.imshow(image[:, :, 0])
+                if image_adv.shape[-1] == 1:
+                    ax.imshow(image_adv[:, :, 0])
                 else:
-                    ax.imshow(image)
+                    ax.imshow(image_adv)
                 plot_count = plot_count + 1
                 if plot_count >= count:
                     break
@@ -204,11 +219,12 @@ def _report_attack_results(self, save_path):
             Command(
                 "captionof",
                 "figure",
-                extra_arguments="This is a small selection the of most vulnerable "
-                "adversarial examples per class. They were sorted per class by"
+                extra_arguments="This is a small selection of the most vulnerable "
+                "adversarial examples per class. They were sorted per class by "
                 "lowest distance which changes the targets prediction. Sorting per "
                 "class for every n-th image may not give the absolut most "
-                "vulnerable records but provides the highest diversity.",
+                "vulnerable records but provides the highest diversity. "
+                "(First row: Originals, second row: Adversarial examples)",
             )
         )
 
