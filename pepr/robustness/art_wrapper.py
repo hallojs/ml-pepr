@@ -25,7 +25,7 @@ plt.rcParams["grid.linestyle"] = ":"
 
 def _plot_most_vulnerable_aes(self, save_path, target_model_index, count):
     """
-    Plot most vulnerable adversarial examples.
+    Plot most vulnerable (real) adversarial examples.
 
     Parameters
     ----------
@@ -59,7 +59,9 @@ def _plot_most_vulnerable_aes(self, save_path, target_model_index, count):
 
     adv_data = self.attack_results["adversarial_examples"][target_model_index]
     labels = self.labels[self.attack_indices_per_target[target_model_index]]
+    is_adv = self.attack_results["is_adv"][target_model_index]
     nb_classes = np.max(labels) + 1
+    nb_adv = 0
 
     adv = []
     dists = []
@@ -67,16 +69,18 @@ def _plot_most_vulnerable_aes(self, save_path, target_model_index, count):
     predicted_labels = []
 
     for l in range(nb_classes):
-        indices = np.where(labels == l)
-        if indices[0].size == 0:  # numpy 1.19.5 specific
+        if is_adv[l] is np.NaN or np.count_nonzero(is_adv[l]) == 0:
             adv.append(np.NaN)
             dists.append(np.NaN)
             true_labels.append(np.NaN)
             predicted_labels.append(np.NaN)
             continue
+        indices = np.extract(is_adv[l], np.where(labels == l))
         class_data = adv_data[indices]
         class_labels = labels[indices]
-        class_dist = self.attack_results["l2_distance"][target_model_index][l]
+        class_dist = np.extract(
+            is_adv[l], self.attack_results["l2_distance"][target_model_index][l]
+        )
         sort_idxs = np.argsort(class_dist)
 
         pred = self.target_models[target_model_index].predict(class_data)
@@ -85,10 +89,11 @@ def _plot_most_vulnerable_aes(self, save_path, target_model_index, count):
         dists.append(class_dist[sort_idxs])
         true_labels.append(class_labels[sort_idxs])
         predicted_labels.append(pred[sort_idxs])
+        nb_adv = nb_adv + len(sort_idxs)
 
     idx = 0
     plot_count = 0
-    fig, axes = plt.subplots(ncols=min(count, len(labels)), figsize=(15, 5))
+    fig, axes = plt.subplots(ncols=min(count, nb_adv), figsize=(15, 5))
     while plot_count < count:
         cls = argsort_by_nth_element(dists, idx)
         if len(cls) == 0:
@@ -386,6 +391,7 @@ class BaseEvasionAttack(Attack):
         misclass = []
         l2_dist = []
         l2_dist_avg = []
+        is_adv = []
 
         # Run attack for every target model
         for i, art_attack in enumerate(self.art_attacks):
@@ -401,19 +407,23 @@ class BaseEvasionAttack(Attack):
 
             misclass_list = []
             l2_dist_list = []
+            is_adv_list = []
             raw_diff = adv - data
             raw_diff = raw_diff.reshape(raw_diff.shape[0], -1)
             for j in range(np.max(labels) + 1):
                 indices = np.where(labels == j)
 
-                # Calculate accuracy on adversarial examples for every class separately
+                # Find real adversarial examples and calculate accuracy on adversarial
+                # examples for every class separately
                 if indices[0].size == 0:  # numpy 1.19.5 specific
+                    is_adv_list.append(np.NaN)
                     misclass_list.append(np.NaN)
                 else:
-                    _, accuracy = self.target_models[i].evaluate(
-                        adv[indices], labels[indices]
-                    )
-                    misclass_list.append(1 - accuracy)
+                    p = self.target_models[i].predict(adv[indices])
+                    p = np.argmax(p, axis=1)
+                    p = np.not_equal(p, labels[indices])
+                    is_adv_list.append(p)
+                    misclass_list.append(1 - np.mean(p))
 
                 # Calculate L2 distance of adversarial examples
                 if indices[0].size == 0:  # numpy 1.19.5 specific
@@ -426,9 +436,11 @@ class BaseEvasionAttack(Attack):
             misclass.append(misclass_list)
             l2_dist_avg.append(l2_dist_avg_list)
             l2_dist.append(l2_dist_list)
+            is_adv.append(is_adv_list)
 
         self.attack_results["adversarial_examples"] = adv_list
         self.attack_results["success_rate"] = np.nanmean(misclass, axis=1)
+        self.attack_results["is_adv"] = is_adv
         self.attack_results["avg_l2_distance"] = l2_dist_avg
         self.attack_results["success_rate_list"] = misclass
         self.attack_results["l2_distance"] = l2_dist
@@ -640,6 +652,7 @@ class BasePatchAttack(Attack):
         misclass = []
         l2_dist = []
         l2_dist_avg = []
+        is_adv = []
 
         self.attack_results["patch"] = []
         self.attack_results["mask"] = []
@@ -660,19 +673,23 @@ class BasePatchAttack(Attack):
 
             misclass_list = []
             l2_dist_list = []
+            is_adv_list = []
             raw_diff = adv - data
             raw_diff = raw_diff.reshape(raw_diff.shape[0], -1)
             for j in range(np.max(labels) + 1):
                 indices = np.where(labels == j)
 
-                # Calculate accuracy on adversarial examples for every class separately
+                # Find real adversarial examples and calculate accuracy on adversarial
+                # examples for every class separately
                 if indices[0].size == 0:  # numpy 1.19.5 specific
+                    is_adv_list.append(np.NaN)
                     misclass_list.append(np.NaN)
                 else:
-                    _, accuracy = self.target_models[i].evaluate(
-                        adv[indices], labels[indices]
-                    )
-                    misclass_list.append(1 - accuracy)
+                    p = self.target_models[i].predict(adv[indices])
+                    p = np.argmax(p, axis=1)
+                    p = np.not_equal(p, labels[indices])
+                    is_adv_list.append(p)
+                    misclass_list.append(1 - np.mean(p))
 
                 # Calculate L2 distance of adversarial examples
                 if indices[0].size == 0:  # numpy 1.19.5 specific
@@ -685,9 +702,11 @@ class BasePatchAttack(Attack):
             misclass.append(misclass_list)
             l2_dist_avg.append(l2_dist_avg_list)
             l2_dist.append(l2_dist_list)
+            is_adv.append(is_adv_list)
 
         self.attack_results["adversarial_examples"] = adv_list
         self.attack_results["success_rate"] = np.nanmean(misclass, axis=1)
+        self.attack_results["is_adv"] = is_adv
         self.attack_results["avg_l2_distance"] = l2_dist_avg
         self.attack_results["success_rate_list"] = misclass
         self.attack_results["l2_distance"] = l2_dist
