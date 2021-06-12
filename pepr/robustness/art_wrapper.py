@@ -9,7 +9,6 @@ from pepr import report
 import matplotlib.pyplot as plt
 from pylatex import Command, Tabular, MiniPage, NoEscape, Figure
 from pylatex.section import Subsubsection
-from pylatex.utils import italic
 
 import art
 from art.estimators.classification import KerasClassifier
@@ -73,6 +72,7 @@ def _plot_most_vulnerable_aes(self, save_path, target_model_index, count):
 
     for l in range(nb_classes):
         if is_adv[l] is np.NaN or np.count_nonzero(is_adv[l]) == 0:
+            data.append(np.NaN)
             adv.append(np.NaN)
             dists.append(np.NaN)
             true_labels.append(np.NaN)
