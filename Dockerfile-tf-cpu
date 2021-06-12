@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:2.4.1
+FROM tensorflow/tensorflow:2.5.0
 
 WORKDIR /home/pepr
 COPY . .
