@@ -12,7 +12,7 @@ import yaml
 
 from pepr import report
 from pepr.privacy import mia, gmia
-from pepr.robustness import foolbox_wrapper
+from pepr.robustness import foolbox_wrapper, art_wrapper
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -92,6 +92,32 @@ def run_attacks(yaml_path, attack_obj_save_path, functions):
         "L1BrendelBethgeAttack": foolbox_wrapper.L1BrendelBethgeAttack,
         "L2BrendelBethgeAttack": foolbox_wrapper.L2BrendelBethgeAttack,
         "LinfinityBrendelBethgeAttack": foolbox_wrapper.LinfinityBrendelBethgeAttack,
+        "ART_FastGradientMethod": art_wrapper.FastGradientMethod,
+        "ART_AutoAttack": art_wrapper.AutoAttack,
+        "ART_AutoProjectedGradientDescent": art_wrapper.AutoProjectedGradientDescent,
+        "ART_BoundaryAttack": art_wrapper.BoundaryAttack,
+        "ART_BrendelBethgeAttack": art_wrapper.BrendelBethgeAttack,
+        "ART_CarliniL2Method": art_wrapper.CarliniL2Method,
+        "ART_CarliniLInfMethod": art_wrapper.CarliniLInfMethod,
+        "ART_DeepFool": art_wrapper.DeepFool,
+        "ART_ElasticNet": art_wrapper.ElasticNet,
+        "ART_FeatureAdversaries": art_wrapper.FeatureAdversaries,
+        "ART_FrameSaliencyAttack": art_wrapper.FrameSaliencyAttack,
+        "ART_HopSkipJump": art_wrapper.HopSkipJump,
+        "ART_BasicIterativeMethod": art_wrapper.BasicIterativeMethod,
+        "ART_ProjectedGradientDescent": art_wrapper.ProjectedGradientDescent,
+        "ART_NewtonFool": art_wrapper.NewtonFool,
+        "ART_PixelAttack": art_wrapper.PixelAttack,
+        "ART_ThresholdAttack": art_wrapper.ThresholdAttack,
+        "ART_SaliencyMapMethod": art_wrapper.SaliencyMapMethod,
+        "ART_SimBA": art_wrapper.SimBA,
+        "ART_SpatialTransformation": art_wrapper.SpatialTransformation,
+        "ART_SquareAttack": art_wrapper.SquareAttack,
+        "ART_TargetedUniversalPerturbation": art_wrapper.TargetedUniversalPerturbation,
+        "ART_UniversalPerturbation": art_wrapper.UniversalPerturbation,
+        "ART_VirtualAdversarialMethod": art_wrapper.VirtualAdversarialMethod,
+        "ART_ZooAttack": art_wrapper.ZooAttack,
+        "ART_AdversarialPatch": art_wrapper.AdversarialPatch,
     }
 
     attack_object_paths = {}
@@ -152,6 +178,11 @@ def run_attacks(yaml_path, attack_obj_save_path, functions):
             attack_alias = yaml_attack_pars["attack_alias"]
             del yaml_attack_pars_rem["attack_alias"]
 
+            # Handle run arguments
+            kwargs = {}
+            if "run_args" in yaml_attack_pars_rem:
+                kwargs = yaml_attack_pars_rem["run_args"][0]
+
             # Add remaining plaintext parameters
             del yaml_attack_pars_rem["attack_type"]
             attack_pars.update(yaml_attack_pars_rem)
@@ -159,19 +190,23 @@ def run_attacks(yaml_path, attack_obj_save_path, functions):
             logger.info(f"Attack alias: {yaml_attack_pars['attack_alias']}")
             logger.debug(f"attack_pars = {attack_pars}")
             logger.debug(f"data_conf = {data_conf}")
-            attack = attack_constructor_map[attack_type](
-                attack_alias,
-                attack_pars,
-                data,
-                labels,
-                data_conf,
-                target_models,
-            )
+            try:
+                attack = attack_constructor_map[attack_type](
+                    attack_alias,
+                    attack_pars,
+                    data,
+                    labels,
+                    data_conf,
+                    target_models,
+                )
 
-            logger.info("Running attack.")
-            attack.run()
-            logger.debug("Serialize attack object.")
-            pickle_attack_obj(attack)
+                logger.info("Running attack.")
+                attack.run(**kwargs)
+                logger.debug("Serialize attack object.")
+                pickle_attack_obj(attack)
+            except Exception as e:
+                logger.error(e)
+                # traceback.print_exception(type(e), e, e.__traceback__)
 
     return attack_object_paths
 
@@ -194,6 +229,7 @@ def create_report(attack_object_paths, save_path, pdf=False):
     os.makedirs(save_path + "/fig", exist_ok=True)
     sections = []
     for key, attack_obj_path in attack_object_paths.items():
+        logger.debug(f"Try loading {key}")
         with open(attack_obj_path, "rb") as f_obj:
             attack = pickle.load(f_obj)
 
