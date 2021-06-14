@@ -489,6 +489,10 @@ class BaseAttack(Attack):
         """
         Create subsubsection describing the most important results of the attack.
 
+        Note: If only one epsilon is given, a histogram is generated showing the
+        distribution of the success rate over the classes. If multiple epsilons are
+        given, a Epsilon-Misclassification is generated.
+
         Parameters
         ----------
         save_path :
@@ -500,23 +504,49 @@ class BaseAttack(Attack):
         self.report_section.append(Subsubsection("Attack Results"))
         res = self.attack_results
 
-        # Epsilon-Misclassification graph
+        path = ""
+        title = ""
+        alias_no_spaces = str.replace(self.attack_alias, " ", "_")
         epsilons = np.array(self.epsilons)
         misclass = np.array(res["success_rate"][tm])
         dist = np.array(res["avg_l2_distance"][tm])
 
-        sort_idx = np.argsort(epsilons)
-        fig = plt.figure()
-        ax = plt.axes()
         if len(epsilons) > 1:
-            ax.plot(epsilons[sort_idx], misclass[sort_idx])
+            # Epsilon-Misclassification graph
+            title = "Epsilon-Misclassification-Rate"
+            path = f"fig/{alias_no_spaces}-epsilon_misclass_graph.pdf"
+
+            sort_idx = np.argsort(epsilons)
+            fig = plt.figure()
+            ax = plt.axes()
+            if len(epsilons) > 1:
+                ax.plot(epsilons[sort_idx], misclass[sort_idx])
+            else:
+                ax.plot(epsilons[sort_idx], misclass[sort_idx], "o")
+            ax.set_xlabel("Epsilon")
+            ax.set_ylabel("Misclassification Rate")
+            fig.savefig(save_path + f"/{path}")
+            plt.close(fig)
         else:
-            ax.plot(epsilons[sort_idx], misclass[sort_idx], "o")
-        ax.set_xlabel("Epsilon")
-        ax.set_ylabel("Misclassification Rate")
-        alias_no_spaces = str.replace(self.attack_alias, " ", "_")
-        fig.savefig(save_path + f"/fig/{alias_no_spaces}-epsilon_misclass_graph.pdf")
-        plt.close(fig)
+            # Histogram
+            misclass_class = []
+            labels = self.labels[self.attack_indices_per_target[tm]]
+            is_adv_eps = self.attack_results["is_adv"][tm][0].numpy()
+            for c in range(np.max(labels) + 1):
+                class_idx = np.where(labels == c)
+                misclass_class.append(np.mean(is_adv_eps[class_idx]))
+
+            fig = plt.figure()
+            ax = plt.axes()
+            ax.hist(misclass_class, edgecolor="black")
+            ax.set_xlabel("Accuracy")
+            ax.set_ylabel("Number of Classes")
+            ax.set_axisbelow(True)
+
+            path = f"fig/{alias_no_spaces}-hist.pdf"
+            title = "Success Rate Distribution"
+            fig.savefig(save_path + f"/{path}")
+            plt.close(fig)
 
         with self.report_section.create(MiniPage()):
             with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
@@ -524,7 +554,7 @@ class BaseAttack(Attack):
                 self.report_section.append(
                     Command(
                         "includegraphics",
-                        NoEscape(f"fig/{alias_no_spaces}-epsilon_misclass_graph.pdf"),
+                        NoEscape(path),
                         "width=8cm",
                     )
                 )
@@ -533,7 +563,7 @@ class BaseAttack(Attack):
                     Command(
                         "captionof",
                         "figure",
-                        extra_arguments="Epsilon-Misclassification-Rate Graph",
+                        extra_arguments=title,
                     )
                 )
 
