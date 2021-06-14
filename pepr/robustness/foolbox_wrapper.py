@@ -542,8 +542,8 @@ class BaseAttack(Attack):
                 self.report_section.append(Command("centering"))
 
                 if len(epsilons) > 1:
-                    worst_epsilon = np.argmin(epsilons)
-                    best_epsilon = np.argmax(epsilons)
+                    worst_epsilon = np.argmin(misclass)
+                    best_epsilon = np.argmax(misclass)
                     with self.report_section.create(Tabular("|l|c|c|")) as result_tab:
                         result_tab.add_hline()
                         result_tab.add_row(
@@ -551,7 +551,11 @@ class BaseAttack(Attack):
                         )
                         result_tab.add_hline()
                         result_tab.add_row(
-                            ["Epsilon", epsilons[worst_epsilon], epsilons[best_epsilon]]
+                            [
+                                "Epsilon",
+                                round(epsilons[worst_epsilon], 4),
+                                round(epsilons[best_epsilon], 4),
+                            ]
                         )
                         result_tab.add_hline()
                         result_tab.add_row(
