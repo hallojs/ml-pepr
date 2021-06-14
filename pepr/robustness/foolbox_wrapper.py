@@ -190,8 +190,8 @@ class BaseAttack(Attack):
             # Calculate average distance of adversarial examples
             dist_eps = []
             avg_dist_eps = []
-            for i in range(len(self.epsilons)):
-                d = fb.distances.l2(inputs_t, clipped[i]).numpy()
+            for e in range(len(self.epsilons)):
+                d = fb.distances.l2(inputs_t, clipped[e]).numpy()
                 avg_dist_eps.append(d.mean())
                 dist_eps_class = []
                 for c in range(np.max(self.labels[indices]) + 1):
@@ -219,11 +219,11 @@ class BaseAttack(Attack):
                 for item in arr:
                     string = string + f"{round(item, 3):>10}"
             else:
-                for i in range(5):
-                    string = string + f"{round(arr[i], 3):>10}"
+                for t in range(5):
+                    string = string + f"{round(arr[t], 3):>10}"
                 string = string + f"{'...':>10}"
-                for i in range(-5, 0):
-                    string = string + f"{round(arr[i], 3):>10}"
+                for t in range(-5, 0):
+                    string = string + f"{round(arr[t], 3):>10}"
             return string
 
         # Print every epsilon result of attack
@@ -504,8 +504,6 @@ class BaseAttack(Attack):
         self.report_section.append(Subsubsection("Attack Results"))
         res = self.attack_results
 
-        path = ""
-        title = ""
         alias_no_spaces = str.replace(self.attack_alias, " ", "_")
         epsilons = np.array(self.epsilons)
         misclass = np.array(res["success_rate"][tm])
@@ -640,10 +638,10 @@ class BaseAttack(Attack):
                     "captionof",
                     "figure",
                     extra_arguments="This is a small selection of the most vulnerable "
-                    "adversarial examples per class and of the the epsilon with the "
-                    "highest success rate. They were sorted per class by "
-                    "lowest distance which changes the targets prediction. Sorting per "
-                    "class for every n-th image may not give the absolut most "
+                    "adversarial examples per class and of the epsilon with the "
+                    "highest success rate. They were sorted per class by the lowest "
+                    "distance which changes the target's prediction. Sorting per "
+                    "class for every n-th image may not give the absolute most "
                     "vulnerable records but provides the highest diversity. "
                     "(First row: Originals, second row: Adversarial examples)",
                 )
@@ -2765,7 +2763,7 @@ class BinarizationRefinementAttack(BaseAttack):
 
         self.starting_points = attack_pars["starting_points"]
 
-    def foolbox_run(self, fmodel, inputs_t, criterion_t, epsilons):
+    def foolbox_run(self, fmodel, inputs_t, criterion_t, epsilons, **kwargs):
         """
         Run Foolbox attack with starting points.
 

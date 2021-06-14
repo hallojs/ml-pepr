@@ -220,9 +220,9 @@ def _report_attack_results(self, save_path):
                 "captionof",
                 "figure",
                 extra_arguments="This is a small selection of the most vulnerable "
-                "adversarial examples per class. They were sorted per class by "
-                "lowest distance which changes the targets prediction. Sorting per "
-                "class for every n-th image may not give the absolut most "
+                "adversarial examples per class. They were sorted per class by the "
+                "lowest distance which changes the target's prediction. Sorting per "
+                "class for every n-th image may not give the absolute most "
                 "vulnerable records but provides the highest diversity. "
                 "(First row: Originals, second row: Adversarial examples)",
             )
