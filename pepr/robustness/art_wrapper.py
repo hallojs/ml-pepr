@@ -220,9 +220,9 @@ def _report_attack_results(self, save_path):
                 "captionof",
                 "figure",
                 extra_arguments="This is a small selection of the most vulnerable "
-                "adversarial examples per class. They were sorted per class by "
-                "lowest distance which changes the targets prediction. Sorting per "
-                "class for every n-th image may not give the absolut most "
+                "adversarial examples per class. They were sorted per class by the "
+                "lowest distance which changes the target's prediction. Sorting per "
+                "class for every n-th image may not give the absolute most "
                 "vulnerable records but provides the highest diversity. "
                 "(First row: Originals, second row: Adversarial examples)",
             )
@@ -431,11 +431,11 @@ class BaseEvasionAttack(Attack):
             raw_diff = adv - data
             raw_diff = raw_diff.reshape(raw_diff.shape[0], -1)
             for j in range(np.max(labels) + 1):
-                indices = np.where(labels == j)
+                indices, = np.where(labels == j)
 
                 # Find real adversarial examples and calculate accuracy on adversarial
                 # examples for every class separately
-                if indices[0].size == 0:  # numpy 1.19.5 specific
+                if indices.size == 0:
                     is_adv_list.append(np.NaN)
                     misclass_list.append(np.NaN)
                 else:
@@ -446,7 +446,7 @@ class BaseEvasionAttack(Attack):
                     misclass_list.append(1 - np.mean(p))
 
                 # Calculate L2 distance of adversarial examples
-                if indices[0].size == 0:  # numpy 1.19.5 specific
+                if indices.size == 0:
                     l2_dist_list.append(np.NaN)
                 else:
                     l2_dist_list.append(np.linalg.norm(raw_diff[indices], axis=-1))
@@ -697,11 +697,11 @@ class BasePatchAttack(Attack):
             raw_diff = adv - data
             raw_diff = raw_diff.reshape(raw_diff.shape[0], -1)
             for j in range(np.max(labels) + 1):
-                indices = np.where(labels == j)
+                indices, = np.where(labels == j)
 
                 # Find real adversarial examples and calculate accuracy on adversarial
                 # examples for every class separately
-                if indices[0].size == 0:  # numpy 1.19.5 specific
+                if indices.size == 0:
                     is_adv_list.append(np.NaN)
                     misclass_list.append(np.NaN)
                 else:
@@ -712,7 +712,7 @@ class BasePatchAttack(Attack):
                     misclass_list.append(1 - np.mean(p))
 
                 # Calculate L2 distance of adversarial examples
-                if indices[0].size == 0:  # numpy 1.19.5 specific
+                if indices.size == 0:
                     l2_dist_list.append(np.NaN)
                 else:
                     l2_dist_list.append(np.linalg.norm(raw_diff[indices], axis=-1))

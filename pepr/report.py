@@ -19,11 +19,11 @@ descriptions = {
         "against machine learning models 2017 IEEE Symposium on Security and Privacy "
         "(SP). IEEE, 2017."
     ),
-    "L2ContrastReductionAttack": (
+    "FB_L2ContrastReductionAttack": (
         "Reduces the contrast of the input using a perturbation of the given size. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "VirtualAdversarialAttack": (
+    "FB_VirtualAdversarialAttack": (
         "Second-order gradient-based attack on the logits. The attack calculate an "
         "untargeted adversarial perturbation by performing a approximated second order "
         "optimization step on the KL divergence between the unperturbed predictions "
@@ -34,7 +34,7 @@ descriptions = {
         "preprint arXiv:1507.00677. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "DDNAttack": (
+    "FB_DDNAttack": (
         "The Decoupled Direction and Norm L2 adversarial attack. "
         "Reference: Jérôme Rony, Luiz G. Hafemann, Luiz S. Oliveira, Ismail Ben Ayed, "
         "Robert Sabourin, Eric Granger, “Decoupling Direction and Norm for Efficient "
@@ -42,122 +42,122 @@ descriptions = {
         "arXiv:1811.09600. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "L2ProjectedGradientDescentAttack": (
+    "FB_L2ProjectedGradientDescentAttack": (
         "L2 Projected Gradient Descent. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "LinfProjectedGradientDescentAttack": (
+    "FB_LinfProjectedGradientDescentAttack": (
         "Linf Projected Gradient Descent. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "L2BasicIterativeAttack": (
+    "FB_L2BasicIterativeAttack": (
         "L2 Basic Iterative Method. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "LinfBasicIterativeAttack": (
+    "FB_LinfBasicIterativeAttack": (
         "L-infinity Basic Iterative Method. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "L2FastGradientAttack": (
+    "FB_L2FastGradientAttack": (
         "Fast Gradient Method (FGM). "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "LinfFastGradientAttack": (
+    "FB_LinfFastGradientAttack": (
         "Fast Gradient Sign Method (FGSM). "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "L2AdditiveGaussianNoiseAttack": (
+    "FB_L2AdditiveGaussianNoiseAttack": (
         "Samples Gaussian noise with a fixed L2 size. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "L2AdditiveUniformNoiseAttack": (
+    "FB_L2AdditiveUniformNoiseAttack": (
         "Samples uniform noise with a fixed L2 size. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "L2ClippingAwareAdditiveGaussianNoiseAttack": (
+    "FB_L2ClippingAwareAdditiveGaussianNoiseAttack": (
         "Samples Gaussian noise with a fixed L2 size after clipping. "
         "Reference: Jonas Rauber, Matthias Bethge “Fast Differentiable Clipping-Aware "
         "Normalization and Rescaling”. arXiv preprint arXiv:2007.07677. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "L2ClippingAwareAdditiveUniformNoiseAttack": (
+    "FB_L2ClippingAwareAdditiveUniformNoiseAttack": (
         "Samples uniform noise with a fixed L2 size after clipping. "
         "Reference: Jonas Rauber, Matthias Bethge “Fast Differentiable Clipping-Aware "
         "Normalization and Rescaling”. arXiv preprint arXiv:2007.07677. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "LinfAdditiveUniformNoiseAttack": (
+    "FB_LinfAdditiveUniformNoiseAttack": (
         "Samples uniform noise with a fixed L-infinity size. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "L2RepeatedAdditiveGaussianNoiseAttack": (
+    "FB_L2RepeatedAdditiveGaussianNoiseAttack": (
         "Repeatedly samples Gaussian noise with a fixed L2 size. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "L2RepeatedAdditiveUniformNoiseAttack": (
+    "FB_L2RepeatedAdditiveUniformNoiseAttack": (
         "Repeatedly samples uniform noise with a fixed L2 size. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "L2ClippingAwareRepeatedAdditiveGaussianNoiseAttack": (
+    "FB_L2ClippingAwareRepeatedAdditiveGaussianNoiseAttack": (
         "Repeatedly samples Gaussian noise with a fixed L2 size after clipping. "
         "Reference: Jonas Rauber, Matthias Bethge “Fast Differentiable Clipping-Aware "
         "Normalization and Rescaling”. arXiv preprint arXiv:2007.07677. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "L2ClippingAwareRepeatedAdditiveUniformNoiseAttack": (
+    "FB_L2ClippingAwareRepeatedAdditiveUniformNoiseAttack": (
         "Repeatedly samples uniform noise with a fixed L2 size after clipping. "
         "Reference: Jonas Rauber, Matthias Bethge “Fast Differentiable Clipping-Aware "
         "Normalization and Rescaling”. arXiv preprint arXiv:2007.07677. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "LinfRepeatedAdditiveUniformNoiseAttack": (
+    "FB_LinfRepeatedAdditiveUniformNoiseAttack": (
         "Repeatedly samples uniform noise with a fixed L-infinity size. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "InversionAttack": (
+    "FB_InversionAttack": (
         "Creates “negative images” by inverting the pixel values. "
         "Reference: Hossein Hosseini, Baicen Xiao, Mayoore Jaiswal, Radha Poovendran, "
         "“On the Limitation of Convolutional Neural Networks in Recognizing Negative "
         "Images”. arXiv preprint arXiv:1607.02533. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "BinarySearchContrastReductionAttack": (
+    "FB_BinarySearchContrastReductionAttack": (
         "Reduces the contrast of the input using a binary search to find the smallest "
         "adversarial perturbation. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "LinearSearchContrastReductionAttack": (
+    "FB_LinearSearchContrastReductionAttack": (
         "Reduces the contrast of the input using a linear search to find the smallest "
         "adversarial perturbation. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "L2CarliniWagnerAttack": (
+    "FB_L2CarliniWagnerAttack": (
         "Implementation of the Carlini & Wagner L2 Attack. "
         "Reference: Nicholas Carlini, David Wagner, “Towards evaluating the robustness "
         "of neural networks. In 2017 ieee symposium on security and privacy”. arXiv "
         "preprint arXiv:1608.04644. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "NewtonFoolAttack": (
+    "FB_NewtonFoolAttack": (
         "Implementation of the NewtonFool Attack. "
         "Reference: Uyeong Jang et al., “Objective Metrics and Gradient Descent "
         "Algorithms for Adversarial Examples in Machine Learning” "
         "https://dl.acm.org/doi/10.1145/3134600.3134635. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "EADAttack": (
+    "FB_EADAttack": (
         "Implementation of the EAD Attack with EN Decision Rule. "
         "Reference: Pin-Yu Chen, Yash Sharma, Huan Zhang, Jinfeng Yi, Cho-Jui Hsieh, "
         "“EAD: Elastic-Net Attacks to Deep Neural Networks via Adversarial Examples”, "
         "https://www.aaai.org/ocs/index.php/AAAI/AAAI18/paper/viewPaper/16893 "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "GaussianBlurAttack": (
+    "FB_GaussianBlurAttack": (
         "Blurs the inputs using a Gaussian filter with linearly increasing standard "
         "deviation. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "L2DeepFoolAttack": (
+    "FB_L2DeepFoolAttack": (
         "A simple and fast gradient-based adversarial attack. Implements the DeepFool "
         "L2 attack. "
         "Reference: Seyed-Mohsen Moosavi-Dezfooli, Alhussein Fawzi, Pascal Frossard, "
@@ -165,7 +165,7 @@ descriptions = {
         "preprint arXiv:1511.04599. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "LinfDeepFoolAttack": (
+    "FB_LinfDeepFoolAttack": (
         "A simple and fast gradient-based adversarial attack. Implements the DeepFool "
         "L-Infinity attack. "
         "Reference: Seyed-Mohsen Moosavi-Dezfooli, Alhussein Fawzi, Pascal Frossard, "
@@ -173,23 +173,23 @@ descriptions = {
         "preprint arXiv:1511.04599. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "SaltAndPepperNoiseAttack": (
+    "FB_SaltAndPepperNoiseAttack": (
         "Increases the amount of salt and pepper noise until the input is "
         "misclassified. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "LinearSearchBlendedUniformNoiseAttack": (
+    "FB_LinearSearchBlendedUniformNoiseAttack": (
         "Blends the input with a uniform noise input until it is misclassified. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "BinarizationRefinementAttack": (
+    "FB_BinarizationRefinementAttack": (
         "For models that preprocess their inputs by binarizing the inputs, this attack "
         "can improve adversarials found by other attacks. It does this by utilizing "
         "information about the binarization and mapping values to the corresponding "
         "value in the clean input or to the right side of the threshold. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "BoundaryAttack": (
+    "FB_BoundaryAttack": (
         "A powerful adversarial attack that requires neither gradients nor "
         "probabilities. "
         "Reference: Wieland Brendel (*), Jonas Rauber (*), Matthias Bethge, "
@@ -197,7 +197,7 @@ descriptions = {
         "Machine Learning Models”. arXiv preprint arXiv:1712.04248. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "L0BrendelBethgeAttack": (
+    "FB_L0BrendelBethgeAttack": (
         "L0 variant of the Brendel & Bethge adversarial attack. This is a "
         "powerful gradient-based adversarial attack that follows the adversarial "
         "boundary (the boundary between the space of adversarial and non-adversarial "
@@ -209,7 +209,7 @@ descriptions = {
         "arXiv preprint arXiv:1907.01003. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "L1BrendelBethgeAttack": (
+    "FB_L1BrendelBethgeAttack": (
         "L1 variant of the Brendel & Bethge adversarial attack. This is a "
         "powerful gradient-based adversarial attack that follows the adversarial "
         "boundary (the boundary between the space of adversarial and non-adversarial "
@@ -221,7 +221,7 @@ descriptions = {
         "arXiv preprint arXiv:1907.01003. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "L2BrendelBethgeAttack": (
+    "FB_L2BrendelBethgeAttack": (
         "L2 variant of the Brendel & Bethge adversarial attack. This is a "
         "powerful gradient-based adversarial attack that follows the adversarial "
         "boundary (the boundary between the space of adversarial and non-adversarial "
@@ -233,7 +233,7 @@ descriptions = {
         "arXiv preprint arXiv:1907.01003. "
         "Attack implementation provided by the Foolbox toolbox."
     ),
-    "LinfinityBrendelBethgeAttack": (
+    "FB_LinfinityBrendelBethgeAttack": (
         "L-infinity variant of the Brendel & Bethge adversarial attack. This is a "
         "powerful gradient-based adversarial attack that follows the adversarial "
         "boundary (the boundary between the space of adversarial and non-adversarial "
