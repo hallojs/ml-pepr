@@ -1,7 +1,6 @@
 """PePR wrapper classes for foolbox attack classes."""
 
 import logging
-import numpy
 import numpy as np
 import os
 
@@ -195,8 +194,8 @@ class BaseAttack(Attack):
                 avg_dist_eps.append(d.mean())
                 dist_eps_class = []
                 for c in range(np.max(self.labels[indices]) + 1):
-                    c_idx = np.where(self.labels[indices] == c)
-                    if c_idx[0].size == 0:  # numpy 1.19.5 specific
+                    c_idx, = np.where(self.labels[indices] == c)
+                    if c_idx.size == 0:
                         dist_eps_class.append(np.NaN)
                     else:
                         dist_eps_class.append(d[c_idx])
