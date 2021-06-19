@@ -11,7 +11,7 @@ import tensorflow as tf
 import yaml
 
 from pepr import report
-from pepr.privacy import mia, gmia
+from pepr.privacy import mia, gmia, art_extraction_wrapper
 from pepr.robustness import foolbox_wrapper, art_wrapper
 
 logger = logging.getLogger(__name__)
@@ -118,6 +118,7 @@ def run_attacks(yaml_path, attack_obj_save_path, functions):
         "ART_VirtualAdversarialMethod": art_wrapper.VirtualAdversarialMethod,
         "ART_ZooAttack": art_wrapper.ZooAttack,
         "ART_AdversarialPatch": art_wrapper.AdversarialPatch,
+        "ART_CopycatCNN": art_extraction_wrapper.CopycatCNN,
     }
 
     attack_object_paths = {}

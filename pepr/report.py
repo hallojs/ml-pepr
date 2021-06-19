@@ -460,6 +460,15 @@ descriptions = {
         "Gilmer, “Adversarial Patch” (2018). arXiv preprint arXiv:1712.09665. "
         "Attack implementation provided by the Adversarial Robustness Toolbox (ART)."
     ),
+    "ART_CopycatCNN": (
+        "Implementation of the Copycat CNN attack from Rodrigues Correia-Silva et al. "
+        "(2018). "
+        "Reference: Jacson Rodrigues Correia-Silva, Rodrigo F. Berriel, Claudine "
+        "Badue, Alberto F. de Souza, Thiago Oliveira-Santos, “Copycat CNN: Stealing "
+        "Knowledge by Persuading Confession with Random Non-Labeled Data” (2018). "
+        "arXiv preprint arXiv:1806.05476. "
+        "Attack implementation provided by the Adversarial Robustness Toolbox (ART)."
+    ),
 }
 
 
