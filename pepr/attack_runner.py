@@ -119,6 +119,7 @@ def run_attacks(yaml_path, attack_obj_save_path, functions):
         "ART_ZooAttack": art_wrapper.ZooAttack,
         "ART_AdversarialPatch": art_wrapper.AdversarialPatch,
         "ART_CopycatCNN": art_extraction_wrapper.CopycatCNN,
+        "ART_KnockoffNets": art_extraction_wrapper.KnockoffNets,
     }
 
     attack_object_paths = {}

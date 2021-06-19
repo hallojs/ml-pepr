@@ -469,6 +469,13 @@ descriptions = {
         "arXiv preprint arXiv:1806.05476. "
         "Attack implementation provided by the Adversarial Robustness Toolbox (ART)."
     ),
+    "ART_KnockoffNets": (
+        "Implementation of the Knockoff Nets attack from Orekondy et al. (2018). "
+        "Reference: Tribhuvanesh Orekondy, Bernt Schiele, Mario Fritz, “Knockoff Nets: "
+        "Stealing Functionality of Black-Box Models” (2018). arXiv preprint "
+        "arXiv:1812.02766. "
+        "Attack implementation provided by the Adversarial Robustness Toolbox (ART)."
+    ),
 }
 
 

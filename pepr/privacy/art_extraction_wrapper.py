@@ -209,6 +209,8 @@ class BaseExtractionAttack(Attack):
         """
         for key in self.pars_descriptors:
             desc = self.pars_descriptors[key]
+            if key == "verbose":
+                continue
             value = str(self.extraction_attacks[tm].__dict__[key])
 
             table.add_hline()
@@ -387,4 +389,98 @@ class CopycatCNN(BaseExtractionAttack):
             "Copycat CNN",
             self.attack_alias,
             "ART_CopycatCNN",
+        )
+
+
+class KnockoffNets(BaseExtractionAttack):
+    """
+    art.attacks.extraction.KnockoffNets wrapper class.
+
+    Attack description:
+    Implementation of the Knockoff Nets attack from Orekondy et al. (2018).
+
+    Paper link: https://arxiv.org/abs/1812.02766
+
+    Parameters
+    ----------
+    attack_alias : str
+        Alias for a specific instantiation of the class.
+    attack_pars : dict
+        Dictionary containing all needed attack parameters:
+
+        * batch_size_fit (int): (optional) Size of batches for fitting the thieved
+          classifier.
+        * batch_size_query (int): (optional) Size of batches for querying the victim
+          classifier.
+        * nb_epochs (int): (optional) Number of epochs to use for training.
+        * nb_stolen (int): (optional) Number of queries submitted to the victim
+          classifier to steal it.
+        * use_probability (bool): (optional) Use probability.
+        * sampling_strategy (str): Sampling strategy, either `random` or `adaptive`.
+        * reward (str): Reward type, in ['cert', 'div', 'loss', 'all'].
+        * verbose (bool): Show progress bars.
+        * stolen_record_indices (np.ndarray): Indices of records to use for the
+          extraction attack.
+
+    data : numpy.ndarray
+        Dataset with all input images used to attack the target models.
+    labels : numpy.ndarray
+        Array of all labels used to attack the target models.
+    data_conf : dict
+        Dictionary describing for every target model which record-indices should be used
+        for the attack.
+
+        * stolen_record_indices (np.ndarray): Indices of records to use for the
+          extraction attack.
+        * eval_record_indices (np.ndarray): Indices of records for measuring the
+          accuracy of the extracted model.
+
+    target_models : iterable
+        List of target models which should be tested.
+    """
+
+    def __init__(
+        self, attack_alias, attack_pars, data, labels, data_conf, target_models
+    ):
+        pars_descriptors = {
+            "batch_size_fit": "Batch size (thieved classifier)",
+            "batch_size_query": "Batch size (victim classifier)",
+            "nb_epochs": "Number of epochs for training",
+            "nb_stolen": "Number of victim queries",
+            "use_probability": "Use probability",
+            "sampling_strategy": "Sampling strategy",
+            "reward": "Reward type",
+            "verbose": "Show progress bars",
+        }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+
+        extraction_attacks = []
+        for target_model in target_models:
+            target_classifier = KerasClassifier(target_model, clip_values=(0, 1))
+            extraction_attacks.append(
+                art.attacks.extraction.KnockoffNets(
+                    classifier=target_classifier, **params
+                )
+            )
+
+        super().__init__(
+            attack_alias,
+            {"stolen_models": attack_pars["stolen_models"]},
+            data,
+            labels,
+            data_conf,
+            target_models,
+            extraction_attacks,
+            pars_descriptors,
+        )
+
+        self.report_section = report.ReportSection(
+            "Knockoff Nets",
+            self.attack_alias,
+            "ART_KnockoffNets",
         )
