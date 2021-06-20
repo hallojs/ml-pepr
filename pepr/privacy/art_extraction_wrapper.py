@@ -83,8 +83,11 @@ class BaseExtractionAttack(Attack):
     attack_results : dict
         Dictionary storing the attack model results.
 
-        * extracted_classifiers (list): List of extracted classifiers.
-        * ec_accuracy (list): List of the accuracy of the extracted classifiers.
+        * extracted_classifiers (list): List of extracted classifiers per target model.
+        * ec_accuracy (list): List of the accuracy of the extracted classifiers per
+          target model.
+        * ec_accuracy_list (list): List of the accuracy of the extracted classifiers per
+          target model and class. Shape: (target_model, class)
     """
 
     def __init__(
@@ -121,6 +124,7 @@ class BaseExtractionAttack(Attack):
         ]
         extracted_classifiers = []
         ec_accuracy = []
+        ec_accuracy_list = []
         for i, extraction_attack in enumerate(self.extraction_attacks):
             logger.info(
                 f"Attack target model ({i + 1}/{len(self.extraction_attacks)})."
@@ -134,16 +138,27 @@ class BaseExtractionAttack(Attack):
                 thieved_classifier=stolen_classifiers[i],
             )
 
-            # Get accuracy of extracted model
+            # Get accuracy of extracted model for every class
             eval_data = self.data[self.data_conf["eval_record_indices"][i]]
             eval_labels = self.labels[self.data_conf["eval_record_indices"][i]]
-            _, acc = extracted_classifier._model.evaluate(eval_data, eval_labels)
+            ec_acc_tm = []
+            for j in range(np.max(eval_labels) + 1):
+                idx, = np.where(eval_labels == j)
+                if idx.size == 0:
+                    ec_acc_tm.append(np.NaN)
+                else:
+                    _, acc = extracted_classifier._model.evaluate(
+                        eval_data[idx], eval_labels[idx]
+                    )
+                    ec_acc_tm.append(acc)
 
             extracted_classifiers.append(extracted_classifier)
-            ec_accuracy.append(acc)
+            ec_accuracy.append(np.nanmean(ec_acc_tm))
+            ec_accuracy_list.append(ec_acc_tm)
 
         self.attack_results["extracted_classifiers"] = extracted_classifiers
         self.attack_results["ec_accuracy"] = ec_accuracy
+        self.attack_results["ec_accuracy_list"] = ec_accuracy_list
 
         # Print every epsilon result of attack
         def _target_model_rows():
@@ -194,7 +209,7 @@ class BaseExtractionAttack(Attack):
             Path to save the tex, pdf and asset files of the attack report.
         """
         self._report_attack_configuration()
-        self._report_attack_results()
+        self._report_attack_results(save_path)
 
     def _gen_attack_pars_rows(self, tm, table):
         """
@@ -219,11 +234,6 @@ class BaseExtractionAttack(Attack):
     def _report_attack_configuration(self):
         """
         Create subsubsection about the attack and data configuration.
-
-        Parameters
-        ----------
-        self : BaseEvasionAttack or BasePatchAttack
-            Base attack object.
         """
         # Create tables for attack parameters and the data configuration.
         tm = 0  # Specify target model
@@ -260,7 +270,7 @@ class BaseExtractionAttack(Attack):
                     tab_dc.add_row(["Attack set size", attack_data_size])
                     tab_dc.add_hline()
                     tab_dc.add_row(
-                        ["Evaluation set size", len(dc["eval_record_indices"][0])]
+                        ["Evaluation set size", len(dc["eval_record_indices"][tm])]
                     )
                     tab_dc.add_hline()
                 self.report_section.append(Command("captionsetup", "labelformat=empty"))
@@ -272,14 +282,14 @@ class BaseExtractionAttack(Attack):
                     )
                 )
 
-    def _report_attack_results(self):
+    def _report_attack_results(self, save_path):
         """
         Create subsubsection describing the most important results of the attack.
 
         Parameters
         ----------
-        self : BaseEvasionAttack or BasePatchAttack
-            Base attack object.
+        save_path :
+            Path to save the tex, pdf and asset files of the attack report.
 
         This subsection contains results only for the first target model.
         """
@@ -287,10 +297,39 @@ class BaseExtractionAttack(Attack):
         self.report_section.append(Subsubsection("Attack Results"))
         res = self.attack_results
 
+        # Histogram
+        fig = plt.figure()
+        ax = plt.axes()
+        ax.hist(res["ec_accuracy_list"][tm], edgecolor="black")
+        ax.set_xlabel("Accuracy")
+        ax.set_ylabel("Number of Classes")
+        ax.set_axisbelow(True)
+        alias_no_spaces = str.replace(self.attack_alias, " ", "_")
+        path = f"fig/{alias_no_spaces}-hist.pdf"
+        fig.savefig(save_path + f"/{path}")
+        plt.close(fig)
+
         with self.report_section.create(MiniPage()):
             with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
                 self.report_section.append(Command("centering"))
+                self.report_section.append(
+                    Command(
+                        "includegraphics",
+                        NoEscape(path),
+                        "width=8cm",
+                    )
+                )
+                self.report_section.append(Command("captionsetup", "labelformat=empty"))
+                self.report_section.append(
+                    Command(
+                        "captionof",
+                        "figure",
+                        extra_arguments="Evaluation Accuracy Distribution",
+                    )
+                )
 
+            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+                self.report_section.append(Command("centering"))
                 with self.report_section.create(Tabular("|l|c|")) as result_tab:
                     result_tab.add_hline()
                     result_tab.add_row(
