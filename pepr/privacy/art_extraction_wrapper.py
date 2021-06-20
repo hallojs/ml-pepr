@@ -3,9 +3,9 @@ import numpy as np
 import os
 
 from pepr.attack import Attack
-from pepr import report
+from pepr import report, utilities
 import matplotlib.pyplot as plt
-from pylatex import Command, Tabular, MiniPage, NoEscape, Figure
+from pylatex import Command, Tabular, MiniPage, NoEscape
 from pylatex.section import Subsubsection
 
 import art
@@ -298,16 +298,9 @@ class BaseExtractionAttack(Attack):
         res = self.attack_results
 
         # Histogram
-        fig = plt.figure()
-        ax = plt.axes()
-        ax.hist(res["ec_accuracy_list"][tm], edgecolor="black")
-        ax.set_xlabel("Accuracy")
-        ax.set_ylabel("Number of Classes")
-        ax.set_axisbelow(True)
-        alias_no_spaces = str.replace(self.attack_alias, " ", "_")
-        path = f"fig/{alias_no_spaces}-hist.pdf"
-        fig.savefig(save_path + f"/{path}")
-        plt.close(fig)
+        path = utilities.plot_class_dist_histogram(
+            self.attack_alias, res["ec_accuracy_list"][tm], save_path
+        )
 
         with self.report_section.create(MiniPage()):
             with self.report_section.create(MiniPage(width=r"0.49\textwidth")):

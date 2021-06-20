@@ -5,7 +5,7 @@ import numpy as np
 import os
 
 from pepr.attack import Attack
-from pepr import report
+from pepr import report, utilities
 import matplotlib.pyplot as plt
 from pylatex import Command, NoEscape, Tabular, MiniPage, Figure
 from pylatex.section import Subsubsection
@@ -532,18 +532,11 @@ class BaseAttack(Attack):
             for c in range(np.max(labels) + 1):
                 class_idx = np.where(labels == c)
                 misclass_class.append(np.mean(is_adv_eps[class_idx]))
-
-            fig = plt.figure()
-            ax = plt.axes()
-            ax.hist(misclass_class, edgecolor="black")
-            ax.set_xlabel("Accuracy")
-            ax.set_ylabel("Number of Classes")
-            ax.set_axisbelow(True)
-
-            path = f"fig/{alias_no_spaces}-hist.pdf"
             title = "Success Rate Distribution"
-            fig.savefig(save_path + f"/{path}")
-            plt.close(fig)
+
+            path = utilities.plot_class_dist_histogram(
+                self.attack_alias, misclass_class, save_path
+            )
 
         with self.report_section.create(MiniPage()):
             with self.report_section.create(MiniPage(width=r"0.49\textwidth")):

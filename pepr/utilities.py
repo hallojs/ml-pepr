@@ -51,3 +51,36 @@ def assign_record_ids_to_target_models(
             )
 
     return records_per_target_model + offset
+
+
+def plot_class_dist_histogram(attack_alias, class_data, save_path):
+    """
+    Plot a class distribution histogram.
+
+    Parameters
+    ----------
+    attack_alias : str
+        Alias for a specific instantiation of the class.
+    class_data : list
+        List of data to plot per class.
+    save_path : str
+        Path to save the plotted figure.
+
+    Returns
+    -------
+    str
+        Path to the saved figure.
+    """
+    import matplotlib.pyplot as plt
+
+    fig = plt.figure()
+    ax = plt.axes()
+    ax.hist(class_data, edgecolor="black")
+    ax.set_xlabel("Accuracy")
+    ax.set_ylabel("Number of Classes")
+    ax.set_axisbelow(True)
+    alias_no_spaces = str.replace(attack_alias, " ", "_")
+    path = f"fig/{alias_no_spaces}-hist.pdf"
+    fig.savefig(save_path + f"/{path}")
+    plt.close(fig)
+    return path
