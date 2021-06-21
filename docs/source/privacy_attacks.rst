@@ -7,3 +7,4 @@ Privacy Attacks
 
    mia
    gmia
+   art_extraction_wrapper
