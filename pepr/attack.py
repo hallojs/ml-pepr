@@ -2,8 +2,9 @@
 
 from abc import ABC, abstractmethod
 
-from pylatex import Section
 from tensorflow.keras import models
+
+from pepr.report import ReportSection
 
 
 class Attack(ABC):
@@ -40,8 +41,10 @@ class Attack(ABC):
 
         # Dummy section to get rid of unresolved reference warnings. This attribute
         # should be overwritten by the actual report section as soon as it is created.
-        self.report_section = Section(
-            "[Placeholder] If you see this, something went wrong."
+        self.report_section = ReportSection(
+            "[Placeholder] If you see this, something went wrong.",
+            "placeholder",
+            "placeholder",
         )
 
         # Path of serialized object for tf's Model.save()

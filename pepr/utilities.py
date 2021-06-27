@@ -92,8 +92,8 @@ def create_attack_pars_table(report_section, values, pars_descriptors):
 
     Parameters
     ----------
-    report_section : pylatex.section.Section
-        Section in LaTex report for the current attack.
+    report_section : pepr.report.ReportSection
+        ReportSection container object for the current attack.
     values : dict
         Dictionary with the values stored for the keys in `pars_descriptors`. If
         `pars_descriptors` has an entry "max_iter", then `values` should also have an
