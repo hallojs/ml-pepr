@@ -248,35 +248,6 @@ class BaseMembershipInferenceAttack(Attack):
         self._report_attack_configuration()
         self._report_attack_results(save_path)
 
-    def _gen_attack_pars_rows(self, tm, table):
-        """
-        Generate LaTex table rows with fancy parameter descriptions.
-
-        Parameters
-        ----------
-        tm : int
-            Target model index.
-        table : pylatex.Tabular
-            Pylatex table in which the rows are append.
-
-        Returns
-        -------
-        int
-            Number of table rows added.
-        """
-        count = 0
-        for key in self.pars_descriptors:
-            desc = self.pars_descriptors[key]
-            if key == "attack_model":
-                continue
-            value = str(self.inference_attacks[tm].__dict__[key])
-
-            table.add_hline()
-            table.add_row([desc, value])
-            count = count + 1
-
-        return count
-
     def _report_attack_configuration(self):
         """
         Create subsubsection about the attack and data configuration.
@@ -293,9 +264,11 @@ class BaseMembershipInferenceAttack(Attack):
                 if "attack_model" in temp_pars_desc:
                     del temp_pars_desc["attack_model"]
 
+                values = self.inference_attacks[tm].__dict__.copy()
+                # TODO: Include HopSkipJump parameters
                 utilities.create_attack_pars_table(
                     self.report_section,
-                    self.inference_attacks[tm],
+                    values,
                     temp_pars_desc,
                 )
 
@@ -431,10 +404,10 @@ class MembershipInferenceBlackBox(BaseMembershipInferenceAttack):
             if k in attack_pars:
                 params[k] = attack_pars[k]
 
-        extraction_attacks = []
+        inference_attacks = []
         for target_model in target_models:
             target_classifier = KerasClassifier(target_model, clip_values=(0, 1))
-            extraction_attacks.append(
+            inference_attacks.append(
                 membership_inference.MembershipInferenceBlackBox(
                     classifier=target_classifier, **params
                 )
@@ -446,7 +419,7 @@ class MembershipInferenceBlackBox(BaseMembershipInferenceAttack):
             labels,
             data_conf,
             target_models,
-            extraction_attacks,
+            inference_attacks,
             pars_descriptors,
         )
 
@@ -528,10 +501,10 @@ class MembershipInferenceBlackBoxRuleBased(BaseMembershipInferenceAttack):
     ):
         pars_descriptors = {}  # No additional parameters
 
-        extraction_attacks = []
+        inference_attacks = []
         for target_model in target_models:
             target_classifier = KerasClassifier(target_model, clip_values=(0, 1))
-            extraction_attacks.append(
+            inference_attacks.append(
                 membership_inference.MembershipInferenceBlackBoxRuleBased(
                     classifier=target_classifier
                 )
@@ -543,7 +516,7 @@ class MembershipInferenceBlackBoxRuleBased(BaseMembershipInferenceAttack):
             labels,
             data_conf,
             target_models,
-            extraction_attacks,
+            inference_attacks,
             pars_descriptors,
         )
 
@@ -571,6 +544,128 @@ class MembershipInferenceBlackBoxRuleBased(BaseMembershipInferenceAttack):
         membership_results = inference_attack.infer(
             self.data[self.data_conf["attack_record_indices"][tm_index]],
             self.labels[self.data_conf["attack_record_indices"][tm_index]],
+        )
+
+        return membership_results
+
+
+class LabelOnlyDecisionBoundary(BaseMembershipInferenceAttack):
+    """
+    art.attacks.inference.membership_inference.LabelOnlyDecisionBoundary wrapper
+    class.
+
+    Attack description:
+    Implementation of Label-Only Inference Attack based on Decision Boundary.
+
+    Paper link: https://arxiv.org/abs/2007.14321
+
+    Parameters
+    ----------
+    attack_alias : str
+        Alias for a specific instantiation of the class.
+    attack_pars : dict
+        Dictionary containing all needed attack parameters:
+
+        * distance_threshold_tau (float): Threshold distance for decision boundary.
+          Samples with boundary distances larger than threshold are considered members
+          of the training dataset.
+        * norm: Order of the norm. Possible values: “inf”, np.inf or 2.
+        * max_iter (int): Maximum number of iterations.
+        * max_eval (int): Maximum number of evaluations for estimating gradient.
+        * init_eval (int): Initial number of evaluations for estimating gradient.
+        * init_size (int): Maximum number of trials for initial generation of
+          adversarial examples.
+        * verbose (bool): Show progress bars.
+
+    data : numpy.ndarray
+        Dataset with all input images used to attack the target models.
+    labels : numpy.ndarray
+        Array of all labels used to attack the target models.
+    data_conf : dict
+        Dictionary describing for every target model which record-indices should be used
+        for the attack.
+
+        * train_record_indices (np.ndarray): Input to training process. Includes all
+          features used to train the original model.
+        * test_record_indices (np.ndarray): Test records that are not used in the
+          training of the target model.
+        * attack_record_indices (np.ndarray): Input to attack. Includes all features
+          except the attacked feature.
+        * attack_membership_status (np.ndarray): True membership status of the
+          attack_records 1 indicates a member and 0 indicates non-member. This is used
+          to compare the attacks results with the true membership status.
+
+    target_models : iterable
+        List of target models which should be tested.
+    """
+
+    def __init__(
+        self, attack_alias, attack_pars, data, labels, data_conf, target_models
+    ):
+        pars_descriptors = {
+            "distance_threshold_tau": "Threshold distance",
+        }
+
+        # Save HopSkipJump parameters
+        self.hopskipjump_args = attack_pars.copy()
+        del self.hopskipjump_args["distance_threshold_tau"]
+
+        inference_attacks = []
+        for target_model in target_models:
+            target_classifier = KerasClassifier(target_model, clip_values=(0, 1))
+            inference_attacks.append(
+                membership_inference.LabelOnlyDecisionBoundary(
+                    target_classifier,
+                    distance_threshold_tau=attack_pars["distance_threshold_tau"],
+                )
+            )
+
+        super().__init__(
+            attack_alias,
+            data,
+            labels,
+            data_conf,
+            target_models,
+            inference_attacks,
+            pars_descriptors,
+        )
+
+        self.report_section = report.ReportSection(
+            "Label Only Decision Boundary",
+            self.attack_alias,
+            "ART_LabelOnlyDecisionBoundary",
+        )
+
+    def inference_run(self, tm_index):
+        """
+        Run the Label-Only - Decision Boundary inference attack.
+
+        Parameters
+        ----------
+        tm_index : int
+            Index of the currently attacked target model.
+
+        Returns
+        -------
+        An array holding the inferred membership status, 1 indicates a member and 0
+        indicates non-member, or class probabilities.
+        """
+        inference_attack = self.inference_attacks[tm_index]
+        # Calibrate distance threshold maximising the membership inference accuracy on
+        # x_train and x_test.
+        inference_attack.calibrate_distance_threshold(
+            self.data[self.data_conf["train_record_indices"][tm_index]],
+            self.labels[self.data_conf["train_record_indices"][tm_index]],
+            self.data[self.data_conf["test_record_indices"][tm_index]],
+            self.labels[self.data_conf["test_record_indices"][tm_index]],
+            **self.hopskipjump_args,
+        )
+
+        # Get inference
+        membership_results = inference_attack.infer(
+            self.data[self.data_conf["attack_record_indices"][tm_index]],
+            self.labels[self.data_conf["attack_record_indices"][tm_index]],
+            **self.hopskipjump_args,
         )
 
         return membership_results

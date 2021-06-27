@@ -488,6 +488,13 @@ descriptions = {
         "sample is correct, then it is a member. Otherwise, it is not a member. "
         "Attack implementation provided by the Adversarial Robustness Toolbox (ART)."
     ),
+    "ART_LabelOnlyDecisionBoundary": (
+        "Implementation of Label-Only Inference Attack based on Decision Boundary. "
+        "Reference: Christopher A. Choquette-Choo, Florian Tramer, Nicholas Carlini, "
+        "Nicolas Papernot, “Label-Only Membership Inference Attacks” (2021). arXiv "
+        "preprint arXiv:2007.14321. "
+        "Attack implementation provided by the Adversarial Robustness Toolbox (ART)."
+    ),
 }
 
 

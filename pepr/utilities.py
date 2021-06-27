@@ -86,7 +86,7 @@ def plot_class_dist_histogram(attack_alias, class_data, save_path):
     return path
 
 
-def create_attack_pars_table(report_section, inference_attack, pars_descriptors):
+def create_attack_pars_table(report_section, values, pars_descriptors):
     """
     Generate LaTex table from pars_descriptors with fancy parameter descriptions.
 
@@ -94,8 +94,10 @@ def create_attack_pars_table(report_section, inference_attack, pars_descriptors)
     ----------
     report_section : pylatex.section.Section
         Section in LaTex report for the current attack.
-    inference_attack : art.attacks.attack.InferenceAttack
-        Current ART attack object containing the attack parameters to read.
+    values : dict
+        Dictionary with the values stored for the keys in `pars_descriptors`. If
+        `pars_descriptors` has an entry "max_iter", then `values` should also have an
+        entry "max_iter" but holding the argument value instead of a description.
     pars_descriptors : dict
         Dictionary of attack parameters and their description shown in the attack
         report.
@@ -106,6 +108,7 @@ def create_attack_pars_table(report_section, inference_attack, pars_descriptors)
         Number of table rows added.
     """
     from pylatex import Command, Tabular
+
     new_rows = len(pars_descriptors)
 
     if new_rows > 0:
@@ -115,7 +118,10 @@ def create_attack_pars_table(report_section, inference_attack, pars_descriptors)
             for key in pars_descriptors:
                 # Add table row per pars_descriptor entry
                 desc = pars_descriptors[key]
-                value = str(inference_attack.__dict__[key])
+                if isinstance(values[key], float):
+                    value = str(round(values[key], 3))
+                else:
+                    value = str(values[key])
                 tab_ap.add_hline()
                 tab_ap.add_row([desc, value])
             tab_ap.add_hline()

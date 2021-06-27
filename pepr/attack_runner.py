@@ -122,6 +122,7 @@ def run_attacks(yaml_path, attack_obj_save_path, functions):
         "ART_KnockoffNets": art_extraction_wrapper.KnockoffNets,
         "ART_MembershipInferenceBlackBox": art_inference_wrapper.MembershipInferenceBlackBox,
         "ART_MembershipInferenceBlackBoxRuleBased": art_inference_wrapper.MembershipInferenceBlackBoxRuleBased,
+        "ART_LabelOnlyDecisionBoundary": art_inference_wrapper.LabelOnlyDecisionBoundary,
     }
 
     attack_object_paths = {}
