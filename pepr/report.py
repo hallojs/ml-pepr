@@ -495,6 +495,18 @@ descriptions = {
         "preprint arXiv:2007.14321. "
         "Attack implementation provided by the Adversarial Robustness Toolbox (ART)."
     ),
+    "ART_MIFace": (
+        "Implementation of the MIFace algorithm from Fredrikson et al. (2015). While "
+        "in that paper the attack is demonstrated specifically against face "
+        "recognition models, it is applicable more broadly to classifiers with "
+        "continuous features which expose class gradients. "
+        "Reference: Fredrikson, Matt and Jha, Somesh and Ristenpart, Thomas, "
+        "“Model Inversion Attacks That Exploit Confidence Information and Basic "
+        "Countermeasures” Proceedings of the 22nd ACM SIGSAC Conference on Computer "
+        "and Communications Security (2015). Pages 1322–1333 "
+        "https://doi.org/10.1145/2810103.2813677 . "
+        "Attack implementation provided by the Adversarial Robustness Toolbox (ART)."
+    ),
 }
 
 

@@ -10,7 +10,7 @@ from pylatex import Command, Tabular, MiniPage, NoEscape
 from pylatex.section import Subsubsection
 
 from art.estimators.classification import KerasClassifier
-from art.attacks.inference import membership_inference
+from art.attacks.inference import membership_inference, model_inversion
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -36,7 +36,7 @@ class BaseMembershipInferenceAttack(Attack):
     labels : numpy.ndarray
         Array of all labels used to attack the target models.
     data_conf : dict
-        Record-indices for extraction and evaluation:
+        Record-indices for inference and evaluation:
 
         * train_record_indices (np.ndarray): (optional) Input to training process.
           Includes all features used to train the original model.
@@ -51,7 +51,7 @@ class BaseMembershipInferenceAttack(Attack):
     target_models : iterable
         List of target models which should be tested.
     inference_attacks : list(art.attacks.Attack)
-        List of ART extraction attack objects per target model which are wrapped in
+        List of ART inference attack objects per target model which are wrapped in
         this class.
     pars_descriptors : dict
         Dictionary of attack parameters and their description shown in the attack
@@ -64,7 +64,7 @@ class BaseMembershipInferenceAttack(Attack):
     attack_alias : str
         Alias for a specific instantiation of the class.
     attack_pars : dict
-        Extraction attack specific attack parameters:
+        Inference attack specific attack parameters:
     data : numpy.ndarray
         Dataset with all training samples used in the given pentesting setting.
     labels : numpy.ndarray
@@ -72,14 +72,14 @@ class BaseMembershipInferenceAttack(Attack):
     target_models : iterable
         List of target models which should be tested.
     data_conf : dict
-        Record-indices for extraction and evaluation:
+        Record-indices for inference and evaluation:
     inference_attacks : list(art.attacks.Attack)
         List of ART attack objects per target model which are wrapped in this class.
     pars_descriptors : dict
         Dictionary of attack parameters and their description shown in the attack
         report.
-        Example: {"classifier": "A victim classifier"} for the attribute named
-        "classifier" of CopycatCNN.
+        Example: {"attack_model_type": "Attack model type"} for the attribute named
+        "attack_model_type" of MembershipInferenceBlackBox.
     attack_results : dict
         Dictionary storing the attack model results.
 
@@ -669,3 +669,253 @@ class LabelOnlyDecisionBoundary(BaseMembershipInferenceAttack):
         )
 
         return membership_results
+
+
+class MIFace(Attack):
+    """
+    art.attacks.inference.membership_inference.MIFace wrapper class.
+
+    Attack description:
+    Implementation of the MIFace algorithm from Fredrikson et al. (2015). While in that
+    paper the attack is demonstrated specifically against face recognition models, it is
+    applicable more broadly to classifiers with continuous features which expose class
+    gradients.
+
+    Paper link: https://dl.acm.org/doi/10.1145/2810103.2813677
+
+    Parameters
+    ----------
+    attack_alias : str
+        Alias for a specific instantiation of the class.
+    attack_pars : dict
+        Dictionary containing all needed attack parameters:
+
+        * max_iter (int): (optional) Maximum number of gradient descent iterations for
+          the model inversion.
+        * window_length (int): (optional) Length of window for checking whether descent
+          should be aborted.
+        * threshold (float): (optional) Threshold for descent stopping criterion.
+        * batch_size (int): (optional) Size of internal batches.
+        * verbose (bool): (optional) Show progress bars.
+
+    data : numpy.ndarray
+        Dataset with all input images used to attack the target models.
+    labels : numpy.ndarray
+        Array of all labels used to attack the target models.
+    data_conf : dict
+        Dictionary describing for every target model which record-indices should be used
+        for the attack.
+
+        * initial_input_data (np.ndarray): An array with the initial input to the victim
+          classifier. If None, then initial input will be initialized as zero array.
+        * initial_input_targets (np.ndarray): Target values of shape (nb_samples,).
+
+    target_models : iterable
+        List of target models which should be tested.
+
+    Attributes
+    ----------
+    attack_alias : str
+        Alias for a specific instantiation of the class.
+    attack_pars : dict
+        Inference attack specific attack parameters:
+    data : numpy.ndarray
+        Dataset with all training samples used in the given pentesting setting.
+    labels : numpy.ndarray
+        Array of all labels used in the given pentesting setting.
+    target_models : iterable
+        List of target models which should be tested.
+    data_conf : dict
+        Record-indices for inference and evaluation:
+    inference_attacks : list(art.attacks.Attack)
+        List of ART attack objects per target model which are wrapped in this class.
+    pars_descriptors : dict
+        Dictionary of attack parameters and their description shown in the attack
+        report.
+        Example: {"max_iter": "Max. iterations"} for the attribute named
+        "max_iter" of MIFace.
+    attack_results : dict
+        Dictionary storing the attack model results.
+
+        * inferred_training_samples (list): The inferred training samples per target
+          model.
+    """
+
+    def __init__(
+        self, attack_alias, attack_pars, data, labels, data_conf, target_models
+    ):
+        super().__init__(
+            attack_alias,
+            {},
+            data,
+            labels,
+            data_conf,
+            target_models,
+        )
+
+        self.pars_descriptors = {
+            "max_iter": "Max. iterations",
+            "window_length": "Window length",
+            "threshold": "Stopping threshold",
+            "batch_size": "Batch size",
+            "verbose": "Verbose output",
+        }
+
+        # Handle specific attack class parameters
+        params = {}
+        for k in self.pars_descriptors:
+            if k in attack_pars:
+                params[k] = attack_pars[k]
+
+        self.inference_attacks = []
+        for target_model in target_models:
+            target_classifier = KerasClassifier(target_model, clip_values=(0, 1))
+            self.inference_attacks.append(
+                model_inversion.MIFace(target_classifier, **params)
+            )
+
+        self.report_section = report.ReportSection(
+            "Model Inversion MIFace",
+            self.attack_alias,
+            "ART_MIFace",
+        )
+
+    def run(self):
+        """
+        Run ART inference attack
+        """
+        inferred_samples = []
+
+        for i, inference_attack in enumerate(self.inference_attacks):
+            logger.info(f"Attack target model ({i + 1}/{len(self.inference_attacks)}).")
+
+            inferred_res = inference_attack.infer(
+                self.data_conf["initial_input_data"][i],
+                self.data_conf["initial_input_targets"][i],
+            )
+
+            inferred_samples.append(inferred_res)
+
+        self.attack_results["inferred_training_samples"] = inferred_samples
+
+        logger.info(
+            "Attack Summary"
+            f"\n"
+            f"\n###################### Attack Results ######################"
+            f"\nFist inferred training sample per target model:"
+        )
+        plt.figure(figsize=(15, 5))
+        for i in range(len(self.target_models)):
+            plt.subplot(1, len(self.target_models), i + 1)
+            plt.imshow(
+                (
+                    np.reshape(
+                        inferred_samples[i][
+                            0 + i,
+                        ],
+                        (
+                            inferred_samples[i][
+                                0 + i,
+                            ].shape[0],
+                            inferred_samples[i][
+                                0 + i,
+                            ].shape[1],
+                        ),
+                    )
+                )
+            )
+
+    def create_attack_report(self, save_path="art_report", pdf=False):
+        """
+        Create an attack report just for the given attack instantiation.
+
+        Parameters
+        ----------
+        save_path : str
+            Path to save the tex, pdf and asset files of the attack report.
+        pdf : bool
+            If set, generate pdf out of latex file.
+        """
+
+        # Create directory structure for the attack report, including the figure
+        # directory for the figures of the results subsubsection.
+        os.makedirs(save_path + "/fig", exist_ok=True)
+
+        self.create_attack_section(save_path)
+        report.report_generator(save_path, [self.report_section], pdf)
+
+    def create_attack_section(self, save_path):
+        """
+        Create an attack section for the given attack instantiation.
+
+        Parameters
+        ----------
+        save_path : str
+            Path to save the tex, pdf and asset files of the attack report.
+        """
+        self._report_attack_configuration()
+        self._report_attack_results(save_path)
+
+    def _report_attack_configuration(self):
+        """
+        Create subsubsection about the attack and data configuration.
+        """
+        # Create tables for attack parameters and the data configuration.
+        tm = 0  # Specify target model
+
+        dc = self.data_conf
+        self.report_section.append(Subsubsection("Attack Details"))
+        with self.report_section.create(MiniPage()):
+            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+                self.report_section.append(Command("centering"))
+                temp_pars_desc = self.pars_descriptors.copy()
+                if "verbose" in temp_pars_desc:
+                    del temp_pars_desc["verbose"]
+                values = self.inference_attacks[tm].__dict__.copy()
+
+                utilities.create_attack_pars_table(
+                    self.report_section,
+                    values,
+                    temp_pars_desc,
+                )
+
+            with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
+                # -- Create table for the data configuration
+                self.report_section.append(Command("centering"))
+                with self.report_section.create(Tabular("|l|c|")) as tab_dc:
+                    tab_dc.add_hline()
+                    tab_dc.add_row(["Attacked target models", len(self.target_models)])
+                    tab_dc.add_hline()
+                    if "initial_input_data" in dc:
+                        input_size = dc["initial_input_data"][tm].shape[0]
+                        tab_dc.add_row(["Input data size", input_size])
+                        tab_dc.add_hline()
+                    if "initial_input_targets" in dc:
+                        target_size = len(dc["initial_input_targets"][tm])
+                        tab_dc.add_row(["Target size", target_size])
+                        tab_dc.add_hline()
+                self.report_section.append(Command("captionsetup", "labelformat=empty"))
+                self.report_section.append(
+                    Command(
+                        "captionof",
+                        "table",
+                        extra_arguments="Target and Data Configuration",
+                    )
+                )
+
+    def _report_attack_results(self, save_path):
+        """
+        Create subsubsection describing the most important results of the attack.
+
+        Parameters
+        ----------
+        save_path :
+            Path to save the tex, pdf and asset files of the attack report.
+
+        This subsection contains results only for the first target model.
+        """
+        tm = 0  # Specify target model
+        self.report_section.append(Subsubsection("Attack Results"))
+        res = self.attack_results
+
+        # TODO: Plot first 10 inferred images

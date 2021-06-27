@@ -123,6 +123,7 @@ def run_attacks(yaml_path, attack_obj_save_path, functions):
         "ART_MembershipInferenceBlackBox": art_inference_wrapper.MembershipInferenceBlackBox,
         "ART_MembershipInferenceBlackBoxRuleBased": art_inference_wrapper.MembershipInferenceBlackBoxRuleBased,
         "ART_LabelOnlyDecisionBoundary": art_inference_wrapper.LabelOnlyDecisionBoundary,
+        "ART_MIFace": art_inference_wrapper.MIFace,
     }
 
     attack_object_paths = {}
