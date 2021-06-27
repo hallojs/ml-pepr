@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 
-import tensorflow as tf
+from pylatex import Section
 from tensorflow.keras import models
 
 
@@ -37,6 +37,12 @@ class Attack(ABC):
         self.data_conf = data_conf
         self.target_models = target_models
         self.attack_results = {}
+
+        # Dummy section to get rid of unresolved reference warnings. This attribute
+        # should be overwritten by the actual report section as soon as it is created.
+        self.report_section = Section(
+            "[Placeholder] If you see this, something went wrong."
+        )
 
         # Path of serialized object for tf's Model.save()
         self.obj_save_path = "attack_objects"
