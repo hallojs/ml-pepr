@@ -476,6 +476,18 @@ descriptions = {
         "arXiv:1812.02766. "
         "Attack implementation provided by the Adversarial Robustness Toolbox (ART)."
     ),
+    "ART_MembershipInferenceBlackBox": (
+        "Implementation of a learned black-box membership inference attack. "
+        "This implementation can use as input to the learning process probabilities/ "
+        "logits or losses, depending on the type of model and provided configuration. "
+        "Attack implementation provided by the Adversarial Robustness Toolbox (ART)."
+    ),
+    "ART_MembershipInferenceBlackBoxRuleBased": (
+        "Implementation of a simple, rule-based black-box membership inference attack. "
+        "This implementation uses the simple rule: if the model’s prediction for a "
+        "sample is correct, then it is a member. Otherwise, it is not a member. "
+        "Attack implementation provided by the Adversarial Robustness Toolbox (ART)."
+    ),
 }
 
 

@@ -84,3 +84,50 @@ def plot_class_dist_histogram(attack_alias, class_data, save_path):
     fig.savefig(save_path + f"/{path}")
     plt.close(fig)
     return path
+
+
+def create_attack_pars_table(report_section, inference_attack, pars_descriptors):
+    """
+    Generate LaTex table from pars_descriptors with fancy parameter descriptions.
+
+    Parameters
+    ----------
+    report_section : pylatex.section.Section
+        Section in LaTex report for the current attack.
+    inference_attack : art.attacks.attack.InferenceAttack
+        Current ART attack object containing the attack parameters to read.
+    pars_descriptors : dict
+        Dictionary of attack parameters and their description shown in the attack
+        report.
+
+    Returns
+    -------
+    int
+        Number of table rows added.
+    """
+    from pylatex import Command, Tabular
+    new_rows = len(pars_descriptors)
+
+    if new_rows > 0:
+        # Create table for the attack parameters.
+        new_rows = len(pars_descriptors)
+        with report_section.create(Tabular("|l|c|")) as tab_ap:
+            for key in pars_descriptors:
+                # Add table row per pars_descriptor entry
+                desc = pars_descriptors[key]
+                value = str(inference_attack.__dict__[key])
+                tab_ap.add_hline()
+                tab_ap.add_row([desc, value])
+            tab_ap.add_hline()
+        report_section.append(Command("captionsetup", "labelformat=empty"))
+        report_section.append(
+            Command(
+                "captionof",
+                "table",
+                extra_arguments="Attack parameters",
+            )
+        )
+    else:
+        report_section.append("Attack has no configuration parameters.")
+
+    return new_rows

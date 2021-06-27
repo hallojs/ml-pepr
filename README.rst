@@ -67,7 +67,7 @@ PePR offers the following attacks:
 +------------------------------------------------------------+------------------------+--------------+
 | [3]_ Foolbox Attacks                                       | Robustness             | |nb2|_       |
 +------------------------------------------------------------+------------------------+--------------+
-| [4]_ Adversarial Robustness Toolbox (ART) Attacks          | Robustness             | |nb3|_       |
+| [4]_ Adversarial Robustness Toolbox (ART) Attacks          | Robustness/Privacy     | |nb3|_       |
 +------------------------------------------------------------+------------------------+--------------+
 
 .. |nb0| image:: https://colab.research.google.com/assets/colab-badge.svg

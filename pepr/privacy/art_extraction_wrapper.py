@@ -176,7 +176,7 @@ class BaseExtractionAttack(Attack):
             f"\n"
             f"\n###################### Attack Results ######################"
             f"\n"
-            + f"\n{'Target Models':<20}{'Success':>10}{'Distance':>10}"
+            + f"\n{'Target Models':<20}{'Accuracy':>10}"
             + _target_model_rows()
         )
 
@@ -245,9 +245,6 @@ class BaseExtractionAttack(Attack):
                 # -- Create table for the attack parameters.
                 self.report_section.append(Command("centering"))
                 with self.report_section.create(Tabular("|l|c|")) as tab_ap:
-                    if hasattr(self, "use_labels"):
-                        tab_ap.add_hline()
-                        tab_ap.add_row(["Use true labels", self.use_labels])
                     self._gen_attack_pars_rows(tm, tab_ap)
                     tab_ap.add_hline()
                 self.report_section.append(Command("captionsetup", "labelformat=empty"))
