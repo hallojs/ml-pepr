@@ -6,7 +6,7 @@ import os
 from pepr.attack import Attack
 from pepr import report, utilities
 import matplotlib.pyplot as plt
-from pylatex import Command, Tabular, MiniPage, NoEscape
+from pylatex import Command, Tabular, MiniPage, NoEscape, Figure
 from pylatex.section import Subsubsection
 
 from art.estimators.classification import KerasClassifier
@@ -798,32 +798,30 @@ class MIFace(Attack):
 
         self.attack_results["inferred_training_samples"] = inferred_samples
 
+        nb_tm = len(self.target_models)
+        if nb_tm > 1:
+            desc = "Fist inferred training sample per target model:"
+        else:
+            desc = "Fist inferred training samples:"
         logger.info(
             "Attack Summary"
             f"\n"
             f"\n###################### Attack Results ######################"
-            f"\nFist inferred training sample per target model:"
+            f"\n{desc}"
         )
+
         plt.figure(figsize=(15, 5))
-        for i in range(len(self.target_models)):
-            plt.subplot(1, len(self.target_models), i + 1)
-            plt.imshow(
-                (
-                    np.reshape(
-                        inferred_samples[i][
-                            0 + i,
-                        ],
-                        (
-                            inferred_samples[i][
-                                0 + i,
-                            ].shape[0],
-                            inferred_samples[i][
-                                0 + i,
-                            ].shape[1],
-                        ),
-                    )
-                )
-            )
+        if nb_tm > 1:
+            for i in range(nb_tm):
+                plt.subplot(1, nb_tm, i + 1)
+                plt.axis("off")
+                plt.imshow(inferred_samples[i][0])
+        else:
+            image_count = min(10, len(inferred_samples[0]))
+            for i in range(image_count):
+                plt.subplot(1, image_count, i + 1)
+                plt.axis("off")
+                plt.imshow(inferred_samples[0][i])
 
     def create_attack_report(self, save_path="art_report", pdf=False):
         """
@@ -918,4 +916,34 @@ class MIFace(Attack):
         self.report_section.append(Subsubsection("Attack Results"))
         res = self.attack_results
 
-        # TODO: Plot first 10 inferred images
+        # Plot image grid
+        nb_smaples = min(10, len(res["inferred_training_samples"][tm]))
+        ncols = min(10, nb_smaples)
+        fig, axes = plt.subplots(nrows=1, ncols=ncols, figsize=(15, 5))
+        for i in range(nb_smaples):
+            image = res["inferred_training_samples"][tm][i]
+            ax = axes[i]
+            ax.set_xticks([])
+            ax.set_yticks([])
+            ax.set_xlabel(f"Example {i}")
+            ax.imshow(image)
+
+        alias_no_spaces = str.replace(self.attack_alias, " ", "_")
+        fig.savefig(
+            save_path + f"/fig/{alias_no_spaces}-examples.pdf", bbox_inches="tight"
+        )
+        plt.close(fig)
+
+        with self.report_section.create(Figure(position="H")) as fig:
+            fig.add_image(
+                f"fig/{alias_no_spaces}-examples.pdf", width=NoEscape(r"\textwidth")
+            )
+            self.report_section.append(Command("captionsetup", "labelformat=empty"))
+            self.report_section.append(
+                Command(
+                    "captionof",
+                    "figure",
+                    extra_arguments="Inferred Samples (up to 10 samples, not sorted, "
+                    "not selected by any criteria)",
+                )
+            )
