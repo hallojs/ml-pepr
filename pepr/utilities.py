@@ -118,12 +118,13 @@ def create_attack_pars_table(report_section, values, pars_descriptors):
             for key in pars_descriptors:
                 # Add table row per pars_descriptor entry
                 desc = pars_descriptors[key]
-                if isinstance(values[key], float):
-                    value = str(round(values[key], 3))
-                else:
-                    value = str(values[key])
-                tab_ap.add_hline()
-                tab_ap.add_row([desc, value])
+                if key in values:
+                    if isinstance(values[key], float):
+                        value = str(round(values[key], 3))
+                    else:
+                        value = str(values[key])
+                    tab_ap.add_hline()
+                    tab_ap.add_row([desc, value])
             tab_ap.add_hline()
         report_section.append(Command("captionsetup", "labelformat=empty"))
         report_section.append(

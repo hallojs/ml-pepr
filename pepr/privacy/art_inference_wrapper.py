@@ -265,7 +265,9 @@ class BaseMembershipInferenceAttack(Attack):
                     del temp_pars_desc["attack_model"]
 
                 values = self.inference_attacks[tm].__dict__.copy()
-                # TODO: Include HopSkipJump parameters
+                if hasattr(self, "hopskipjump_args"):
+                    logger.debug("Include HopSkipJump params")
+                    values.update(self.hopskipjump_args)
                 utilities.create_attack_pars_table(
                     self.report_section,
                     values,
@@ -606,11 +608,21 @@ class LabelOnlyDecisionBoundary(BaseMembershipInferenceAttack):
     ):
         pars_descriptors = {
             "distance_threshold_tau": "Threshold distance",
+            # HopSkipJump parameters
+            "norm": "Adversarial perturbation norm",
+            "max_iter": "Max. iterations",
+            "max_eval": "Max. evaluations",
+            "init_eval": "Initial evaluations",
+            "init_size": "Max. trials",
+            "verbose": "Verbose output",
         }
 
         # Save HopSkipJump parameters
         self.hopskipjump_args = attack_pars.copy()
         del self.hopskipjump_args["distance_threshold_tau"]
+        # Hide verbose parameter from report
+        if "verbose" in self.hopskipjump_args:
+            del self.hopskipjump_args["verbose"]
 
         inference_attacks = []
         for target_model in target_models:
