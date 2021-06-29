@@ -431,6 +431,17 @@ class MembershipInferenceBlackBox(BaseMembershipInferenceAttack):
             "ART_MembershipInferenceBlackBox",
         )
 
+    def __getstate__(self):
+        if self.inference_attacks[0].default_model:
+            for inference_attack in self.inference_attacks:
+                # Delete attack model, because some are not pickable
+                del inference_attack.__dict__["attack_model"]
+        return super().__getstate__()
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        # TODO: Restore attack models (not required for just generating report)
+
     def inference_run(self, tm_index):
         """
         Run the black box inference attack.
