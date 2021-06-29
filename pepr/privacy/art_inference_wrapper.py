@@ -463,8 +463,8 @@ class MembershipInferenceBlackBox(BaseMembershipInferenceAttack):
 
 class MembershipInferenceBlackBoxRuleBased(BaseMembershipInferenceAttack):
     """
-    art.attacks.inference.membership_inference.MembershipInferenceBlackBoxRuleBased
-    wrapper class.
+    art.attacks.inference.membership_inference.MembershipInferenceBlackBoxRuleBased wrapper
+    class.
 
     Attack description:
     Implementation of a simple, rule-based black-box membership inference attack.
@@ -569,13 +569,15 @@ class LabelOnlyDecisionBoundary(BaseMembershipInferenceAttack):
         * distance_threshold_tau (float): Threshold distance for decision boundary.
           Samples with boundary distances larger than threshold are considered members
           of the training dataset.
-        * norm: Order of the norm. Possible values: “inf”, np.inf or 2.
-        * max_iter (int): Maximum number of iterations.
-        * max_eval (int): Maximum number of evaluations for estimating gradient.
-        * init_eval (int): Initial number of evaluations for estimating gradient.
-        * init_size (int): Maximum number of trials for initial generation of
+        * norm: (optional) Order of the norm. Possible values: “inf”, np.inf or 2.
+        * max_iter (int): (optional) Maximum number of iterations.
+        * max_eval (int): (optional) Maximum number of evaluations for estimating
+          gradient.
+        * init_eval (int): (optional) Initial number of evaluations for estimating
+          gradient.
+        * init_size (int): (optional) Maximum number of trials for initial generation of
           adversarial examples.
-        * verbose (bool): Show progress bars.
+        * verbose (bool): (optional) Show progress bars.
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
