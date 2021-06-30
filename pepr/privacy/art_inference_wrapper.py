@@ -301,14 +301,9 @@ class BaseMembershipInferenceAttack(Attack):
                     )
                 )
 
-    def _report_attack_results(self, save_path):
+    def _report_attack_results(self):
         """
         Create subsubsection describing the most important results of the attack.
-
-        Parameters
-        ----------
-        save_path :
-            Path to save the tex, pdf and asset files of the attack report.
 
         This subsection contains results only for the first target model.
         """
@@ -440,7 +435,12 @@ class MembershipInferenceBlackBox(BaseMembershipInferenceAttack):
 
     def __setstate__(self, state):
         super().__setstate__(state)
-        # TODO: Restore attack models (not required for just generating report)
+        # TODO: Restore attack models (not required for generating report)
+        # The attack_model attribute of the object must be stored and restored
+        # separately due to the incompatibility to Python's pickle. This can be done
+        # with model.save() (TensorFlow) or torch.save() (PyTorch). Restoring the
+        # attack model is not required for generating a report like the attack runner
+        # does.
 
     def inference_run(self, tm_index):
         """
