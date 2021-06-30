@@ -361,8 +361,9 @@ class MembershipInferenceBlackBox(BaseMembershipInferenceAttack):
         * input_type (str): (optional) the type of input to train the attack on. Can be
           one of: ‘prediction’ or ‘loss’. Default is prediction. Predictions can be
           either probabilities or logits, depending on the return type of the model.
-        * attack_model: (optional) The attack model to train, optional. If none is
-          provided, a default model will be created.
+        * attack_model: The attack model to train. Due to stability issues only
+          TensorFlow Keras models are currently allowed. (Use PyTorch at your own risk,
+          your runtime may crash.)
 
     data : numpy.ndarray
         Dataset with all input images used to attack the target models.
@@ -394,6 +395,17 @@ class MembershipInferenceBlackBox(BaseMembershipInferenceAttack):
             "input_type": "Input type",
             "attack_model": "Attack model",
         }
+
+        # Display warning if no Keras model is provided
+        if (
+            "attack_model" in attack_pars
+            and not isinstance(attack_pars["attack_model"], KerasClassifier)
+        ) or "attack_model" not in attack_pars:
+            logger.warning(
+                "The provided Attack Model (attack_model) seems not to be a Keras "
+                "classifier. This may result in stability issues and your runtime may "
+                "crash! It is recommended to use a Keras model for this attack."
+            )
 
         # Handle specific attack class parameters
         params = {}
