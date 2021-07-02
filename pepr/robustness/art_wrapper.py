@@ -161,16 +161,11 @@ def _report_attack_results(self, save_path):
     res = self.attack_results
 
     # Histogram
-    fig = plt.figure()
-    ax = plt.axes()
-    ax.hist(res["success_rate_list"][tm], edgecolor="black")
-    ax.set_xlabel("Accuracy")
-    ax.set_ylabel("Number of Classes")
-    ax.set_axisbelow(True)
-
-    alias_no_spaces = str.replace(self.attack_alias, " ", "_")
-    fig.savefig(save_path + f"/fig/{alias_no_spaces}-hist.pdf")
-    plt.close(fig)
+    path = report.plot_class_dist_histogram(
+        self.attack_alias,
+        res["success_rate_list"][tm],
+        save_path,
+    )
 
     with self.report_section.create(MiniPage()):
         with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
@@ -178,7 +173,7 @@ def _report_attack_results(self, save_path):
             self.report_section.append(
                 Command(
                     "includegraphics",
-                    NoEscape(f"fig/{alias_no_spaces}-hist.pdf"),
+                    NoEscape(path),
                     "width=8cm",
                 )
             )
@@ -210,6 +205,7 @@ def _report_attack_results(self, save_path):
             )
 
     _plot_most_vulnerable_aes(self, save_path, tm, 10)
+    alias_no_spaces = str.replace(self.attack_alias, " ", "_")
     with self.report_section.create(Figure(position="H")) as fig:
         fig.add_image(
             f"fig/{alias_no_spaces}-examples.pdf", width=NoEscape(r"\textwidth")

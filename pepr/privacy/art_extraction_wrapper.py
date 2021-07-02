@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 from pepr.attack import Attack
-from pepr import report, utilities
+from pepr import report
 import matplotlib.pyplot as plt
 from pylatex import Command, Tabular, MiniPage, NoEscape
 from pylatex.section import Subsubsection
