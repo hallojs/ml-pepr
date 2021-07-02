@@ -57,7 +57,7 @@ For full and concrete examples checkout our
 +----------------------------+------------------------------------------------------------------------------+--------------+
 | ``direct_gmia_tutorial``   | Attack a single target model with direct-gmia.                               | |nb1|_       |
 +----------------------------+------------------------------------------------------------------------------+--------------+
-| ``attack_runner_tutorial`` | Organize a pentest.                                                          | Coming soon! |
+| ``attack_runner_tutorial`` | Organize a pentest.                                                          | |nb2|_       |
 +----------------------------+------------------------------------------------------------------------------+--------------+
 
 .. |nb0| image:: https://colab.research.google.com/assets/colab-badge.svg
@@ -65,3 +65,6 @@ For full and concrete examples checkout our
 
 .. |nb1| image:: https://colab.research.google.com/assets/colab-badge.svg
 .. _nb1: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/direct_gmia_tutorial.ipynb
+
+.. |nb2| image:: https://colab.research.google.com/assets/colab-badge.svg
+.. _nb2: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/attack_runner_tutorial/attack_runner_tutorial.ipynb
