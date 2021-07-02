@@ -8,3 +8,4 @@ Privacy Attacks
    mia
    gmia
    art_extraction_wrapper
+   art_inference_wrapper

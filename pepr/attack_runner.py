@@ -11,7 +11,7 @@ import tensorflow as tf
 import yaml
 
 from pepr import report
-from pepr.privacy import mia, gmia, art_extraction_wrapper
+from pepr.privacy import mia, gmia, art_extraction_wrapper, art_inference_wrapper
 from pepr.robustness import foolbox_wrapper, art_wrapper
 
 logger = logging.getLogger(__name__)
@@ -120,6 +120,10 @@ def run_attacks(yaml_path, attack_obj_save_path, functions):
         "ART_AdversarialPatch": art_wrapper.AdversarialPatch,
         "ART_CopycatCNN": art_extraction_wrapper.CopycatCNN,
         "ART_KnockoffNets": art_extraction_wrapper.KnockoffNets,
+        "ART_MembershipInferenceBlackBox": art_inference_wrapper.MembershipInferenceBlackBox,
+        "ART_MembershipInferenceBlackBoxRuleBased": art_inference_wrapper.MembershipInferenceBlackBoxRuleBased,
+        "ART_LabelOnlyDecisionBoundary": art_inference_wrapper.LabelOnlyDecisionBoundary,
+        "ART_MIFace": art_inference_wrapper.MIFace,
     }
 
     attack_object_paths = {}

@@ -476,6 +476,37 @@ descriptions = {
         "arXiv:1812.02766. "
         "Attack implementation provided by the Adversarial Robustness Toolbox (ART)."
     ),
+    "ART_MembershipInferenceBlackBox": (
+        "Implementation of a learned black-box membership inference attack. "
+        "This implementation can use as input to the learning process probabilities/ "
+        "logits or losses, depending on the type of model and provided configuration. "
+        "Attack implementation provided by the Adversarial Robustness Toolbox (ART)."
+    ),
+    "ART_MembershipInferenceBlackBoxRuleBased": (
+        "Implementation of a simple, rule-based black-box membership inference attack. "
+        "This implementation uses the simple rule: if the model’s prediction for a "
+        "sample is correct, then it is a member. Otherwise, it is not a member. "
+        "Attack implementation provided by the Adversarial Robustness Toolbox (ART)."
+    ),
+    "ART_LabelOnlyDecisionBoundary": (
+        "Implementation of Label-Only Inference Attack based on Decision Boundary. "
+        "Reference: Christopher A. Choquette-Choo, Florian Tramer, Nicholas Carlini, "
+        "Nicolas Papernot, “Label-Only Membership Inference Attacks” (2021). arXiv "
+        "preprint arXiv:2007.14321. "
+        "Attack implementation provided by the Adversarial Robustness Toolbox (ART)."
+    ),
+    "ART_MIFace": (
+        "Implementation of the MIFace algorithm from Fredrikson et al. (2015). While "
+        "in that paper the attack is demonstrated specifically against face "
+        "recognition models, it is applicable more broadly to classifiers with "
+        "continuous features which expose class gradients. "
+        "Reference: Fredrikson, Matt and Jha, Somesh and Ristenpart, Thomas, "
+        "“Model Inversion Attacks That Exploit Confidence Information and Basic "
+        "Countermeasures” Proceedings of the 22nd ACM SIGSAC Conference on Computer "
+        "and Communications Security (2015). Pages 1322–1333 "
+        "https://doi.org/10.1145/2810103.2813677 . "
+        "Attack implementation provided by the Adversarial Robustness Toolbox (ART)."
+    ),
 }
 
 
@@ -556,3 +587,90 @@ def report_generator(save_path, attack_subsections, pdf=False):
         doc.generate_pdf(save_path + "/attack_report", clean_tex=False)
     else:
         doc.generate_tex(save_path + "/attack_report")
+
+
+def plot_class_dist_histogram(attack_alias, class_data, save_path):
+    """
+    Plot a class distribution histogram.
+
+    Parameters
+    ----------
+    attack_alias : str
+        Alias for a specific instantiation of the class.
+    class_data : list
+        List of data to plot per class.
+    save_path : str
+        Path to save the plotted figure.
+
+    Returns
+    -------
+    str
+        Path to the saved figure.
+    """
+    import matplotlib.pyplot as plt
+
+    fig = plt.figure()
+    ax = plt.axes()
+    ax.hist(class_data, edgecolor="black")
+    ax.set_xlabel("Accuracy")
+    ax.set_ylabel("Number of Classes")
+    ax.set_axisbelow(True)
+    alias_no_spaces = str.replace(attack_alias, " ", "_")
+    path = f"fig/{alias_no_spaces}-hist.pdf"
+    fig.savefig(save_path + f"/{path}")
+    plt.close(fig)
+    return path
+
+
+def create_attack_pars_table(report_section, values, pars_descriptors):
+    """
+    Generate LaTex table from pars_descriptors with fancy parameter descriptions.
+
+    Parameters
+    ----------
+    report_section : pepr.report.ReportSection
+        ReportSection container object for the current attack.
+    values : dict
+        Dictionary with the values stored for the keys in `pars_descriptors`. If
+        `pars_descriptors` has an entry "max_iter", then `values` should also have an
+        entry "max_iter" but holding the argument value instead of a description.
+    pars_descriptors : dict
+        Dictionary of attack parameters and their description shown in the attack
+        report.
+
+    Returns
+    -------
+    int
+        Number of table rows added.
+    """
+    from pylatex import Command, Tabular
+
+    new_rows = len(pars_descriptors)
+
+    if new_rows > 0:
+        # Create table for the attack parameters.
+        new_rows = len(pars_descriptors)
+        with report_section.create(Tabular("|l|c|")) as tab_ap:
+            for key in pars_descriptors:
+                # Add table row per pars_descriptor entry
+                desc = pars_descriptors[key]
+                if key in values:
+                    if isinstance(values[key], float):
+                        value = str(round(values[key], 3))
+                    else:
+                        value = str(values[key])
+                    tab_ap.add_hline()
+                    tab_ap.add_row([desc, value])
+            tab_ap.add_hline()
+        report_section.append(Command("captionsetup", "labelformat=empty"))
+        report_section.append(
+            Command(
+                "captionof",
+                "table",
+                extra_arguments="Attack parameters",
+            )
+        )
+    else:
+        report_section.append("Attack has no configuration parameters.")
+
+    return new_rows

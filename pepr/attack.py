@@ -2,8 +2,9 @@
 
 from abc import ABC, abstractmethod
 
-import tensorflow as tf
 from tensorflow.keras import models
+
+from pepr.report import ReportSection
 
 
 class Attack(ABC):
@@ -37,6 +38,14 @@ class Attack(ABC):
         self.data_conf = data_conf
         self.target_models = target_models
         self.attack_results = {}
+
+        # Dummy section to get rid of unresolved reference warnings. This attribute
+        # should be overwritten by the actual report section as soon as it is created.
+        self.report_section = ReportSection(
+            "[Placeholder] If you see this, something went wrong.",
+            "placeholder",
+            "placeholder",
+        )
 
         # Path of serialized object for tf's Model.save()
         self.obj_save_path = "attack_objects"

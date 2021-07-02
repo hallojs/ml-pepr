@@ -534,7 +534,7 @@ class BaseAttack(Attack):
                 misclass_class.append(np.mean(is_adv_eps[class_idx]))
             title = "Success Rate Distribution"
 
-            path = utilities.plot_class_dist_histogram(
+            path = report.plot_class_dist_histogram(
                 self.attack_alias, misclass_class, save_path
             )
 

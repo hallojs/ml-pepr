@@ -1,5 +1,5 @@
-ART Attacks
-===============
+ART Evasion Attacks
+===================
 
 .. currentmodule:: pepr.robustness.art_wrapper
 
