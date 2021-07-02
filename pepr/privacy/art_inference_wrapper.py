@@ -246,7 +246,7 @@ class BaseMembershipInferenceAttack(Attack):
             Path to save the tex, pdf and asset files of the attack report.
         """
         self._report_attack_configuration()
-        self._report_attack_results(save_path)
+        self._report_attack_results()
 
     def _report_attack_configuration(self):
         """
@@ -268,7 +268,7 @@ class BaseMembershipInferenceAttack(Attack):
                 if hasattr(self, "hopskipjump_args"):
                     logger.debug("Include HopSkipJump params")
                     values.update(self.hopskipjump_args)
-                utilities.create_attack_pars_table(
+                report.create_attack_pars_table(
                     self.report_section,
                     values,
                     temp_pars_desc,
@@ -908,7 +908,7 @@ class MIFace(Attack):
                     del temp_pars_desc["verbose"]
                 values = self.inference_attacks[tm].__dict__.copy()
 
-                utilities.create_attack_pars_table(
+                report.create_attack_pars_table(
                     self.report_section,
                     values,
                     temp_pars_desc,

@@ -295,7 +295,7 @@ class BaseExtractionAttack(Attack):
         res = self.attack_results
 
         # Histogram
-        path = utilities.plot_class_dist_histogram(
+        path = report.plot_class_dist_histogram(
             self.attack_alias, res["ec_accuracy_list"][tm], save_path
         )
 
