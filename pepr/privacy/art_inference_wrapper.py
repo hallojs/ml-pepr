@@ -421,6 +421,8 @@ class MembershipInferenceBlackBox(BaseMembershipInferenceAttack):
                     classifier=target_classifier, **params
                 )
             )
+            if inference_attacks[-1].attack_model_type is "None":
+                inference_attacks[-1].attack_model_type = "Custom"
 
         super().__init__(
             attack_alias,
