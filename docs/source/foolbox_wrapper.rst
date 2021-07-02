@@ -3,8 +3,18 @@ Foolbox Attacks
 
 .. currentmodule:: pepr.robustness.foolbox_wrapper
 
-You can find a basic example notebook `here <https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/foolbox_tutorial.ipynb>`_.
+.. note:: You can find a basic example notebook `here <https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/foolbox_tutorial.ipynb>`_.
 
+Base Wrapper Class
+******************
+The base class does not implement any attack. The :ref:`Foolbox attack wrappers
+<Foolbox Attack Wrappers>` inherit from the `BaseAttack` class and have the same
+attributes.
+
+.. autoclass:: BaseAttack
+
+Foolbox Attack Wrappers
+***********************
 .. autosummary::
     :nosignatures:
 

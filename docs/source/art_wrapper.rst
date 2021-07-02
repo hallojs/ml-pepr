@@ -3,8 +3,19 @@ ART Evasion Attacks
 
 .. currentmodule:: pepr.robustness.art_wrapper
 
-You can find a basic example notebook `here <https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/art_tutorial.ipynb>`_.
+.. note:: You can find a basic example notebook `here <https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/art_tutorial.ipynb>`_.
 
+Base Wrapper Class
+******************
+The base classes do not implement any attack. The :ref:`ART evasion attack wrappers
+<ART Evasion Attack Wrappers>` inherit from the `BaseEvasionAttack` or `BasePatchAttack`
+class and have the same attributes.
+
+.. autoclass:: BaseEvasionAttack
+.. autoclass:: BasePatchAttack
+
+ART Evasion Attack Wrappers
+***************************
 .. autosummary::
     :nosignatures:
 
