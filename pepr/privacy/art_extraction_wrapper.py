@@ -244,16 +244,14 @@ class BaseExtractionAttack(Attack):
             with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
                 # -- Create table for the attack parameters.
                 self.report_section.append(Command("centering"))
-                with self.report_section.create(Tabular("|l|c|")) as tab_ap:
-                    self._gen_attack_pars_rows(tm, tab_ap)
-                    tab_ap.add_hline()
-                self.report_section.append(Command("captionsetup", "labelformat=empty"))
-                self.report_section.append(
-                    Command(
-                        "captionof",
-                        "table",
-                        extra_arguments="Attack parameters",
-                    )
+                temp_pars_desc = self.pars_descriptors.copy()
+                if "verbose" in temp_pars_desc:
+                    del temp_pars_desc["verbose"]
+                values = self.extraction_attacks[tm].__dict__.copy()
+                report.create_attack_pars_table(
+                    self.report_section,
+                    values,
+                    temp_pars_desc,
                 )
 
             with self.report_section.create(MiniPage(width=r"0.49\textwidth")):

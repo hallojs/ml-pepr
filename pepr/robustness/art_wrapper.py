@@ -243,20 +243,7 @@ def _report_attack_configuration(self):
         with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
             # -- Create table for the attack parameters.
             self.report_section.append(Command("centering"))
-            with self.report_section.create(Tabular("|l|c|")) as tab_ap:
-                if hasattr(self, "use_labels"):
-                    tab_ap.add_hline()
-                    tab_ap.add_row(["Use true labels", self.use_labels])
-                self._gen_attack_pars_rows(tm, tab_ap)
-                tab_ap.add_hline()
-            self.report_section.append(Command("captionsetup", "labelformat=empty"))
-            self.report_section.append(
-                Command(
-                    "captionof",
-                    "table",
-                    extra_arguments="Attack parameters",
-                )
-            )
+            self._gen_attack_pars_table(tm)
 
         with self.report_section.create(MiniPage(width=r"0.49\textwidth")):
             # -- Create table for the data configuration
@@ -513,27 +500,33 @@ class BaseEvasionAttack(Attack):
         _report_attack_configuration(self)
         _report_attack_results(self, save_path)
 
-    def _gen_attack_pars_rows(self, tm, table):
+    def _gen_attack_pars_table(self, tm):
         """
-        Generate LaTex table rows with fancy parameter descriptions.
+        Generate LaTex table for attack parameters with fancy parameter descriptions.
 
         Parameters
         ----------
         tm : int
             Target model index.
-        table : pylatex.Tabular
-            Pylatex table in which the rows are append.
         """
-        for key in self.pars_descriptors:
-            desc = self.pars_descriptors[key]
-            if key == "targeted":
-                key = "_targeted"
-            elif key == "verbose":
-                continue
-            value = str(self.art_attacks[tm].__dict__[key])
+        temp_pars_desc = self.pars_descriptors.copy()
+        if "verbose" in temp_pars_desc:
+            del temp_pars_desc["verbose"]
+        if "targeted" in temp_pars_desc:
+            temp_pars_desc["_targeted"] = temp_pars_desc["targeted"]
+            del temp_pars_desc["targeted"]
+        values = self.art_attacks[tm].__dict__.copy()
 
-            table.add_hline()
-            table.add_row([desc, value])
+        # Add use_labels to table
+        if hasattr(self, "use_labels"):
+            temp_pars_desc["use_labels"] = "Use true labels"
+            values["use_labels"] = self.use_labels
+
+        report.create_attack_pars_table(
+            self.report_section,
+            values,
+            temp_pars_desc,
+        )
 
 
 class BasePatchAttack(Attack):
@@ -779,34 +772,35 @@ class BasePatchAttack(Attack):
         _report_attack_configuration(self)
         _report_attack_results(self, save_path)
 
-    def _gen_attack_pars_rows(self, tm, table):
+    def _gen_attack_pars_table(self, tm):
         """
-        Generate LaTex table rows with fancy parameter descriptions.
+        Generate LaTex table for attack parameters with fancy parameter descriptions.
 
         Parameters
         ----------
         tm : int
             Target model index.
-        table : pylatex.Tabular
-            Pylatex table in which the rows are append.
         """
-        for key in self.pars_descriptors:
-            desc = self.pars_descriptors[key]
-            if key == "targeted":
-                key = "_targeted"
-            elif key == "verbose":
-                continue
-            elif key.startswith("gen_"):
-                key = key.replace("gen_", "", 1)
+        temp_pars_desc = self.pars_descriptors.copy()
+        if "verbose" in temp_pars_desc:
+            del temp_pars_desc["verbose"]
+        if "targeted" in temp_pars_desc:
+            temp_pars_desc["_targeted"] = temp_pars_desc["targeted"]
+            del temp_pars_desc["targeted"]
+        for key in temp_pars_desc:
+            if key.startswith("gen_"):
+                temp_pars_desc[key.replace("gen_", "", 1)] = temp_pars_desc[key]
+                del temp_pars_desc[key]
             elif key.startswith("apply_"):
-                key = key.replace("apply_", "", 1)
-            try:
-                value = str(self.art_attacks[tm].__dict__[key])
-            except KeyError:
-                value = str(self.art_attacks[tm]._attack.__dict__[key])
-
-            table.add_hline()
-            table.add_row([desc, value])
+                temp_pars_desc[key.replace("apply_", "", 1)] = temp_pars_desc[key]
+                del temp_pars_desc[key]
+        values = self.art_attacks[tm].__dict__.copy()
+        values.update(self.art_attacks[tm]._attack.__dict__.copy())
+        report.create_attack_pars_table(
+            self.report_section,
+            values,
+            temp_pars_desc,
+        )
 
 
 class AdversarialPatch(BasePatchAttack):
