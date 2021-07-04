@@ -8,10 +8,12 @@ Foolbox Attacks
 Base Wrapper Class
 ******************
 The base class does not implement any attack. The :ref:`Foolbox attack wrappers
-<Foolbox Attack Wrappers>` inherit from the `BaseAttack` class and have the same
+<foolbox_wrappers>` inherit from the `BaseAttack` class and have the same
 attributes.
 
 .. autoclass:: BaseAttack
+
+.. _foolbox_wrappers:
 
 Foolbox Attack Wrappers
 ***********************

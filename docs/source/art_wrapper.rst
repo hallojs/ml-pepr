@@ -8,11 +8,13 @@ ART Evasion Attacks
 Base Wrapper Class
 ******************
 The base classes do not implement any attack. The :ref:`ART evasion attack wrappers
-<ART Evasion Attack Wrappers>` inherit from the `BaseEvasionAttack` or `BasePatchAttack`
+<art_evasion_wrappers>` inherit from the `BaseEvasionAttack` or `BasePatchAttack`
 class and have the same attributes.
 
 .. autoclass:: BaseEvasionAttack
 .. autoclass:: BasePatchAttack
+
+.. _art_evasion_wrappers:
 
 ART Evasion Attack Wrappers
 ***************************

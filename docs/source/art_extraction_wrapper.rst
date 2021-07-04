@@ -6,10 +6,12 @@ ART Extraction Attacks
 Base Wrapper Class
 ******************
 The base class does not implement any attack. The :ref:`ART extraction attack wrappers
-<ART Extraction Attack Wrappers>` inherit from the `BaseExtractionAttack` class
+<art_extraction_wrappers>` inherit from the `BaseExtractionAttack` class
 and have the same attributes.
 
 .. autoclass:: BaseExtractionAttack
+
+.. _art_extraction_wrappers:
 
 ART Extraction Attack Wrappers
 ******************************

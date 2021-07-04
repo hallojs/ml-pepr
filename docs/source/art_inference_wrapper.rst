@@ -6,10 +6,12 @@ ART Inference Attacks
 Base Wrapper Class
 ******************
 The base class does not implement any attack. The :ref:`ART inference attack wrappers
-<ART Inference Attack Wrappers>` inherit from the `BaseMembershipInferenceAttack` class
+<art_inference_wrappers>` inherit from the `BaseMembershipInferenceAttack` class
 and have the same attributes.
 
 .. autoclass:: BaseMembershipInferenceAttack
+
+.. _art_inference_wrappers:
 
 ART Inference Attack Wrappers
 *****************************
