@@ -636,7 +636,9 @@ def create_attack_pars_table(report_section, values, pars_descriptors):
         entry "max_iter" but holding the argument value instead of a description.
     pars_descriptors : dict
         Dictionary of attack parameters and their description shown in the attack
-        report.
+        report. Only attack parameters in this dictionary are added to the table. To
+        hide a parameter (e.g. the verbose switch), do not include it in this
+        dictionary.
 
     Returns
     -------
