@@ -50,15 +50,19 @@ Examples
 For full and concrete examples checkout our
 `example notebooks <https://github.com/hallojs/ml-pepr/tree/master/notebooks>`_:
 
-+----------------------------+------------------------------------------------------------------------------+--------------+
-| Notebook                   | Description                                                                  | Google Colab |
-+============================+==============================================================================+==============+
-| ``mia_tutorial``           | Attack a single target model with mia.                                       | |nb0|_       |
-+----------------------------+------------------------------------------------------------------------------+--------------+
-| ``direct_gmia_tutorial``   | Attack a single target model with direct-gmia.                               | |nb1|_       |
-+----------------------------+------------------------------------------------------------------------------+--------------+
-| ``attack_runner_tutorial`` | Organize a pentest.                                                          | |nb2|_       |
-+----------------------------+------------------------------------------------------------------------------+--------------+
++----------------------------+-----------------------------------------------------------------------------------------+--------------+
+| Notebook                   | Description                                                                             | Google Colab |
++============================+=========================================================================================+==============+
+| ``mia_tutorial``           | Attack a single target model with mia.                                                  | |nb0|_       |
++----------------------------+-----------------------------------------------------------------------------------------+--------------+
+| ``direct_gmia_tutorial``   | Attack a single target model with direct-gmia.                                          | |nb1|_       |
++----------------------------+-----------------------------------------------------------------------------------------+--------------+
+| ``foolbox_tutorial``       | Run attacks from the `Foolbox <https://github.com/bethgelab/foolbox>`_                  | |nb2|_       |
++----------------------------+-----------------------------------------------------------------------------------------+--------------+
+| ``art_tutorial``           | Run attacks from `ART <https://github.com/Trusted-AI/adversarial-robustness-toolbox>`_  | |nb3|_       |
++----------------------------+-----------------------------------------------------------------------------------------+--------------+
+| ``attack_runner_tutorial`` | Organize a pentest.                                                                     | |nb4|_       |
++----------------------------+-----------------------------------------------------------------------------------------+--------------+
 
 .. |nb0| image:: https://colab.research.google.com/assets/colab-badge.svg
 .. _nb0: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/mia_tutorial.ipynb
@@ -67,4 +71,10 @@ For full and concrete examples checkout our
 .. _nb1: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/direct_gmia_tutorial.ipynb
 
 .. |nb2| image:: https://colab.research.google.com/assets/colab-badge.svg
-.. _nb2: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/attack_runner_tutorial/attack_runner_tutorial.ipynb
+.. _nb2: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/foolbox_tutorial.ipynb
+
+.. |nb3| image:: https://colab.research.google.com/assets/colab-badge.svg
+.. _nb3: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/art_tutorial.ipynb
+
+.. |nb4| image:: https://colab.research.google.com/assets/colab-badge.svg
+.. _nb4: https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/attack_runner_tutorial/attack_runner_tutorial.ipynb
