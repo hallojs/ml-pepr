@@ -86,6 +86,8 @@ def filter_out_outlier(
     filter_pars : dict
         Dictionary containing needed filter parameters:
 
+        * number_classes (int): Number of different classes the target model
+          predict.
         * number_reference_models (int): Number of reference models to be trained.
         * reference_training_set_size (int): Size of the trainings set for each
           reference model.
@@ -319,6 +321,6 @@ def filter_out_outlier(
     )
 
     # Step 8
-    filtered_target_indices = np.delete(data_conf["evaluation_indices"], target_records)
+    filtered_data_indices = np.delete(data_conf["evaluation_indices"], target_records)
 
-    return filtered_target_indices, neighbor_threshold, probability_threshold
+    return filtered_data_indices, neighbor_threshold, probability_threshold
