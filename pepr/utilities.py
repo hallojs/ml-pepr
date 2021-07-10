@@ -56,9 +56,15 @@ def assign_record_ids_to_target_models(
 
     return records_per_target_model + offset
 
-def filter_out_outlier(data, labels, filter_pars, data_conf, save_path=None, load_pars=None):
+
+def filter_out_outlier(
+    data, labels, filter_pars, data_conf, save_path=None, load_pars=None
+):
     """
     Filter out potentially vulnerable samples.
+
+    The first 7 steps are identical to the first 7 of the direct GMIA attack
+    (:meth:`pepr.privacy.gmia.DirectGmia`) to find potential vulnerable records.
 
     Steps:
 
@@ -146,20 +152,23 @@ def filter_out_outlier(data, labels, filter_pars, data_conf, save_path=None, loa
         Calculated neighbor threshold of the result.
     float:
         Calculated probability threshold of the result.
+
+    References
+    ----------
+    Partial implementation of the direct gmia from Long, Yunhui and Bindschaedler,
+    Vincent and Wang, Lei and Bu, Diyue and Wang, Xiaofeng and Tang, Haixu and Gunter,
+    Carl A and Chen, Kai (2018). Understanding membership inferences on well-generalized
+    learning models. arXiv preprint arXiv:1802.04889.
     """
     from pepr.privacy.gmia import DirectGmia
     from tensorflow.keras import models, utils
 
-    labels_cat = utils.to_categorical(
-        labels, num_classes=filter_pars["number_classes"]
-    )
+    labels_cat = utils.to_categorical(labels, num_classes=filter_pars["number_classes"])
 
     # Slice data set
     # -- Used to train the reference models
     reference_train_data = data[data_conf["reference_indices"]]
-    reference_train_labels_cat = labels_cat[
-        data_conf["reference_indices"]
-    ]
+    reference_train_labels_cat = labels_cat[data_conf["reference_indices"]]
 
     # -- Used to train the target models
     target_train_data = data[data_conf["target_indices"]]
@@ -173,12 +182,10 @@ def filter_out_outlier(data, labels, filter_pars, data_conf, save_path=None, loa
     if load or "records_per_reference_model" not in load_pars.keys():
         # -- Compute Step 1
         logger.info("Create mapping of records to reference models.")
-        records_per_reference_model = (
-            DirectGmia._assign_records_to_reference_models(
-                filter_pars["number_reference_models"],
-                len(reference_train_data),
-                filter_pars["reference_training_set_size"],
-            )
+        records_per_reference_model = DirectGmia._assign_records_to_reference_models(
+            filter_pars["number_reference_models"],
+            len(reference_train_data),
+            filter_pars["reference_training_set_size"],
         )
         # -- Save Step 1
         if save_path is not None:
@@ -192,8 +199,7 @@ def filter_out_outlier(data, labels, filter_pars, data_conf, save_path=None, loa
         records_per_reference_model = np.load(path)
 
     logger.debug(
-        f"records_per_reference_model shape: "
-        f"{records_per_reference_model.shape}"
+        f"records_per_reference_model shape: " f"{records_per_reference_model.shape}"
     )
 
     # Step 2
@@ -223,8 +229,7 @@ def filter_out_outlier(data, labels, filter_pars, data_conf, save_path=None, loa
 
     # Steps 3-6
     if load or (
-        "pairwise_distances_hlf_" + filter_pars["hlf_metric"]
-        not in load_pars.keys()
+        "pairwise_distances_hlf_" + filter_pars["hlf_metric"] not in load_pars.keys()
     ):
         # -- Compute Step 3
         logger.info("Generate intermediate models")
