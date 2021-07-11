@@ -1024,7 +1024,7 @@ class Mia(attack.Attack):
         ax.legend()
 
         alias_no_spaces = str.replace(self.attack_alias, " ", "_")
-        fig.savefig(save_path + f"fig/{alias_no_spaces}-ecdf.pdf", bbox_inches="tight")
+        fig.savefig(save_path + f"/fig/{alias_no_spaces}-ecdf.pdf", bbox_inches="tight")
         plt.close(fig)
 
         with self.report_section.create(MiniPage()):
