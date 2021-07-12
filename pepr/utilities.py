@@ -58,24 +58,23 @@ def assign_record_ids_to_target_models(
 
 
 def filter_out_outlier(
-    data, labels, filter_pars, data_conf, save_path=None, load_pars=None
+    data, labels, filter_pars, save_path=None, load_pars=None
 ):
     """
     Filter out potentially vulnerable samples.
 
-    The first 7 steps are identical to the first 7 of the direct GMIA attack
-    (:meth:`pepr.privacy.gmia.DirectGmia`) to find potential vulnerable records.
+    The general idea is similar to (:meth:`pepr.privacy.gmia.DirectGmia`) to find
+    potential vulnerable records.
 
     Steps:
 
     1. Create mapping of records to reference models.
     2. Train the reference models.
     3. Generate intermediate models.
-    4. Extract reference high-level features.
-    5. Extract target high-level features.
-    6. Compute pairwise distances between reference and target high-level features.
-    7. Determine potential vulnerable target records.
-    8. Remove potential vulnerable target records.
+    4. Extract high-level features.
+    5. Compute pairwise distances between high-level features.
+    6. Determine potential vulnerable records.
+    7. Remove potential vulnerable records.
 
     Parameters
     ----------
@@ -103,27 +102,17 @@ def filter_out_outlier(
         * hlf_layer_number (int): If value is n, the n-th layer of the model
           returned by create_compile_model is used to extract the high-level feature
           vectors.
-        * neighbor_threshold (float): If distance is smaller then the neighbor
+        * distance_neighbor_threshold (float): If distance is smaller than the neighbor
           threshold the record is selected as target record.
-        * probability_threshold (float): For details see section 4.3 from the paper.
-        * number_target_records (int): If set, the selection algorithm performs
-          `max_search_rounds`, to find a `neighbor_threshold`, that leads to a finding
-          of `n_targets` target records. These target records are most vulnerable with
-          respect to our selection criterion.
+        * number_neighbor_threshold (float): If number of neighbors of a record is
+          smaller than this, it is considered a vulnerable example.
+        * number_outlier (int): If set, the selection algorithm performs
+          `max_search_rounds`, to find a `distance_neighbor_threshold`, that leads to a
+          finding of `n_targets` target records. These target records are most
+          vulnerable with respect to our selection criterion.
         * max_search_rounds (int): If `number_target_records` is given, maximal
           `max_search_rounds` are performed to find `number_target_records` of potential
           vulnerable target records.
-
-    data_conf : dict
-
-        * reference_indices (list): List of indices describing which of the records
-          from data are used to train the reference models.
-        * target_indices (list): List of indices describing which of the records
-          from data were used to train the target model(s).
-        * evaluation_indices (list): List of indices describing which of the records
-          from data are used to evaluate an attack. Typically these are to one half
-          records used to train the target models and one half neither used to train
-          the target model(s) or the reference models.
 
     save_path : str
         If path is given, the following (partly computational expensive)
@@ -131,10 +120,8 @@ def filter_out_outlier(
 
         * The mapping of training-records to reference models
         * The trained reference models
-        * The reference high-level features
-        * The target high-level features
-        * The matrix containing all pairwise distances between the reference- and
-          target high-level features.
+        * The high-level features
+        * The matrix containing all pairwise distances between the high-level features.
 
     load_pars : dict
         If this dictionary is given, the following computational intermediate
@@ -149,11 +136,11 @@ def filter_out_outlier(
     Returns
     -------
     numpy.ndarray:
-        Target indices without outliers.
+        Dataset indices without outliers.
     float:
-        Calculated neighbor threshold of the result.
+        Calculated neighbor distance threshold of the result.
     float:
-        Calculated probability threshold of the result.
+        Calculated neighbor count threshold of the result.
 
     References
     ----------
@@ -167,17 +154,6 @@ def filter_out_outlier(
 
     labels_cat = utils.to_categorical(labels, num_classes=filter_pars["number_classes"])
 
-    # Slice data set
-    # -- Used to train the reference models
-    reference_train_data = data[data_conf["reference_indices"]]
-    reference_train_labels_cat = labels_cat[data_conf["reference_indices"]]
-
-    # -- Used to train the target models
-    target_train_data = data[data_conf["target_indices"]]
-
-    # -- Used for the evaluation of an attack
-    attack_eval_data = data[data_conf["evaluation_indices"]]
-
     load = load_pars is None
 
     # Step 1
@@ -186,7 +162,7 @@ def filter_out_outlier(
         logger.info("Create mapping of records to reference models.")
         records_per_reference_model = DirectGmia._assign_records_to_reference_models(
             filter_pars["number_reference_models"],
-            len(reference_train_data),
+            len(data),
             filter_pars["reference_training_set_size"],
         )
         # -- Save Step 1
@@ -210,8 +186,8 @@ def filter_out_outlier(
         reference_models = DirectGmia._train_reference_models(
             filter_pars["create_compile_model"],
             records_per_reference_model,
-            reference_train_data,
-            reference_train_labels_cat,
+            data,
+            labels_cat,
             filter_pars["reference_epochs"],
             filter_pars["reference_batch_size"],
         )
@@ -240,38 +216,22 @@ def filter_out_outlier(
         )
 
         # -- Compute Step 4
-        logger.info("Extract reference high-level features.")
-        reference_hlf = DirectGmia._extract_hlf(
-            reference_intermediate_models, reference_train_data
-        )
+        logger.info("Extract high-level features.")
+        hlf = DirectGmia._extract_hlf(reference_intermediate_models, data)
         # -- Save Step 4
         if save_path is not None:
-            path = save_path + "/reference_hlf.npy"
-            logger.info(f"Save reference high-level features: {path}.")
-            np.save(path, reference_hlf)
+            path = save_path + "/hlf.npy"
+            logger.info(f"Save high-level features: {path}.")
+            np.save(path, hlf)
 
         # -- Compute Step 5
-        logger.info("Extract target high-level features.")
-        target_hlf = DirectGmia._extract_hlf(
-            reference_intermediate_models, attack_eval_data
-        )
-        # -- Save Step 5
-        if save_path is not None:
-            path = save_path + "/target_hlf.npy"
-            logger.info(f"Save target high-level features: {path}.")
-            np.save(path, reference_hlf)
-
-        # -- Compute Step 6
-        logger.info(
-            "Compute pairwise distances between reference and target high-level "
-            "features."
-        )
+        logger.info("Compute pairwise distances between high-level features.")
         hlf_distances = DirectGmia._calc_pairwise_distances(
-            target_hlf,
-            reference_hlf,
+            hlf,
+            hlf,
             filter_pars["hlf_metric"],
         )
-        # -- Save Step 6 (Results from step 3-6)
+        # -- Save Step 5 (Results from step 3-5)
         if save_path is not None:
             path = (
                 save_path
@@ -279,48 +239,83 @@ def filter_out_outlier(
                 + filter_pars["hlf_metric"]
                 + ".npy"
             )
-            logger.info(
-                f"Save pairwise distances between reference and target high-level "
-                f"features: {path}."
-            )
+            logger.info(f"Save pairwise distances between high-level features: {path}.")
             np.save(path, hlf_distances)
 
     else:
-        # -- Or Load results from Steps 3-6
+        # -- Or Load results from Steps 3-5
         path = load_pars["pairwise_distances_hlf_" + filter_pars["hlf_metric"]]
         logger.info(f"Load distance matrix : {path}.")
         hlf_distances = np.load(path)
 
-    # -- Compute Step 7
-    number_target_records = None
-    if "number_target_records" in filter_pars.keys():
-        number_target_records = filter_pars["number_target_records"]
+    # -- Compute Step 6
+    number_outlier = None
+    if "number_outlier" in filter_pars.keys():
+        number_outlier = filter_pars["number_outlier"]
     max_search_rounds = 100
     if "max_search_rounds" in filter_pars.keys():
         max_search_rounds = filter_pars["max_search_rounds"]
-    neighbor_threshold = 0.5
-    if "neighbor_threshold" in filter_pars.keys():
-        neighbor_threshold = filter_pars["neighbor_threshold"]
-    probability_threshold = 0.1
-    if "probability_threshold" in filter_pars.keys():
-        probability_threshold = filter_pars["probability_threshold"]
+    distance_neighbor_threshold = 0.5
+    if "distance_neighbor_threshold" in filter_pars.keys():
+        distance_neighbor_threshold = filter_pars["distance_neighbor_threshold"]
+    number_neighbor_threshold = 10
+    if "number_neighbor_threshold" in filter_pars.keys():
+        number_neighbor_threshold = filter_pars["number_neighbor_threshold"]
 
-    logger.info("Determine potential vulnerable target records.")
+    logger.info("Determine potential vulnerable data records (outliers).")
+
+    def select_outlier(
+        distances,
+        distance_neighbor_threshold=0.5,
+        number_neighbor_threshold=10,
+        number_outlier=None,
+        max_search_rounds=100,
+    ):
+        def selection():
+            n_neighbors = np.count_nonzero(distances < distance_neighbor_threshold, axis=1)
+            return np.where(n_neighbors < number_neighbor_threshold)[0]
+
+        if number_outlier is None:
+            return selection(), distance_neighbor_threshold, number_neighbor_threshold
+
+        outlier_indices = selection()
+        jmp_size = 1
+        cnt = 0
+        while len(outlier_indices) != number_outlier and cnt < max_search_rounds:
+            # Binary search
+            jmp_size /= 2
+            if len(outlier_indices) < number_outlier:
+                distance_neighbor_threshold -= jmp_size
+            else:
+                distance_neighbor_threshold += jmp_size
+
+            cnt += 1
+            outlier_indices = selection()
+            if cnt % 5 == 0:
+                logger.debug(f"Performed {cnt} search rounds.")
+                logger.debug(f"Found {len(outlier_indices)} outlier.")
+                logger.debug(f"Distance neighbor threshold: {distance_neighbor_threshold}")
+
+        logger.info(f"Performed {cnt} search rounds.")
+        logger.info(f"Number of outliers: {len(outlier_indices)}.")
+        logger.info(f"Outlier (indexes): {outlier_indices}.")
+        logger.info(f"Distance neighbor threshold: {distance_neighbor_threshold}")
+
+        return outlier_indices, distance_neighbor_threshold, number_neighbor_threshold
+
     (
-        target_records,
-        neighbor_threshold,
-        probability_threshold,
-    ) = DirectGmia._select_target_records(
-        len(reference_train_data),
-        len(target_train_data),
+        outlier_indices,
+        distance_neighbor_threshold,
+        number_neighbor_threshold,
+    ) = select_outlier(
         hlf_distances,
-        neighbor_threshold,
-        probability_threshold,
-        number_target_records,
+        distance_neighbor_threshold,
+        number_neighbor_threshold,
+        number_outlier,
         max_search_rounds,
     )
 
-    # Step 8
-    filtered_data_indices = np.delete(data_conf["evaluation_indices"], target_records)
+    # Step 7
+    filtered_data_indices = np.delete(np.arange(len(data)), outlier_indices)
 
-    return filtered_data_indices, neighbor_threshold, probability_threshold
+    return filtered_data_indices, distance_neighbor_threshold, number_neighbor_threshold
