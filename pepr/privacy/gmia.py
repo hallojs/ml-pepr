@@ -749,20 +749,30 @@ class DirectGmia(attack.Attack):
             return selection(), neighbor_threshold, probability_threshold
 
         target_records = selection()
+        # Calculating search area for binary search, so that every possible threshold
+        # can be reached. The search area will look something like this:
+        #                  initial jump size
+        #                 |---------------|
+        # [00000000000----*---------------] (search area)
+        #             ^   ^              ^
+        #             |   |              max distance value
+        #             |   initial neighbor threshold
+        #             min distance value
+        max_dist = np.max(distances)
+        min_dist = np.min(distances)
+        last_jmp = max(
+            abs(neighbor_threshold - max_dist),
+            abs(neighbor_threshold - min_dist),
+        )
         cnt = 0
-        last_jmp = neighbor_threshold
         while len(target_records) != number_target_records and cnt < max_search_rounds:
-            if cnt == 0 and len(target_records) < number_target_records:
-                neighbor_threshold += last_jmp
-            elif cnt == 0 and len(target_records) > number_target_records:
-                neighbor_threshold += last_jmp
+            # Binary search
+            last_jmp /= 2
+            if len(target_records) < number_target_records:
+                neighbor_threshold -= last_jmp
             else:
-                if len(target_records) < number_target_records:
-                    last_jmp *= 2
-                    neighbor_threshold -= last_jmp
-                else:
-                    last_jmp /= 2
-                    neighbor_threshold += last_jmp
+                neighbor_threshold += last_jmp
+
             cnt += 1
             target_records = selection()
             if cnt % 5 == 0:
@@ -1313,7 +1323,8 @@ class DirectGmia(attack.Attack):
 
         with self.report_section.create(Figure(position="H")) as fig:
             fig.add_image(
-                f"fig/{alias_no_spaces}-hist_selected_records.pdf", width=NoEscape(r"0.5\textwidth")
+                f"fig/{alias_no_spaces}-hist_selected_records.pdf",
+                width=NoEscape(r"0.5\textwidth"),
             )
             self.report_section.append(Command("captionsetup", "labelformat=empty"))
             self.report_section.append(
