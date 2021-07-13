@@ -279,7 +279,9 @@ def filter_out_outlier(
             return selection(), distance_neighbor_threshold, number_neighbor_threshold
 
         outlier_indices = selection()
-        jmp_size = 1
+        max_dist = np.max(distances)
+        min_dist = np.min(distances)
+        jmp_size = max(abs(distance_neighbor_threshold - max_dist), abs(distance_neighbor_threshold - min_dist))
         cnt = 0
         while len(outlier_indices) != number_outlier and cnt < max_search_rounds:
             # Binary search
