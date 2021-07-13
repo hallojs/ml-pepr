@@ -57,9 +57,7 @@ def assign_record_ids_to_target_models(
     return records_per_target_model + offset
 
 
-def filter_out_outlier(
-    data, labels, filter_pars, save_path=None, load_pars=None
-):
+def filter_out_outlier(data, labels, filter_pars, save_path=None, load_pars=None):
     """
     Filter out potentially vulnerable samples.
 
@@ -130,8 +128,7 @@ def filter_out_outlier(
         * records_per_reference_model (str) : Path to the mapping.
         * reference_models (list) : List of paths to the reference models.
         * pairwise_distance_hlf_<hlf_metric> (str) :  Path to the pairwise distance
-          matrix between the reference- and target high-level features using a
-          hlf_metric (e.g. cosine).
+          matrix between the high-level features using a hlf_metric (e.g. cosine).
 
     Returns
     -------
@@ -272,16 +269,30 @@ def filter_out_outlier(
         max_search_rounds=100,
     ):
         def selection():
-            n_neighbors = np.count_nonzero(distances < distance_neighbor_threshold, axis=1)
+            n_neighbors = np.count_nonzero(
+                distances < distance_neighbor_threshold, axis=1
+            )
             return np.where(n_neighbors < number_neighbor_threshold)[0]
 
         if number_outlier is None:
             return selection(), distance_neighbor_threshold, number_neighbor_threshold
 
         outlier_indices = selection()
+        # Calculating search area for binary search, so that every possible threshold
+        # can be reached. The search area will look something like this:
+        #                  initial jump size
+        #                 |---------------|
+        # [00000000000----*---------------] (search area)
+        #             ^   ^              ^
+        #             |   |              max distance value
+        #             |   initial neighbor threshold
+        #             min distance value
         max_dist = np.max(distances)
         min_dist = np.min(distances)
-        jmp_size = max(abs(distance_neighbor_threshold - max_dist), abs(distance_neighbor_threshold - min_dist))
+        jmp_size = max(
+            abs(distance_neighbor_threshold - max_dist),
+            abs(distance_neighbor_threshold - min_dist),
+        )
         cnt = 0
         while len(outlier_indices) != number_outlier and cnt < max_search_rounds:
             # Binary search
@@ -296,7 +307,9 @@ def filter_out_outlier(
             if cnt % 5 == 0:
                 logger.debug(f"Performed {cnt} search rounds.")
                 logger.debug(f"Found {len(outlier_indices)} outlier.")
-                logger.debug(f"Distance neighbor threshold: {distance_neighbor_threshold}")
+                logger.debug(
+                    f"Distance neighbor threshold: {distance_neighbor_threshold}"
+                )
 
         logger.info(f"Performed {cnt} search rounds.")
         logger.info(f"Number of outliers: {len(outlier_indices)}.")
