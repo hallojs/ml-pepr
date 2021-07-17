@@ -1,0 +1,464 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Generalized Membership Inference Attack (Direct) &mdash; ML-PePR alpha documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="ML-PePR alpha documentation" href="index.html"/>
+        <link rel="up" title="Privacy Attacks" href="privacy_attacks.html"/>
+        <link rel="next" title="ART Extraction Attacks" href="art_extraction_wrapper.html"/>
+        <link rel="prev" title="Membership Inference Attack" href="mia.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> ML-PePR
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quick_start_guide.html">Quick-Start Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="privacy_attacks.html">Privacy Attacks</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="mia.html">Membership Inference Attack</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Generalized Membership Inference Attack (Direct)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="art_extraction_wrapper.html">ART Extraction Attacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="art_inference_wrapper.html">ART Inference Attacks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="robustness_attacks.html">Robustness Attacks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="attack_runner.html">Attack Runner</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utilities.html">Utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ML-PePR</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="privacy_attacks.html">Privacy Attacks</a> &raquo;</li>
+        
+      <li>Generalized Membership Inference Attack (Direct)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/gmia.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="generalized-membership-inference-attack-direct">
+<h1>Generalized Membership Inference Attack (Direct)<a class="headerlink" href="#generalized-membership-inference-attack-direct" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pepr.privacy.gmia.DirectGmia">
+<em class="property">class </em><code class="descclassname">pepr.privacy.gmia.</code><code class="descname">DirectGmia</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.privacy.gmia.DirectGmia" title="Permalink to this definition">¶</a></dt>
+<dd><p>Direct Generalized Membership Inference Attack (d-GMIA)</p>
+<p>Attack-Steps:</p>
+<ol class="arabic simple">
+<li>Create mapping of records to reference models.</li>
+<li>Train the reference models.</li>
+<li>Generate intermediate models.</li>
+<li>Extract reference high-level features.</li>
+<li>Extract target high-level features.</li>
+<li>Compute pairwise distances between reference and target high-level
+features.</li>
+<li>Determine potential vulnerable target records.</li>
+<li>Infer log losses of reference models.</li>
+<li>Infer log losses of target model.</li>
+<li>Sample reference losses, approximate empirical cumulative distribution
+function, smooth ecdf with piecewise cubic interpolation.</li>
+<li>Determine members and non-members with left-tailed hypothesis test.</li>
+<li>Evaluate the attack results.</li>
+</ol>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the gmia.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>number_classes (int): Number of different classes the target model
+predict.</li>
+<li>number_reference_models (int): Number of reference models to be trained.</li>
+<li>reference_training_set_size (int): Size of the trainings set for each
+reference model.</li>
+<li>create_compile_model (function): Function that returns a compiled
+TensorFlow model (typically identical to the target model) used in the
+training of the reference models.</li>
+<li>reference_epochs (int): Number of training epochs of the reference models.</li>
+<li>reference_batch_size (int): Batch size used in the training of the
+reference models.</li>
+<li>hlf_metric (str): Metric (typically ‘cosine’) used for the distance
+calculations in the high-level feature space. For valid metrics see
+documentation of sklearn.metrics.pairwise_distances.</li>
+<li>hlf_layer_number (int): If value is n, the n-th layer of the model
+returned by create_compile_model is used to extract the high-level feature
+vectors.</li>
+<li>neighbor_threshold (float): If distance is smaller then the neighbor
+threshold the record is selected as target record.</li>
+<li>probability_threshold (float): For details see section 4.3 from the paper.</li>
+<li>number_target_records (int): If set, the selection algorithm performs
+<cite>max_search_rounds</cite>, to find a <cite>neighbor_threshold</cite>, that leads to a finding
+of <cite>n_targets</cite> target records. These target records are most vulnerable with
+respect to our selection criterion.</li>
+<li>max_search_rounds (int): If <cite>number_target_records</cite> is given, maximal
+<cite>max_search_rounds</cite> are performed to find <cite>number_target_records</cite> of potential
+vulnerable target records.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all training samples used in the given pentesting setting.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used in the given pentesting setting.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing which record-indices are used to train the reference
+models, the target model(s) and which are used for the evaluation of the
+attack.</p>
+<ul>
+<li>reference_indices (list): List of indices describing which of the records
+from data are used to train the reference models.</li>
+<li>target_indices (list): List of indices describing which of the records
+from data were used to train the target model(s).</li>
+<li>evaluation_indices (list): List of indices describing which of the records
+from data are used to evaluate the attack. Typically these are to one half
+records used to train the target models and one half neither used to train
+the target model(s) or the reference models.</li>
+<li>record_indices_per_target (numpy.ndarray): n*m array describing for all n
+target models which m indices where used in the training.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="pepr.privacy.gmia.DirectGmia.attack_alias">
+<code class="descname">attack_alias</code><a class="headerlink" href="#pepr.privacy.gmia.DirectGmia.attack_alias" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Alias for a specific instantiation of the attack class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.gmia.DirectGmia.attack_pars">
+<code class="descname">attack_pars</code><a class="headerlink" href="#pepr.privacy.gmia.DirectGmia.attack_pars" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Dictionary containing all needed parameters fo the attack.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.gmia.DirectGmia.data">
+<code class="descname">data</code><a class="headerlink" href="#pepr.privacy.gmia.DirectGmia.data" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy.ndarray</em> – Dataset with all training samples used in the given pentesting setting.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.gmia.DirectGmia.labels">
+<code class="descname">labels</code><a class="headerlink" href="#pepr.privacy.gmia.DirectGmia.labels" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy.ndarray</em> – Array of all labels used in the given pentesting setting.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.gmia.DirectGmia.data_conf">
+<code class="descname">data_conf</code><a class="headerlink" href="#pepr.privacy.gmia.DirectGmia.data_conf" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Dictionary describing the data configuration of the given pentesting
+setting.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.gmia.DirectGmia.target_models">
+<code class="descname">target_models</code><a class="headerlink" href="#pepr.privacy.gmia.DirectGmia.target_models" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>iterable</em> – List of target models which should be tested.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.gmia.DirectGmia.attack_results">
+<code class="descname">attack_results</code><a class="headerlink" href="#pepr.privacy.gmia.DirectGmia.attack_results" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> –</p>
+<ul class="simple">
+<li>selected_target_records (numpy.ndarray): List of record indices selected as
+potential vulnerable.</li>
+<li>neighbor_threshold (float): If distance is smaller then the neighbor threshold
+the record is selected as target record.</li>
+<li>probability_threshold (float): For details see section 4.3 from the original
+publication.</li>
+<li>reference_inferences (numpy.ndarray): Array of log losses of the predictions
+on the reference models.</li>
+<li>target_inferences (numpy.ndarray): Array of log losses of the predictions on
+the target models.</li>
+<li>used_target_records (numpy.ndarray): Target records finally used for the
+attack.</li>
+<li>pchip_references (list): Interpolated ecdfs of sampled log losses.</li>
+<li>ecdf_references (list): Estimated CDF of sampled log losses.</li>
+<li>tp_list (list): True positives per cut-off-p-value (0, 0.01, 0.02, …, 1) and
+target model.</li>
+<li>fp_list (list): False positives per cut-off-p-value and target model.</li>
+<li>fn_list (list): False negatives per cut-off-p-value and target model.</li>
+<li>tn_list (list): True negatives per cut-off-p-value and target model.</li>
+<li>precision_list (list): Attack precision per cut-off-p-value and target model.</li>
+<li>recall_list (list): Attack recall per cut-off-p-value and target model.</li>
+<li>overall_precision (list): Attack precision averaged over all target models per
+cut-off-p-value.</li>
+<li>overall_recall (list): Attack recall averaged over all target models per
+cut-off-p-value.</li>
+</ul>
+</dd></dl>
+
+<p class="rubric">References</p>
+<p>Implementation of the direct gmia from Long, Yunhui and Bindschaedler, Vincent and
+Wang, Lei and Bu, Diyue and Wang, Xiaofeng and Tang, Haixu and Gunter, Carl A and
+Chen, Kai (2018). Understanding membership inferences on well-generalized learning
+models. arXiv preprint arXiv:1802.04889.</p>
+<dl class="method">
+<dt id="pepr.privacy.gmia.DirectGmia.create_attack_report">
+<code class="descname">create_attack_report</code><span class="sig-paren">(</span><em>save_path='gmia_report'</em>, <em>pdf=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.privacy.gmia.DirectGmia.create_attack_report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an attack report just for the given attack instantiation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>save_path</strong> (<em>str</em>) – Path to save the tex and pdf file of the attack report.</li>
+<li><strong>pdf</strong> (<em>bool</em>) – If set, generate pdf out of latex file.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pepr.privacy.gmia.DirectGmia.create_attack_section">
+<code class="descname">create_attack_section</code><span class="sig-paren">(</span><em>save_path</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.privacy.gmia.DirectGmia.create_attack_section" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a report section for the gmia attack instantiation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pepr.privacy.gmia.DirectGmia.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>save_path=None</em>, <em>load_pars=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.privacy.gmia.DirectGmia.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the direct generalized membership inference attack.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>save_path</strong> (<em>str</em>) – <p>If path is given, the following (partly computational expensive)
+intermediate results are saved to disk:</p>
+<ul>
+<li>The mapping of training-records to reference models</li>
+<li>The trained reference models</li>
+<li>The reference high-level features</li>
+<li>The target high-level features</li>
+<li>The matrix containing all pairwise distances between the reference- and
+target high-level features.</li>
+</ul>
+</li>
+<li><strong>load_pars</strong> (<em>dict</em>) – <p>If this dictionary is given, the following computational intermediate
+results can be loaded from disk.</p>
+<ul>
+<li>records_per_reference_model (str) : Path to the mapping.</li>
+<li>reference_models (list) : List of paths to the reference models.</li>
+<li>pairwise_distance_hlf_&lt;hlf_metric&gt; (str) :  Path to the pairwise distance
+matrix between the reference- and target high-level features using a
+hlf_metric (e.g. cosine).</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="art_extraction_wrapper.html" class="btn btn-neutral float-right" title="ART Extraction Attacks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="mia.html" class="btn btn-neutral" title="Membership Inference Attack" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Institute for IT-Security (University of Luebeck).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'alpha',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

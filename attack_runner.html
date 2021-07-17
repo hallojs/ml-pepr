@@ -1,0 +1,608 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Attack Runner &mdash; ML-PePR alpha documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="ML-PePR alpha documentation" href="index.html"/>
+        <link rel="next" title="Utilities" href="utilities.html"/>
+        <link rel="prev" title="ART Evasion Attacks" href="art_wrapper.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> ML-PePR
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quick_start_guide.html">Quick-Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="privacy_attacks.html">Privacy Attacks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="robustness_attacks.html">Robustness Attacks</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Attack Runner</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-pepr.attack_runner">Module Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#saved-attack-objects">Saved Attack Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#attack-runner-configuration">Attack Runner Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#attack-parameters-attack-pars">Attack Parameters (<code class="docutils literal"><span class="pre">attack_pars</span></code>)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#attack-independent-keys">Attack Independent Keys</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#special-key-run-args">Special key <code class="docutils literal"><span class="pre">run_args</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#attack-dependent-keys">Attack Dependent Keys</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#data-configuration-data-conf">Data Configuration (<code class="docutils literal"><span class="pre">data_conf</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-configuration">Example Configuration</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utilities.html">Utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ML-PePR</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Attack Runner</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/attack_runner.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="attack-runner">
+<span id="label-attack-runner"></span><h1>Attack Runner<a class="headerlink" href="#attack-runner" title="Permalink to this headline">¶</a></h1>
+<p>The attack runner is a script to execute multiple attacks at once. It can create one
+attack report containing the results of all executed attacks.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last">An attack runner tutorial notebook is available <a class="reference external" href="https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/attack_runner_tutorial/attack_runner_tutorial.ipynb">here</a>.</p>
+</div>
+<div class="section" id="module-pepr.attack_runner">
+<span id="module-documentation"></span><h2>Module Documentation<a class="headerlink" href="#module-pepr.attack_runner" title="Permalink to this headline">¶</a></h2>
+<p>Attack runner for convenient pentesting with multiple configurations.</p>
+<dl class="function">
+<dt id="pepr.attack_runner.create_report">
+<code class="descclassname">pepr.attack_runner.</code><code class="descname">create_report</code><span class="sig-paren">(</span><em>attack_object_paths</em>, <em>save_path</em>, <em>pdf=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.attack_runner.create_report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an attack report for all attacks.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_object_paths</strong> (<em>dict</em>) – Dictionary with attack alias and the corresponding path to the serialized attack
+object.</li>
+<li><strong>save_path</strong> (<em>str</em>) – Path where to save the report files.</li>
+<li><strong>pdf</strong> (<em>bool</em>) – If true, the attack runner will build the LaTex report and save an PDF to the
+save path.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pepr.attack_runner.run_attacks">
+<code class="descclassname">pepr.attack_runner.</code><code class="descname">run_attacks</code><span class="sig-paren">(</span><em>yaml_path</em>, <em>attack_obj_save_path</em>, <em>functions</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.attack_runner.run_attacks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run multiple attacks configured in a YAML file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>yaml_path</strong> (<em>str</em>) – Path to attack configuration file in YAML format.</li>
+<li><strong>attack_obj_save_path</strong> (<em>str</em>) – Path where to save the serialized attack objects.</li>
+<li><strong>functions</strong> (<em>dict</em>) – Dictionary containing the functions which return TensorFlow models. The keys
+should correspond to the strings in the configuration file.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dictionary with attack alias and the corresponding path to the serialized attack
+object in the same order as specified in the YAML configuration.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="saved-attack-objects">
+<h2>Saved Attack Objects<a class="headerlink" href="#saved-attack-objects" title="Permalink to this headline">¶</a></h2>
+<p>The attack runner saves all created attack objects into the specified directory
+(<code class="docutils literal"><span class="pre">attack_obj_save_path</span></code>) using
+<a class="reference external" href="https://docs.python.org/3.6/library/pickle.html">Python Pickle</a>. When unpickling
+these objects, make sure, that the corresponding folders with the “tm” suffix are
+available in the same directory, because they include the target models.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Currently, the only purpose for saving the attack objects is for the
+<code class="docutils literal"><span class="pre">create_report</span></code> function. In the future these objects may be used to avoid
+re-execution of unchanged attacks.</p>
+</div>
+</div>
+<div class="section" id="attack-runner-configuration">
+<h2>Attack Runner Configuration<a class="headerlink" href="#attack-runner-configuration" title="Permalink to this headline">¶</a></h2>
+<p>The attack runner configuration file is an YAML file that specifies everything that is
+needed to run an attack. There are two required main keys for every attack:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">attack_pars</span></code></li>
+<li><code class="docutils literal"><span class="pre">data_conf</span></code></li>
+</ul>
+<div class="section" id="attack-parameters-attack-pars">
+<h3>Attack Parameters (<code class="docutils literal"><span class="pre">attack_pars</span></code>)<a class="headerlink" href="#attack-parameters-attack-pars" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="attack-independent-keys">
+<h4>Attack Independent Keys<a class="headerlink" href="#attack-independent-keys" title="Permalink to this headline">¶</a></h4>
+<p><code class="docutils literal"><span class="pre">attack_pars</span></code> is a list of attack parameters for every attack to run. <strong>Every</strong> list
+entry <strong>must have</strong> the following not attack dependent keys:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">attack_type</span></code></li>
+<li><code class="docutils literal"><span class="pre">attack_alias</span></code></li>
+<li><code class="docutils literal"><span class="pre">path_to_dataset_data</span></code></li>
+<li><code class="docutils literal"><span class="pre">path_to_dataset_labels</span></code></li>
+<li><code class="docutils literal"><span class="pre">target_models</span></code></li>
+</ul>
+<p><code class="docutils literal"><span class="pre">attack_type</span></code> specifies the type of the attack (e.g. <code class="docutils literal"><span class="pre">&quot;mia&quot;</span></code> or <code class="docutils literal"><span class="pre">&quot;gmia&quot;</span></code>).
+<code class="docutils literal"><span class="pre">attack_alias</span></code> defines a unique name for the attack configuration. It is saved in the
+attack object and is the heading of the subsection in the report.
+<code class="docutils literal"><span class="pre">path_to_dataset_data</span></code> and <code class="docutils literal"><span class="pre">path_to_dataset_labels</span></code> each defining a path to a
+serialized numpy array. <code class="docutils literal"><span class="pre">target_models</span></code> defines an array of paths where the serialized
+target models are saved.</p>
+<p>Example:</p>
+<div class="highlight-yaml"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">attack_pars</span><span class="p p-Indicator">:</span>
+<span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">attack_type</span><span class="p p-Indicator">:</span> <span class="s">&quot;mia&quot;</span>
+  <span class="l l-Scalar l-Scalar-Plain">attack_alias</span><span class="p p-Indicator">:</span> <span class="s">&quot;MIA</span><span class="nv"> </span><span class="s">Default&quot;</span>
+  <span class="l l-Scalar l-Scalar-Plain">path_to_dataset_data</span><span class="p p-Indicator">:</span> <span class="s">&quot;datasets/cifar100_data.npy&quot;</span>
+  <span class="l l-Scalar l-Scalar-Plain">path_to_dataset_labels</span><span class="p p-Indicator">:</span> <span class="s">&quot;datasets/cifar100_labels.npy&quot;</span>
+  <span class="l l-Scalar l-Scalar-Plain">target_model_paths</span><span class="p p-Indicator">:</span>
+  <span class="p p-Indicator">-</span> <span class="s">&quot;data/target_model_mia0&quot;</span>
+  <span class="p p-Indicator">-</span> <span class="s">&quot;data/target_model_mia1&quot;</span>
+  <span class="c1"># ... attack dependent keys</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="special-key-run-args">
+<h4>Special key <code class="docutils literal"><span class="pre">run_args</span></code><a class="headerlink" href="#special-key-run-args" title="Permalink to this headline">¶</a></h4>
+<p>For passing additional parameters to the run-function of the attack, add them to
+<code class="docutils literal"><span class="pre">run_args</span></code> like in the following example:</p>
+<div class="highlight-yaml"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">run_args</span><span class="p p-Indicator">:</span>
+<span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">param1</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+  <span class="l l-Scalar l-Scalar-Plain">param2</span><span class="p p-Indicator">:</span> <span class="s">&quot;example&quot;</span>
+  <span class="l l-Scalar l-Scalar-Plain">param3</span><span class="p p-Indicator">:</span> <span class="s">&quot;You</span><span class="nv"> </span><span class="s">got</span><span class="nv"> </span><span class="s">it!&quot;</span>
+</pre></div>
+</td></tr></table></div>
+<p>This is equivalent to:</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">attack</span> <span class="o">=</span> <span class="n">PeprAttackPlaceholder</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">attack</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">param1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">param2</span><span class="o">=</span><span class="s2">&quot;example&quot;</span><span class="p">,</span> <span class="n">param3</span><span class="o">=</span><span class="s2">&quot;You got it!&quot;</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<p><code class="docutils literal"><span class="pre">run_args</span></code> is optional and available for every attack. The arguments that can be
+passed depend on the chosen attack, please read its documentation.
+In the Adversarial Robustness Toolbox (ART) for example, the maximum number of
+iterations of the <code class="docutils literal"><span class="pre">PixelAttack</span></code> is passed as an argument to the <code class="docutils literal"><span class="pre">generate()</span></code>
+function. Below is an example configuration of the <code class="docutils literal"><span class="pre">PixelAttack</span></code> using
+<code class="docutils literal"><span class="pre">run_args</span></code>.</p>
+<p>Example 2:</p>
+<div class="highlight-yaml"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">attack_pars</span><span class="p p-Indicator">:</span>
+<span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">attack_type</span><span class="p p-Indicator">:</span> <span class="s">&quot;ART_PixelAttack&quot;</span>
+  <span class="l l-Scalar l-Scalar-Plain">attack_alias</span><span class="p p-Indicator">:</span> <span class="s">&quot;PixelAttack&quot;</span>
+  <span class="l l-Scalar l-Scalar-Plain">path_to_dataset_data</span><span class="p p-Indicator">:</span> <span class="s">&quot;datasets/mnist_data.npy&quot;</span>
+  <span class="l l-Scalar l-Scalar-Plain">path_to_dataset_labels</span><span class="p p-Indicator">:</span> <span class="s">&quot;datasets/mnist_labels.npy&quot;</span>
+  <span class="l l-Scalar l-Scalar-Plain">target_model_paths</span><span class="p p-Indicator">:</span>
+  <span class="p p-Indicator">-</span> <span class="s">&quot;data/target_model&quot;</span>
+  <span class="l l-Scalar l-Scalar-Plain">run_args</span><span class="p p-Indicator">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">max_iter</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">20</span>
+  <span class="c1"># ... attack dependent keys</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="attack-dependent-keys">
+<h4>Attack Dependent Keys<a class="headerlink" href="#attack-dependent-keys" title="Permalink to this headline">¶</a></h4>
+<p>One list entry consists of a dictionary with all attack parameters for the desired
+attack. All keys of the <code class="docutils literal"><span class="pre">attack_pars</span></code> dictionary that are passed to the corresponding
+attack constructor, must be also defined in the list entry.</p>
+<p>This means, to set a specific parameter in the <code class="docutils literal"><span class="pre">attack_pars</span></code> dictionary of an attack,
+the YAML key must have the same name as the key in <code class="docutils literal"><span class="pre">attack_pars</span></code> to set. But there are
+exceptions for arrays and functions:</p>
+<p><strong>Arrays:</strong> <code class="docutils literal"><span class="pre">&lt;np&gt;</span></code> - If there is an attack dependent key to set with a list or numpy array, the
+<code class="docutils literal"><span class="pre">&lt;np&gt;</span></code> prefix is used for the key. If the attack runner sees this prefix, it expects
+the value to be a path to a serialized numpy array which will be loaded with
+<code class="docutils literal"><span class="pre">numpy.load</span></code>.</p>
+<p><strong>Functions:</strong> <code class="docutils literal"><span class="pre">&lt;fn&gt;</span></code> - If there is an attack dependent key to set with a function pointer from
+the function dictionary (<code class="docutils literal"><span class="pre">functions</span></code> parameter of <code class="docutils literal"><span class="pre">run_attacks</span></code>), the <code class="docutils literal"><span class="pre">&lt;fn&gt;</span></code>
+prefix is used for the key. The value is expected to be a key string in the function
+dictionary.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Prefixes can not be used with attack independent keys! Using it with attack
+independent keys like <code class="docutils literal"><span class="pre">path_to_dataset_data</span></code> will cause the attack to fail!</p>
+</div>
+<p>Listing all attack dependent keys per attack:</p>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>MIA</dt>
+<dd><ul class="first last">
+<li><code class="docutils literal"><span class="pre">number_shadow_models</span></code></li>
+<li><code class="docutils literal"><span class="pre">shadow_training_set_size</span></code></li>
+<li><code class="docutils literal"><span class="pre">number_classes</span></code></li>
+<li><code class="docutils literal"><span class="pre">&lt;fn&gt;create_compile_shadow_model</span></code></li>
+<li><code class="docutils literal"><span class="pre">shadow_epochs</span></code></li>
+<li><code class="docutils literal"><span class="pre">shadow_batch_size</span></code></li>
+<li><code class="docutils literal"><span class="pre">&lt;fn&gt;create_compile_attack_model</span></code></li>
+<li><code class="docutils literal"><span class="pre">attack_epochs</span></code></li>
+<li><code class="docutils literal"><span class="pre">attack_batch_size</span></code></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>GMIA</dt>
+<dd><ul class="first last">
+<li><code class="docutils literal"><span class="pre">number_reference_models</span></code></li>
+<li><code class="docutils literal"><span class="pre">reference_training_set_size</span></code></li>
+<li><code class="docutils literal"><span class="pre">number_classes</span></code></li>
+<li><code class="docutils literal"><span class="pre">&lt;fn&gt;create_compile_model</span></code></li>
+<li><code class="docutils literal"><span class="pre">reference_epochs</span></code></li>
+<li><code class="docutils literal"><span class="pre">reference_batch_size</span></code></li>
+<li><code class="docutils literal"><span class="pre">hlf_metric</span></code></li>
+<li><code class="docutils literal"><span class="pre">hlf_layer_number</span></code></li>
+<li><code class="docutils literal"><span class="pre">number_target_records</span></code></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="data-configuration-data-conf">
+<h3>Data Configuration (<code class="docutils literal"><span class="pre">data_conf</span></code>)<a class="headerlink" href="#data-configuration-data-conf" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal"><span class="pre">data_conf</span></code> is a list of data configurations for every attack. The order must be the
+same as the order of <code class="docutils literal"><span class="pre">attack_pars</span></code>. The required keys are equal to the <code class="docutils literal"><span class="pre">data_conf</span></code>
+dictionary that is passed to the attack constructor but with the prefix <code class="docutils literal"><span class="pre">&lt;np&gt;</span></code> added
+to them as they are paths to serialized numpy arrays.</p>
+<p>The data prefixes explained above can also be used for the data configuration keys.</p>
+<p><strong>Arrays:</strong> <code class="docutils literal"><span class="pre">&lt;np&gt;</span></code> - If there is a key to set with a list or numpy array, the
+<code class="docutils literal"><span class="pre">&lt;np&gt;</span></code> prefix is used for the key. If the attack runner sees this prefix, it expects
+the value to be a path to a serialized numpy array which will be loaded with
+<code class="docutils literal"><span class="pre">numpy.load</span></code>.</p>
+<p><strong>Functions:</strong> <code class="docutils literal"><span class="pre">&lt;fn&gt;</span></code> - If there is a key to set with a function pointer from
+the function dictionary (<code class="docutils literal"><span class="pre">functions</span></code> parameter of <code class="docutils literal"><span class="pre">run_attacks</span></code>), the <code class="docutils literal"><span class="pre">&lt;fn&gt;</span></code>
+prefix is used for the key. The value is expected to be a key string in the function
+dictionary.</p>
+<p>Listing all keys per attack:</p>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>MIA</dt>
+<dd><ul class="first last">
+<li><code class="docutils literal"><span class="pre">&lt;np&gt;shadow_indices</span></code></li>
+<li><code class="docutils literal"><span class="pre">&lt;np&gt;target_indices</span></code></li>
+<li><code class="docutils literal"><span class="pre">&lt;np&gt;evaluation_indices</span></code></li>
+<li><code class="docutils literal"><span class="pre">&lt;np&gt;record_indices_per_target</span></code></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>GMIA</dt>
+<dd><ul class="first last">
+<li><code class="docutils literal"><span class="pre">&lt;np&gt;reference_indices</span></code></li>
+<li><code class="docutils literal"><span class="pre">&lt;np&gt;target_indices</span></code></li>
+<li><code class="docutils literal"><span class="pre">&lt;np&gt;evaluation_indices</span></code></li>
+<li><code class="docutils literal"><span class="pre">&lt;np&gt;record_indices_per_target</span></code></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="example-configuration">
+<h3>Example Configuration<a class="headerlink" href="#example-configuration" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-yaml"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Attack Parameters</span>
+<span class="l l-Scalar l-Scalar-Plain">attack_pars</span><span class="p p-Indicator">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">attack_type</span><span class="p p-Indicator">:</span> <span class="s">&quot;mia&quot;</span>                                              <span class="c1"># --</span>
+    <span class="l l-Scalar l-Scalar-Plain">attack_alias</span><span class="p p-Indicator">:</span> <span class="s">&quot;MIA</span><span class="nv"> </span><span class="s">Tutorial&quot;</span>                                    <span class="c1">#  |</span>
+    <span class="l l-Scalar l-Scalar-Plain">path_to_dataset_data</span><span class="p p-Indicator">:</span> <span class="s">&quot;datasets/cifar100_data.npy&quot;</span>              <span class="c1">#  | Attack independent</span>
+    <span class="l l-Scalar l-Scalar-Plain">path_to_dataset_labels</span><span class="p p-Indicator">:</span> <span class="s">&quot;datasets/cifar100_labels.npy&quot;</span>          <span class="c1">#  | parameters</span>
+    <span class="l l-Scalar l-Scalar-Plain">target_model_paths</span><span class="p p-Indicator">:</span>                                             <span class="c1">#  |</span>
+    <span class="p p-Indicator">-</span> <span class="s">&quot;data/target_model_mia&quot;</span>                                       <span class="c1"># --</span>
+    <span class="l l-Scalar l-Scalar-Plain">number_shadow_models</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>                                       <span class="c1"># --</span>
+    <span class="l l-Scalar l-Scalar-Plain">shadow_training_set_size</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">2500</span>                                  <span class="c1">#  |</span>
+    <span class="l l-Scalar l-Scalar-Plain">number_classes</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>                                             <span class="c1">#  |</span>
+    <span class="l l-Scalar l-Scalar-Plain">&lt;fn&gt;create_compile_shadow_model</span><span class="p p-Indicator">:</span> <span class="s">&quot;create_compile_shadow_model&quot;</span>  <span class="c1">#  |</span>
+    <span class="l l-Scalar l-Scalar-Plain">shadow_epochs</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>                                              <span class="c1">#  | MIA</span>
+    <span class="l l-Scalar l-Scalar-Plain">shadow_batch_size</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>                                           <span class="c1">#  | parameters</span>
+    <span class="l l-Scalar l-Scalar-Plain">&lt;fn&gt;create_compile_attack_model</span><span class="p p-Indicator">:</span> <span class="s">&quot;create_compile_attack_model&quot;</span>  <span class="c1">#  |</span>
+    <span class="l l-Scalar l-Scalar-Plain">attack_epochs</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>                                               <span class="c1">#  |</span>
+    <span class="l l-Scalar l-Scalar-Plain">attack_batch_size</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>                                           <span class="c1"># --</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">attack_type</span><span class="p p-Indicator">:</span> <span class="s">&quot;gmia&quot;</span>                                             <span class="c1"># --</span>
+    <span class="l l-Scalar l-Scalar-Plain">attack_alias</span><span class="p p-Indicator">:</span> <span class="s">&quot;GMIA</span><span class="nv"> </span><span class="s">Tutorial&quot;</span>                                   <span class="c1">#  |</span>
+    <span class="l l-Scalar l-Scalar-Plain">path_to_dataset_data</span><span class="p p-Indicator">:</span> <span class="s">&quot;datasets/fmnist_data.npy&quot;</span>                <span class="c1">#  | Attack independent</span>
+    <span class="l l-Scalar l-Scalar-Plain">path_to_dataset_labels</span><span class="p p-Indicator">:</span> <span class="s">&quot;datasets/fmnist_labels.npy&quot;</span>            <span class="c1">#  | parameters</span>
+    <span class="l l-Scalar l-Scalar-Plain">target_model_paths</span><span class="p p-Indicator">:</span>                                             <span class="c1">#  |</span>
+    <span class="p p-Indicator">-</span> <span class="s">&quot;data/target_model_gmia&quot;</span>                                      <span class="c1"># --</span>
+    <span class="l l-Scalar l-Scalar-Plain">number_reference_models</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>                                    <span class="c1"># --</span>
+    <span class="l l-Scalar l-Scalar-Plain">reference_training_set_size</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">10000</span>                              <span class="c1">#  |</span>
+    <span class="l l-Scalar l-Scalar-Plain">number_classes</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>                                              <span class="c1">#  |</span>
+    <span class="l l-Scalar l-Scalar-Plain">create_compile_model</span><span class="p p-Indicator">:</span> <span class="s">&quot;create_compile_reference_model&quot;</span>          <span class="c1">#  |</span>
+    <span class="l l-Scalar l-Scalar-Plain">reference_epochs</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>                                            <span class="c1">#  | GMIA</span>
+    <span class="l l-Scalar l-Scalar-Plain">reference_batch_size</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>                                        <span class="c1">#  | parameters</span>
+    <span class="l l-Scalar l-Scalar-Plain">hlf_metric</span><span class="p p-Indicator">:</span> <span class="s">&quot;cosine&quot;</span>                                            <span class="c1">#  |</span>
+    <span class="l l-Scalar l-Scalar-Plain">hlf_layer_number</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>                                            <span class="c1">#  |</span>
+    <span class="l l-Scalar l-Scalar-Plain">number_target_records</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">25</span>                                       <span class="c1"># --</span>
+
+<span class="c1"># Data Configuration</span>
+<span class="l l-Scalar l-Scalar-Plain">data_conf</span><span class="p p-Indicator">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">&lt;np&gt;shadow_indices</span><span class="p p-Indicator">:</span> <span class="s">&quot;datasets/shadow_indices.npy&quot;</span>
+    <span class="l l-Scalar l-Scalar-Plain">&lt;np&gt;target_indices</span><span class="p p-Indicator">:</span> <span class="s">&quot;datasets/target_indices.npy&quot;</span>
+    <span class="l l-Scalar l-Scalar-Plain">&lt;np&gt;evaluation_indices</span><span class="p p-Indicator">:</span> <span class="s">&quot;datasets/evaluation_indices.npy&quot;</span>
+    <span class="l l-Scalar l-Scalar-Plain">&lt;np&gt;record_indices_per_target</span><span class="p p-Indicator">:</span> <span class="s">&quot;datasets/record_indices_per_target.npy&quot;</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">&lt;np&gt;reference_indices</span><span class="p p-Indicator">:</span> <span class="s">&quot;datasets/reference_indices.npy&quot;</span>
+    <span class="l l-Scalar l-Scalar-Plain">&lt;np&gt;target_indices</span><span class="p p-Indicator">:</span> <span class="s">&quot;datasets/target_indices.npy&quot;</span>
+    <span class="l l-Scalar l-Scalar-Plain">&lt;np&gt;evaluation_indices</span><span class="p p-Indicator">:</span> <span class="s">&quot;datasets/evaluation_indices.npy&quot;</span>
+    <span class="l l-Scalar l-Scalar-Plain">&lt;np&gt;record_indices_per_target</span><span class="p p-Indicator">:</span> <span class="s">&quot;datasets/record_indices_per_target.npy&quot;</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="utilities.html" class="btn btn-neutral float-right" title="Utilities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="art_wrapper.html" class="btn btn-neutral" title="ART Evasion Attacks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Institute for IT-Security (University of Luebeck).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'alpha',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

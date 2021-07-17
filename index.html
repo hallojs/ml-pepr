@@ -1,0 +1,274 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ML-PePR (Beta) &mdash; ML-PePR alpha documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="ML-PePR alpha documentation" href="#"/>
+        <link rel="next" title="Quick-Start Guide" href="quick_start_guide.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="#" class="icon icon-home"> ML-PePR
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quick_start_guide.html">Quick-Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="privacy_attacks.html">Privacy Attacks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="robustness_attacks.html">Robustness Attacks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="attack_runner.html">Attack Runner</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utilities.html">Utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">ML-PePR</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>ML-PePR (Beta)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="ml-pepr-beta">
+<h1>ML-PePR (Beta)<a class="headerlink" href="#ml-pepr-beta" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<p>ML-PePR stands for Machine Learning Pentesting for Privacy and Robustness and is a Python library for evaluating machine
+learning models. PePR is easily extensible and hackable. PePR’s attack runner allows structured pentesting, and the
+report generator produces straightforward privacy and robustness reports (LaTeX/PDF) from the attack results.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Caution, we cannot guarantee the correctness of PePR. Always do check the plausibility of your results!</p>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>We offer various installation options. Follow the instructions below to perform the desired installation. If you want to
+install the latest developer version, please use the <a class="reference external" href="https://github.com/hallojs/ml-pepr">code-repository</a> of this
+library. The current release is only tested with Python 3.6.</p>
+<div class="section" id="repository">
+<h3>Repository<a class="headerlink" href="#repository" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Clone the repository.</li>
+<li>Cd to project directory: <code class="docutils literal"><span class="pre">cd</span> <span class="pre">mlpepr</span></code></li>
+<li>Run in the terminal: <code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">.</span></code></li>
+</ol>
+</div>
+<div class="section" id="pypi">
+<h3>PyPi<a class="headerlink" href="#pypi" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://pypi.org/project/mlpepr/">pypi</a>-typical: <code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mlpepr</span></code></p>
+</div>
+<div class="section" id="docker">
+<h3>Docker<a class="headerlink" href="#docker" title="Permalink to this headline">¶</a></h3>
+<p>To use PePR inside a docker container, build a CPU or GPU image. Note that your system must be set up for GPU use:
+<a class="reference external" href="https://www.tensorflow.org/install/docker">TensorFlow Docker Requirements</a>.</p>
+<p>Build the docker image:</p>
+<ol class="arabic simple">
+<li>Clone the repository: <code class="docutils literal"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/hallojs/ml-pepr.git</span></code></li>
+<li>Cd to project directory: <code class="docutils literal"><span class="pre">cd</span> <span class="pre">ml-pepr</span></code></li>
+<li>Build the docker image: <code class="docutils literal"><span class="pre">docker</span> <span class="pre">build</span> <span class="pre">-t</span> <span class="pre">&lt;image</span> <span class="pre">name&gt;</span> <span class="pre">.</span> <span class="pre">-f</span> <span class="pre">Dockerfile-tf-&lt;cpu</span> <span class="pre">or</span> <span class="pre">gpu&gt;</span></code></li>
+</ol>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The current version is not tested under Windows and only supports TensorFlow at the Moment!</p>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="quick_start_guide.html" class="btn btn-neutral float-right" title="Quick-Start Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Institute for IT-Security (University of Luebeck).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'alpha',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,1840 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ART Evasion Attacks &mdash; ML-PePR alpha documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="ML-PePR alpha documentation" href="index.html"/>
+        <link rel="up" title="Robustness Attacks" href="robustness_attacks.html"/>
+        <link rel="next" title="Attack Runner" href="attack_runner.html"/>
+        <link rel="prev" title="Foolbox Attacks" href="foolbox_wrapper.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> ML-PePR
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quick_start_guide.html">Quick-Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="privacy_attacks.html">Privacy Attacks</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="robustness_attacks.html">Robustness Attacks</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="foolbox_wrapper.html">Foolbox Attacks</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ART Evasion Attacks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#base-wrapper-class">Base Wrapper Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#art-evasion-attack-wrappers">ART Evasion Attack Wrappers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="attack_runner.html">Attack Runner</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utilities.html">Utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ML-PePR</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="robustness_attacks.html">Robustness Attacks</a> &raquo;</li>
+        
+      <li>ART Evasion Attacks</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/art_wrapper.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="art-evasion-attacks">
+<h1>ART Evasion Attacks<a class="headerlink" href="#art-evasion-attacks" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You can find a basic example notebook <a class="reference external" href="https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/art_tutorial.ipynb">here</a>.</p>
+</div>
+<div class="section" id="base-wrapper-class">
+<h2>Base Wrapper Class<a class="headerlink" href="#base-wrapper-class" title="Permalink to this headline">¶</a></h2>
+<p>The base classes do not implement any attack. The <a class="reference internal" href="#art-evasion-wrappers"><span class="std std-ref">ART evasion attack wrappers</span></a> inherit from the <cite>BaseEvasionAttack</cite> or <cite>BasePatchAttack</cite>
+class and have the same attributes.</p>
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.BaseEvasionAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">BaseEvasionAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>use_labels</em>, <em>data</em>, <em>labels</em>, <em>attack_indices_per_target</em>, <em>target_models</em>, <em>art_attacks</em>, <em>pars_descriptors</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.BaseEvasionAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base ART attack class implementing the logic for running an evasion attack and
+generating a report.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>use_labels</strong> (<em>bool</em>) – If true, the true labels are passed to the generate function. Set true if
+<cite>targeted</cite> is true for a targeted attack.</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>attack_indices_per_target</strong> (<em>numpy.ndarray</em>) – Array of indices to attack per target model.</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+<li><strong>art_attacks</strong> (<em>list</em><em>(</em><em>art.attacks.Attack</em><em>)</em>) – List of ART attack objects per target model which are wrapped in this class.</li>
+<li><strong>pars_descriptors</strong> (<em>dict</em>) – Dictionary of attack parameters and their description shown in the attack
+report.
+Example: {“norm”: “Adversarial perturbation norm”} for the attribute named
+“norm” of FastGradientMethod.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="pepr.robustness.art_wrapper.BaseEvasionAttack.attack_alias">
+<code class="descname">attack_alias</code><a class="headerlink" href="#pepr.robustness.art_wrapper.BaseEvasionAttack.attack_alias" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Alias for a specific instantiation of the class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.art_wrapper.BaseEvasionAttack.use_labels">
+<code class="descname">use_labels</code><a class="headerlink" href="#pepr.robustness.art_wrapper.BaseEvasionAttack.use_labels" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> – If true, the true labels are passed to the generate function. Set true if
+<cite>targeted</cite> is true for a targeted attack.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.art_wrapper.BaseEvasionAttack.data">
+<code class="descname">data</code><a class="headerlink" href="#pepr.robustness.art_wrapper.BaseEvasionAttack.data" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy.ndarray</em> – Dataset with all training samples used in the given pentesting setting.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.art_wrapper.BaseEvasionAttack.labels">
+<code class="descname">labels</code><a class="headerlink" href="#pepr.robustness.art_wrapper.BaseEvasionAttack.labels" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy.ndarray</em> – Array of all labels used in the given pentesting setting.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.art_wrapper.BaseEvasionAttack.target_models">
+<code class="descname">target_models</code><a class="headerlink" href="#pepr.robustness.art_wrapper.BaseEvasionAttack.target_models" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>iterable</em> – List of target models which should be tested.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.art_wrapper.BaseEvasionAttack.attack_indices_per_target">
+<code class="descname">attack_indices_per_target</code><a class="headerlink" href="#pepr.robustness.art_wrapper.BaseEvasionAttack.attack_indices_per_target" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy.ndarray</em> – Array of indices to attack per target model.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.art_wrapper.BaseEvasionAttack.art_attacks">
+<code class="descname">art_attacks</code><a class="headerlink" href="#pepr.robustness.art_wrapper.BaseEvasionAttack.art_attacks" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>list(art.attacks.Attack)</em> – List of ART attack objects per target model which are wrapped in this class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.art_wrapper.BaseEvasionAttack.pars_descriptors">
+<code class="descname">pars_descriptors</code><a class="headerlink" href="#pepr.robustness.art_wrapper.BaseEvasionAttack.pars_descriptors" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Dictionary of attack parameters and their description shown in the attack
+report.
+Example: {“norm”: “Adversarial perturbation norm”} for the attribute named
+“norm” of FastGradientMethod.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.art_wrapper.BaseEvasionAttack.attack_results">
+<code class="descname">attack_results</code><a class="headerlink" href="#pepr.robustness.art_wrapper.BaseEvasionAttack.attack_results" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Dictionary storing the attack model results.</p>
+<ul class="simple">
+<li>adversarial_examples (list): Array of adversarial examples per target model.</li>
+<li>success_rate (list): Percentage of misclassified adversarial examples
+per target model.</li>
+<li>avg_l2_distance (list): Average euclidean distance (L2 norm) between original
+and perturbed images per target model.</li>
+<li>success_rate_list (list): Percentage of misclassified adversarial examples
+per target model and per class.</li>
+<li>l2_distance (list): Euclidean distance (L2 norm) between original
+and perturbed images for every image per target model.</li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.BasePatchAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">BasePatchAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>data</em>, <em>labels</em>, <em>attack_indices_per_target</em>, <em>target_models</em>, <em>art_attacks</em>, <em>pars_descriptors</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.BasePatchAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base ART attack class implementing the logic for creating an adversarial patch,
+applying them to generate adversarial examples and generating a report.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>attack_indices_per_target</strong> (<em>numpy.ndarray</em>) – Array of indices to attack per target model.</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+<li><strong>art_attacks</strong> (<em>list</em><em>(</em><em>art.attacks.Attack</em><em>)</em>) – List of ART attack objects per target model which are wrapped in this class.</li>
+<li><strong>pars_descriptors</strong> (<em>dict</em>) – Dictionary of attack parameters and their description shown in the attack
+report.
+Example: {“norm”: “Adversarial perturbation norm”} for the attribute named
+“norm” of FastGradientMethod.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="pepr.robustness.art_wrapper.BasePatchAttack.attack_alias">
+<code class="descname">attack_alias</code><a class="headerlink" href="#pepr.robustness.art_wrapper.BasePatchAttack.attack_alias" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Alias for a specific instantiation of the class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.art_wrapper.BasePatchAttack.data">
+<code class="descname">data</code><a class="headerlink" href="#pepr.robustness.art_wrapper.BasePatchAttack.data" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy.ndarray</em> – Dataset with all training samples used in the given pentesting setting.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.art_wrapper.BasePatchAttack.labels">
+<code class="descname">labels</code><a class="headerlink" href="#pepr.robustness.art_wrapper.BasePatchAttack.labels" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy.ndarray</em> – Array of all labels used in the given pentesting setting.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.art_wrapper.BasePatchAttack.target_models">
+<code class="descname">target_models</code><a class="headerlink" href="#pepr.robustness.art_wrapper.BasePatchAttack.target_models" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>iterable</em> – List of target models which should be tested.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.art_wrapper.BasePatchAttack.attack_indices_per_target">
+<code class="descname">attack_indices_per_target</code><a class="headerlink" href="#pepr.robustness.art_wrapper.BasePatchAttack.attack_indices_per_target" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy.ndarray</em> – Array of indices to attack per target model.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.art_wrapper.BasePatchAttack.art_attacks">
+<code class="descname">art_attacks</code><a class="headerlink" href="#pepr.robustness.art_wrapper.BasePatchAttack.art_attacks" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>list(art.attacks.Attack)</em> – List of ART attack objects per target model which are wrapped in this class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.art_wrapper.BasePatchAttack.pars_descriptors">
+<code class="descname">pars_descriptors</code><a class="headerlink" href="#pepr.robustness.art_wrapper.BasePatchAttack.pars_descriptors" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Dictionary of attack parameters and their description shown in the attack
+report.
+Example: {“norm”: “Adversarial perturbation norm”} for the attribute named
+“norm” of FastGradientMethod.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.art_wrapper.BasePatchAttack.attack_results">
+<code class="descname">attack_results</code><a class="headerlink" href="#pepr.robustness.art_wrapper.BasePatchAttack.attack_results" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Dictionary storing the attack model results.</p>
+<ul class="simple">
+<li>adversarial_examples (list): Array of adversarial examples per target model.</li>
+<li>success_rate (list): Percentage of misclassified adversarial examples
+per target model.</li>
+<li>avg_l2_distance (list): Average euclidean distance (L2 norm) between original
+and perturbed images per target model.</li>
+<li>success_rate_list (list): Percentage of misclassified adversarial examples
+per target model and per class.</li>
+<li>l2_distance (list): Euclidean distance (L2 norm) between original
+and perturbed images for every image per target model.</li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="art-evasion-attack-wrappers">
+<span id="art-evasion-wrappers"></span><h2>ART Evasion Attack Wrappers<a class="headerlink" href="#art-evasion-attack-wrappers" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.AdversarialPatch" title="pepr.robustness.art_wrapper.AdversarialPatch"><code class="xref py py-obj docutils literal"><span class="pre">AdversarialPatch</span></code></a></td>
+<td>art.attacks.evasion.AdversarialPatch wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.AutoAttack" title="pepr.robustness.art_wrapper.AutoAttack"><code class="xref py py-obj docutils literal"><span class="pre">AutoAttack</span></code></a></td>
+<td>art.attacks.evasion.AutoAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.AutoProjectedGradientDescent" title="pepr.robustness.art_wrapper.AutoProjectedGradientDescent"><code class="xref py py-obj docutils literal"><span class="pre">AutoProjectedGradientDescent</span></code></a></td>
+<td>art.attacks.evasion.AutoProjectedGradientDescent wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.BoundaryAttack" title="pepr.robustness.art_wrapper.BoundaryAttack"><code class="xref py py-obj docutils literal"><span class="pre">BoundaryAttack</span></code></a></td>
+<td>art.attacks.evasion.BoundaryAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.BrendelBethgeAttack" title="pepr.robustness.art_wrapper.BrendelBethgeAttack"><code class="xref py py-obj docutils literal"><span class="pre">BrendelBethgeAttack</span></code></a></td>
+<td>art.attacks.evasion.BrendelBethgeAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.CarliniL2Method" title="pepr.robustness.art_wrapper.CarliniL2Method"><code class="xref py py-obj docutils literal"><span class="pre">CarliniL2Method</span></code></a></td>
+<td>art.attacks.evasion.CarliniL2Method wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.CarliniLInfMethod" title="pepr.robustness.art_wrapper.CarliniLInfMethod"><code class="xref py py-obj docutils literal"><span class="pre">CarliniLInfMethod</span></code></a></td>
+<td>art.attacks.evasion.CarliniLInfMethod wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.DeepFool" title="pepr.robustness.art_wrapper.DeepFool"><code class="xref py py-obj docutils literal"><span class="pre">DeepFool</span></code></a></td>
+<td>art.attacks.evasion.DeepFool wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.ElasticNet" title="pepr.robustness.art_wrapper.ElasticNet"><code class="xref py py-obj docutils literal"><span class="pre">ElasticNet</span></code></a></td>
+<td>art.attacks.evasion.ElasticNet wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.FastGradientMethod" title="pepr.robustness.art_wrapper.FastGradientMethod"><code class="xref py py-obj docutils literal"><span class="pre">FastGradientMethod</span></code></a></td>
+<td>art.attacks.evasion.FastGradientMethod wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.FeatureAdversaries" title="pepr.robustness.art_wrapper.FeatureAdversaries"><code class="xref py py-obj docutils literal"><span class="pre">FeatureAdversaries</span></code></a></td>
+<td>art.attacks.evasion.FeatureAdversaries wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.FrameSaliencyAttack" title="pepr.robustness.art_wrapper.FrameSaliencyAttack"><code class="xref py py-obj docutils literal"><span class="pre">FrameSaliencyAttack</span></code></a></td>
+<td>art.attacks.evasion.FrameSaliencyAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.HopSkipJump" title="pepr.robustness.art_wrapper.HopSkipJump"><code class="xref py py-obj docutils literal"><span class="pre">HopSkipJump</span></code></a></td>
+<td>art.attacks.evasion.HopSkipJump wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.BasicIterativeMethod" title="pepr.robustness.art_wrapper.BasicIterativeMethod"><code class="xref py py-obj docutils literal"><span class="pre">BasicIterativeMethod</span></code></a></td>
+<td>art.attacks.evasion.BasicIterativeMethod wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.ProjectedGradientDescent" title="pepr.robustness.art_wrapper.ProjectedGradientDescent"><code class="xref py py-obj docutils literal"><span class="pre">ProjectedGradientDescent</span></code></a></td>
+<td>art.attacks.evasion.ProjectedGradientDescent wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.NewtonFool" title="pepr.robustness.art_wrapper.NewtonFool"><code class="xref py py-obj docutils literal"><span class="pre">NewtonFool</span></code></a></td>
+<td>art.attacks.evasion.NewtonFool wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.PixelAttack" title="pepr.robustness.art_wrapper.PixelAttack"><code class="xref py py-obj docutils literal"><span class="pre">PixelAttack</span></code></a></td>
+<td>art.attacks.evasion.PixelAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.ThresholdAttack" title="pepr.robustness.art_wrapper.ThresholdAttack"><code class="xref py py-obj docutils literal"><span class="pre">ThresholdAttack</span></code></a></td>
+<td>art.attacks.evasion.ThresholdAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.SaliencyMapMethod" title="pepr.robustness.art_wrapper.SaliencyMapMethod"><code class="xref py py-obj docutils literal"><span class="pre">SaliencyMapMethod</span></code></a></td>
+<td>art.attacks.evasion.SaliencyMapMethod wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.SimBA" title="pepr.robustness.art_wrapper.SimBA"><code class="xref py py-obj docutils literal"><span class="pre">SimBA</span></code></a></td>
+<td>art.attacks.evasion.SimBA wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.SpatialTransformation" title="pepr.robustness.art_wrapper.SpatialTransformation"><code class="xref py py-obj docutils literal"><span class="pre">SpatialTransformation</span></code></a></td>
+<td>art.attacks.evasion.SpatialTransformation wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.SquareAttack" title="pepr.robustness.art_wrapper.SquareAttack"><code class="xref py py-obj docutils literal"><span class="pre">SquareAttack</span></code></a></td>
+<td>art.attacks.evasion.SquareAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.TargetedUniversalPerturbation" title="pepr.robustness.art_wrapper.TargetedUniversalPerturbation"><code class="xref py py-obj docutils literal"><span class="pre">TargetedUniversalPerturbation</span></code></a></td>
+<td>art.attacks.evasion.TargetedUniversalPerturbation wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.UniversalPerturbation" title="pepr.robustness.art_wrapper.UniversalPerturbation"><code class="xref py py-obj docutils literal"><span class="pre">UniversalPerturbation</span></code></a></td>
+<td>art.attacks.evasion.UniversalPerturbation wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.VirtualAdversarialMethod" title="pepr.robustness.art_wrapper.VirtualAdversarialMethod"><code class="xref py py-obj docutils literal"><span class="pre">VirtualAdversarialMethod</span></code></a></td>
+<td>art.attacks.evasion.VirtualAdversarialMethod wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.art_wrapper.ZooAttack" title="pepr.robustness.art_wrapper.ZooAttack"><code class="xref py py-obj docutils literal"><span class="pre">ZooAttack</span></code></a></td>
+<td>art.attacks.evasion.ZooAttack wrapper class.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">PePR only supports ART attacks that can handle the <code class="docutils literal"><span class="pre">KerasClassifier</span></code> and
+image input. The Imperceptible ASR Attack for example is not supported because it
+expects a speech recognition estimator.</p>
+</div>
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.AdversarialPatch">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">AdversarialPatch</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.AdversarialPatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.AdversarialPatch wrapper class.</p>
+<p>Attack description:
+Implementation of the adversarial patch attack for square and rectangular images and
+videos.</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1712.09665">https://arxiv.org/abs/1712.09665</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>rotation_max (float): (optional) The maximum rotation applied to random
+patches. The value is expected to be in the range [0, 180].</li>
+<li>scale_min (float): (optional) The minimum scaling applied to random patches.
+The value should be in the range [0, 1], but less than scale_max.</li>
+<li>scale_max (float): (optional) The maximum scaling applied to random patches.
+The value should be in the range [0, 1], but larger than scale_min.</li>
+<li>learning_rate (float): (optional) The learning rate of the optimization.</li>
+<li>max_iter (int): (optional) The number of optimization steps.</li>
+<li>batch_size (int): (optional) The size of the training batch.</li>
+<li>patch_shape: (optional) The shape of the adversarial patch as a tuple of shape
+(width, height, nb_channels). Currently only supported for
+TensorFlowV2Classifier. For classifiers of other frameworks the patch_shape is
+set to the shape of the input samples.</li>
+<li>verbose (bool): (optional) Show progress bars.</li>
+<li>gen_mask (numpy.ndarray): (optional) A boolean array of shape equal to the
+shape of a single samples (1, H, W) or the shape of x (N, H, W) without their
+channel dimensions. Any features for which the mask is True can be the center
+location of the patch during sampling.</li>
+<li>gen_reset_patch (bool): (optional) If True reset patch to initial values of
+mean of minimal and maximal clip value, else if False (default) restart from
+previous patch values created by previous call to generate or mean of minimal
+and maximal clip value if first call to generate.</li>
+<li>apply_scale (float): Scale of the applied patch in relation to the classifier
+input shape.</li>
+<li>apply_patch_external: (optional) External patch to apply to the images.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.AutoAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">AutoAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.AutoAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.AutoAttack wrapper class.</p>
+<p>Attack description:
+Implementation of the AutoAttack attack.</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/2003.01690">https://arxiv.org/abs/2003.01690</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>norm: (optional) The norm of the adversarial perturbation. Possible values:
+“inf”, np.inf, 1 or 2.</li>
+<li>eps (float): (optional) Maximum perturbation that the attacker can introduce.</li>
+<li>eps_step (float): (optional) Attack step size (input variation) at each
+iteration.</li>
+<li>targeted (bool): (optional) If False run only untargeted attacks, if True also
+run targeted attacks against each possible target.</li>
+<li>estimator_orig (int): (optional) Original estimator to be attacked by
+adversarial examples.</li>
+<li>batch_size (int): (optional) Size of the batch on which adversarial samples
+are generated.</li>
+<li>attacks (bool): (optional) The list of art.attacks.EvasionAttack attacks to be
+used for AutoAttack. If it is None or empty the standard attacks (PGD,
+APGD-ce, APGD-dlr, DeepFool, Square) will be used.</li>
+<li>use_labels (bool): (optional) If true, the true labels are passed to the
+attack as target labels.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.AutoProjectedGradientDescent">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">AutoProjectedGradientDescent</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.AutoProjectedGradientDescent" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.AutoProjectedGradientDescent wrapper class.</p>
+<p>Attack description:
+Implementation of the Auto Projected Gradient Descent attack.</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/2003.01690">https://arxiv.org/abs/2003.01690</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>norm: (optional) The norm of the adversarial perturbation. Possible values:
+“inf”, np.inf, 1 or 2.</li>
+<li>eps (float): (optional) Maximum perturbation that the attacker can introduce.</li>
+<li>eps_step (float): (optional) Attack step size (input variation) at each
+iteration.</li>
+<li>max_iter (int): (optional) The maximum number of iterations.</li>
+<li>targeted (bool): (optional) Indicates whether the attack is targeted (True) or
+untargeted (False).</li>
+<li>nb_random_init (int): (optional) Number of random initialisations within the
+epsilon ball. For num_random_init=0 starting at the original input.</li>
+<li>batch_size (int): (optional) Size of the batch on which adversarial samples
+are generated.</li>
+<li>loss_type: Defines the loss to attack. Available options: None (Use loss
+defined by estimator), “cross_entropy”, or “difference_logits_ratio”.</li>
+<li>verbose (bool): (optional) Show progress bars.</li>
+<li>use_labels (bool): (optional) If true, the true labels are passed to the
+attack as target labels.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.BoundaryAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">BoundaryAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.BoundaryAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.BoundaryAttack wrapper class.</p>
+<p>Attack description:
+Implementation of the boundary attack from Brendel et al. (2018). This is a powerful
+black-box attack that only requires final class prediction.</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1712.04248">https://arxiv.org/abs/1712.04248</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>batch_size (int): (optional) The size of the batch used by the estimator
+during inference.</li>
+<li>targeted (bool): (optional) Should the attack target one specific class.</li>
+<li>delta (float): (optional) Initial step size for the orthogonal step.</li>
+<li>epsilon (float): (optional) Initial step size for the step towards the target.</li>
+<li>step_adapt (float): (optional) Factor by which the step sizes are multiplied
+or divided, must be in the range (0, 1).</li>
+<li>max_iter (int): (optional) Maximum number of iterations.</li>
+<li>num_trial (int): (optional) Maximum number of trials per iteration.</li>
+<li>sample_size (int): (optional) Number of samples per trial.</li>
+<li>init_size (int): (optional) Maximum number of trials for initial generation of
+adversarial examples.</li>
+<li>min_epsilon (float): (optional) Stop attack if perturbation is smaller than
+min_epsilon.</li>
+<li>verbose (bool): (optional) Show progress bars.</li>
+<li>use_labels (bool): (optional) If true, the true labels are passed to the
+attack as target labels.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.BrendelBethgeAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">BrendelBethgeAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.BrendelBethgeAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.BrendelBethgeAttack wrapper class.</p>
+<p>Attack description:
+Base class for the Brendel &amp; Bethge adversarial attack, a powerful
+gradient-based adversarial attack that follows the adversarial boundary (the
+boundary between the space of adversarial and non-adversarial images as defined by
+the adversarial criterion) to find the minimum distance to the clean image.</p>
+<p>This is implementation of the Brendel &amp; Bethge attack follows the reference
+implementation at
+<a class="reference external" href="https://github.com/bethgelab/foolbox/blob/master/foolbox/attacks/brendel_bethge.py">https://github.com/bethgelab/foolbox/blob/master/foolbox/attacks/brendel_bethge.py</a>.</p>
+<p>Implementation differs from the attack used in the paper in two ways:</p>
+<ul class="simple">
+<li>The initial binary search is always using the full 10 steps (for ease of
+implementation).</li>
+<li>The adaptation of the trust region over the course of optimisation is less
+greedy but is more robust, reliable and simpler (decay every K steps)</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>norm: (optional) The norm of the adversarial perturbation. Possible values:
+“inf”, np.inf, 1 or 2.</li>
+<li>targeted (bool): (optional) Flag determining if attack is targeted.</li>
+<li>overshoot (float): (optional) If 1 the attack tries to return exactly to the
+adversarial boundary in each iteration. For higher values the attack tries to
+overshoot over the boundary to ensure that the perturbed sample in each
+iteration is  adversarial.</li>
+<li>steps (int): (optional) Maximum number of iterations to run. Might converge
+and stop before that.</li>
+<li>lr (float): (optional) Trust region radius, behaves similar to a learning
+rate. Smaller values decrease the step size in each iteration and ensure that
+the attack follows the boundary more faithfully.</li>
+<li>lr_decay (float): (optional) The trust region lr is multiplied with lr_decay
+in regular intervals (see lr_num_decay).</li>
+<li>lr_num_decay (int): (optional) Number of learning rate decays in regular
+intervals of length steps / lr_num_decay.</li>
+<li>momentum (float): (optional) Averaging of the boundary estimation over
+multiple steps. A momentum of zero would always take the current estimate
+while values closer to one average over a larger number of iterations.</li>
+<li>binary_search_steps (int): (optional) Number of binary search steps used to
+find the adversarial boundary between the starting point and the clean image.</li>
+<li>batch_size (int): (optional) Batch size for evaluating the model for
+predictions and gradients.</li>
+<li>init_size (int): (optional) Maximum number of random search steps to find
+initial adversarial example.</li>
+<li>use_labels (bool): (optional) If true, the true labels are passed to the
+attack as target labels.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.CarliniL2Method">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">CarliniL2Method</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.CarliniL2Method" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.CarliniL2Method wrapper class.</p>
+<p>Attack description:
+The L_2 optimized attack of Carlini and Wagner (2016). This attack is among the most
+effective and should be used among the primary attacks to evaluate potential
+defences. A major difference wrt to the original implementation
+(<a class="reference external" href="https://github.com/carlini/nn_robust_attacks">https://github.com/carlini/nn_robust_attacks</a>) is that we use line search in the
+optimization of the attack objective.</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1608.04644">https://arxiv.org/abs/1608.04644</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>confidence (float): (optional) Confidence of adversarial examples: a higher
+value produces examples that are farther away, from the original input, but
+classified with higher confidence as the target class.</li>
+<li>targeted (bool): (optional) Should the attack target one specific class.</li>
+<li>learning_rate (float): (optional) The initial learning rate for the attack
+algorithm. Smaller values produce better results but are slower to converge.</li>
+<li>binary_search_steps (int): (optional) Number of times to adjust constant with
+binary search (positive value). If binary_search_steps is large, then the
+algorithm is not very sensitive to the value of initial_const. Note that the
+values gamma=0.999999 and c_upper=10e10 are hardcoded with the same values
+used by the authors of the method.</li>
+<li>max_iter (int): (optional) The maximum number of iterations.</li>
+<li>initial_const (float): (optional) The initial trade-off constant c to use to
+tune the relative importance of distance and confidence. If
+binary_search_steps is large, the initial constant is not important, as
+discussed in Carlini and Wagner (2016).</li>
+<li>max_halving (int): (optional) Maximum number of halving steps in the line
+search optimization.</li>
+<li>max_doubling (int): (optional) Maximum number of doubling steps in the line
+search optimization.</li>
+<li>batch_size (int): (optional) Size of the batch on which adversarial samples
+are generated.</li>
+<li>verbose (bool): (optional) Show progress bars.</li>
+<li>use_labels (bool): (optional) If true, the true labels are passed to the
+attack as target labels.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.CarliniLInfMethod">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">CarliniLInfMethod</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.CarliniLInfMethod" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.CarliniLInfMethod wrapper class.</p>
+<p>Attack description:
+This is a modified version of the L_2 optimized attack of Carlini and Wagner (2016).
+It controls the L_Inf norm, i.e. the maximum perturbation applied to each pixel.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>confidence (float): (optional) Confidence of adversarial examples: a higher
+value produces examples that are farther away, from the original input, but
+classified with higher confidence as the target class.</li>
+<li>targeted (bool): (optional) Should the attack target one specific class.</li>
+<li>learning_rate (float): (optional) The initial learning rate for the attack
+algorithm. Smaller values produce better results but are slower to converge.</li>
+<li>max_iter (int): (optional) The maximum number of iterations.</li>
+<li>max_halving (int): (optional) Maximum number of halving steps in the line
+search optimization.</li>
+<li>max_doubling (int): (optional) Maximum number of doubling steps in the line
+search optimization.</li>
+<li>eps (float): (optional) An upper bound for the L_0 norm of the adversarial
+perturbation.</li>
+<li>batch_size (int): (optional) Size of the batch on which adversarial samples
+are generated.</li>
+<li>verbose (bool): (optional) Show progress bars.</li>
+<li>use_labels (bool): (optional) If true, the true labels are passed to the
+attack as target labels.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.DeepFool">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">DeepFool</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.DeepFool" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.DeepFool wrapper class.</p>
+<p>Attack description:
+Implementation of the attack from Moosavi-Dezfooli et al. (2015).</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1511.04599">https://arxiv.org/abs/1511.04599</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>max_iter (int): (optional) The maximum number of iterations.</li>
+<li>epsilon (float): (optional) Overshoot parameter.</li>
+<li>nb_grads (int): (optional) The number of class gradients (top nb_grads w.r.t.
+prediction) to compute. This way only the most likely classes are considered,
+speeding up the computation.</li>
+<li>batch_size (int): (optional) Batch size</li>
+<li>verbose (bool): (optional) Show progress bars.</li>
+<li>use_labels (bool): (optional) If true, the true labels are passed to the
+attack as target labels.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.ElasticNet">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">ElasticNet</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.ElasticNet" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.ElasticNet wrapper class.</p>
+<p>Attack description:
+The elastic net attack of Pin-Yu Chen et al. (2018).</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1709.04114">https://arxiv.org/abs/1709.04114</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>confidence (float): (optional) Confidence of adversarial examples: a higher
+value produces examples that are farther away, from the original input, but
+classified with higher confidence as the target class.</li>
+<li>targeted (bool): (optional) Should the attack target one specific class.</li>
+<li>learning_rate (float): (optional) The initial learning rate for the attack
+algorithm. Smaller values produce better results but are slower to converge.</li>
+<li>binary_search_steps (int): (optional) Number of times to adjust constant with
+binary search (positive value).</li>
+<li>max_iter (int): (optional) The maximum number of iterations.</li>
+<li>beta (float): (optional) Hyperparameter trading off L2 minimization for L1
+minimization.</li>
+<li>initial_const (float): (optional) The initial trade-off constant c to use to
+une the relative importance of distance and confidence. If binary_search_steps
+is large, the initial constant is not important, as discussed in Carlini and
+Wagner (2016).</li>
+<li>batch_size (int): (optional) Internal size of batches on which adversarial
+samples are generated.</li>
+<li>decision_rule (str): (optional) Decision rule. ‘EN’ means Elastic Net rule,
+‘L1’ means L1 rule, ‘L2’ means L2 rule.</li>
+<li>verbose (bool): (optional) Show progress bars.</li>
+<li>use_labels (bool): (optional) If true, the true labels are passed to the
+attack as target labels.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.FastGradientMethod">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">FastGradientMethod</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.FastGradientMethod" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.FastGradientMethod wrapper class.</p>
+<p>Attack description:
+This attack was originally implemented by Goodfellow et al. (2015) with the infinity
+norm (and is known as the “Fast Gradient Sign Method”). This implementation extends
+the attack to other norms, and is therefore called the Fast Gradient Method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>norm: (optional) The norm of the adversarial perturbation. Possible values:
+“inf”, np.inf, 1 or 2.</li>
+<li>eps (float): (optional) Attack step size (input variation).</li>
+<li>eps_step (float): (optional) Step size of input variation for minimal
+perturbation computation.</li>
+<li>targeted (bool): (optional) Indicates whether the attack is targeted (True) or
+untargeted (False).</li>
+<li>num_random_init (int): (optional) Number of random initialisations within the
+epsilon ball. For random_init=0 starting at the original input.</li>
+<li>batch_size (int): (optional) Size of the batch on which adversarial samples
+are generated.</li>
+<li>minimal (bool): (optional) Indicates if computing the minimal perturbation
+(True). If True, also define eps_step for the step size and eps for the
+maximum perturbation.</li>
+<li>use_labels (bool): (optional) If true, the true labels are passed to the
+attack as target labels.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.FeatureAdversaries">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">FeatureAdversaries</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.FeatureAdversaries" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.FeatureAdversaries wrapper class.</p>
+<p>Attack description:
+This class represent a Feature Adversaries evasion attack.</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1511.05122">https://arxiv.org/abs/1511.05122</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>delta: (optional) The maximum deviation between source and guide images.</li>
+<li>layer: (optional) Index of the representation layer.</li>
+<li>batch_size (int): (optional) Batch size.</li>
+<li>use_labels (bool): (optional) If true, the true labels are passed to the
+attack as target labels.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.FrameSaliencyAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">FrameSaliencyAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.FrameSaliencyAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.FrameSaliencyAttack wrapper class.</p>
+<p>Attack description:
+Implementation of the attack framework proposed by Inkawhich et al. (2018).
+Prioritizes the frame of a sequential input to be adversarially perturbed based on
+the saliency score of each frame.</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1811.11875">https://arxiv.org/abs/1811.11875</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>attacker (EvasionAttack): (optional) An adversarial evasion attacker which
+supports masking. Currently supported: ProjectedGradientDescent,
+BasicIterativeMethod, FastGradientMethod.</li>
+<li>method (str): (optional) Specifies which method to use: “iterative_saliency”
+(adds perturbation iteratively to frame with highest saliency score until
+attack is successful), “iterative_saliency_refresh” (updates perturbation
+after each iteration), “one_shot” (adds all perturbations at once, i.e.
+defaults to original attack).</li>
+<li>frame_index (int): (optional) Index of the axis in input (feature) array x
+representing the frame dimension.</li>
+<li>batch_size (int): (optional) Size of the batch on which adversarial samples
+are generated.</li>
+<li>verbose (bool): (optional) Show progress bars.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.HopSkipJump">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">HopSkipJump</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.HopSkipJump" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.HopSkipJump wrapper class.</p>
+<p>Attack description:
+Implementation of the HopSkipJump attack from Jianbo et al. (2019). This is a
+powerful black-box attack that only requires final class prediction, and is an
+advanced version of the boundary attack.</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1904.02144">https://arxiv.org/abs/1904.02144</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>batch_size (int): (optional) The size of the batch used by the estimator
+during inference.</li>
+<li>targeted (bool): (optional) Should the attack target one specific class.</li>
+<li>norm:(optional) Order of the norm. Possible values: “inf”, np.inf or 2.</li>
+<li>max_iter (int): (optional) Maximum number of iterations.</li>
+<li>max_eval (int): (optional) Maximum number of evaluations for estimating
+gradient.</li>
+<li>init_eval (int): (optional) Initial number of evaluations for estimating
+gradient.</li>
+<li>init_size (int): (optional) Maximum number of trials for initial generation of
+adversarial examples.</li>
+<li>verbose (bool): (optional) Show progress bars.</li>
+<li>use_labels (bool): (optional) If true, the true labels are passed to the
+attack as target labels.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.BasicIterativeMethod">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">BasicIterativeMethod</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.BasicIterativeMethod" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.BasicIterativeMethod wrapper class.</p>
+<p>Attack description:
+The Basic Iterative Method is the iterative version of FGM and FGSM.</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1607.02533">https://arxiv.org/abs/1607.02533</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>eps: (optional) Maximum perturbation that the attacker can introduce.</li>
+<li>eps_step: (optional) Attack step size (input variation) at each iteration.</li>
+<li>max_iter (int): (optional) The maximum number of iterations.</li>
+<li>targeted (bool): (optional) Indicates whether the attack is targeted (True) or
+untargeted (False).</li>
+<li>batch_size (int): (optional) Size of the batch on which adversarial samples
+are generated.</li>
+<li>use_labels (bool): (optional) If true, the true labels are passed to the
+attack as target labels.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.ProjectedGradientDescent">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">ProjectedGradientDescent</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.ProjectedGradientDescent" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.ProjectedGradientDescent wrapper class.</p>
+<p>Attack description:
+The Projected Gradient Descent attack is an iterative method in which, after each
+iteration, the perturbation is projected on an lp-ball of specified radius (in
+addition to clipping the values of the adversarial sample so that it lies in the
+permitted data range). This is the attack proposed by Madry et al. for adversarial
+training.</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1706.06083">https://arxiv.org/abs/1706.06083</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>norm: (optional) The norm of the adversarial perturbation supporting “inf”,
+np.inf, 1 or 2.</li>
+<li>eps: (optional) Maximum perturbation that the attacker can introduce.</li>
+<li>eps_step: (optional) Attack step size (input variation) at each iteration.</li>
+<li>random_eps (bool): (optional) When True, epsilon is drawn randomly from
+truncated normal distribution. The literature suggests this for FGSM based
+training to generalize across different epsilons. eps_step is modified to
+preserve the ratio of eps / eps_step. The effectiveness of this method with
+PGD is untested (<a class="reference external" href="https://arxiv.org/pdf/1611.01236.pdf">https://arxiv.org/pdf/1611.01236.pdf</a>).</li>
+<li>max_iter (int): (optional) The maximum number of iterations.</li>
+<li>targeted (bool): (optional) Indicates whether the attack is targeted (True) or
+untargeted (False).</li>
+<li>num_random_init (int): (optional) Number of random initialisations within the
+epsilon ball. For num_random_init=0 starting at the original input.</li>
+<li>batch_size (int): (optional) Size of the batch on which adversarial samples
+are generated.</li>
+<li>verbose (bool): (optional) Show progress bars.</li>
+<li>use_labels (bool): (optional) If true, the true labels are passed to the
+attack as target labels.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.NewtonFool">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">NewtonFool</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.NewtonFool" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.NewtonFool wrapper class.</p>
+<p>Attack description:
+Implementation of the attack from Uyeong Jang et al. (2017).</p>
+<p>Paper link: <a class="reference external" href="http://doi.acm.org/10.1145/3134600.3134635">http://doi.acm.org/10.1145/3134600.3134635</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>max_iter (int): (optional) The maximum number of iterations.</li>
+<li>eta (float): (optional) The eta coefficient.</li>
+<li>batch_size (int): (optional) Size of the batch on which adversarial samples
+are generated.</li>
+<li>verbose (bool): (optional) Show progress bars.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.PixelAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">PixelAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.PixelAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.PixelAttack wrapper class.</p>
+<p>Attack description:
+This attack was originally implemented by Vargas et al. (2019). It is generalisation
+of One Pixel Attack originally implemented by Su et al. (2019).</p>
+<p>One Pixel Attack Paper link:
+<a class="reference external" href="https://ieeexplore.ieee.org/abstract/document/8601309/citations#citations">https://ieeexplore.ieee.org/abstract/document/8601309/citations#citations</a>
+(arXiv link: <a class="reference external" href="https://arxiv.org/pdf/1710.08864.pdf">https://arxiv.org/pdf/1710.08864.pdf</a>)
+Pixel Attack Paper link: <a class="reference external" href="https://arxiv.org/abs/1906.06026">https://arxiv.org/abs/1906.06026</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>th: (optional) threshold value of the Pixel/ Threshold attack. th=None
+indicates finding a minimum threshold.</li>
+<li>es (int): (optional) Indicates whether the attack uses CMAES (0) or DE (1) as
+Evolutionary Strategy.</li>
+<li>targeted (bool): (optional) Indicates whether the attack is targeted (True) or
+untargeted (False).</li>
+<li>verbose (bool): (optional) Indicates whether to print verbose messages of ES
+used.</li>
+<li>use_labels (bool): (optional) If true, the true labels are passed to the
+attack as target labels.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.ThresholdAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">ThresholdAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.ThresholdAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.ThresholdAttack wrapper class.</p>
+<p>Attack description:
+This attack was originally implemented by Vargas et al. (2019).</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1906.06026">https://arxiv.org/abs/1906.06026</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>th: (optional) threshold value of the Pixel/ Threshold attack. th=None
+indicates finding a minimum threshold.</li>
+<li>es (int): (optional) Indicates whether the attack uses CMAES (0) or DE (1) as
+Evolutionary Strategy.</li>
+<li>targeted (bool): (optional) Indicates whether the attack is targeted (True) or
+untargeted (False).</li>
+<li>verbose (bool): (optional) Indicates whether to print verbose messages of ES
+used.</li>
+<li>use_labels (bool): (optional) If true, the true labels are passed to the
+attack as target labels.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.SaliencyMapMethod">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">SaliencyMapMethod</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.SaliencyMapMethod" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.SaliencyMapMethod wrapper class.</p>
+<p>Attack description:
+Implementation of the Jacobian-based Saliency Map Attack (Papernot et al. 2016).</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1511.07528">https://arxiv.org/abs/1511.07528</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>theta (float): (optional) Amount of Perturbation introduced to each modified
+feature per step (can be positive or negative).</li>
+<li>gamma (float): (optional) Maximum fraction of features being perturbed
+(between 0 and 1).</li>
+<li>batch_size (int): (optional) Size of the batch on which adversarial samples
+are generated.</li>
+<li>verbose (bool): (optional) Show progress bars.</li>
+<li>use_labels (bool): (optional) If true, the true labels are passed to the
+attack as target labels.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.SimBA">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">SimBA</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.SimBA" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.SimBA wrapper class.</p>
+<p>Attack description:
+This class implements the black-box attack SimBA.</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1905.07121">https://arxiv.org/abs/1905.07121</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>attack (str): (optional) attack type: pixel (px) or DCT (dct) attacks</li>
+<li>max_iter (int): (optional) The maximum number of iterations.</li>
+<li>epsilon (float): (optional) Overshoot parameter.</li>
+<li>order (str): (optional) order of pixel attacks: random or diagonal (diag)</li>
+<li>freq_dim (int): (optional) dimensionality of 2D frequency space (DCT).</li>
+<li>stride (int): (optional) stride for block order (DCT).</li>
+<li>targeted (bool): (optional) perform targeted attack</li>
+<li>batch_size (int): (optional) Batch size (but, batch process unavailable in
+this implementation)</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.SpatialTransformation">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">SpatialTransformation</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.SpatialTransformation" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.SpatialTransformation wrapper class.</p>
+<p>Attack description:
+Implementation of the spatial transformation attack using translation and rotation
+of inputs. The attack conducts black-box queries to the target model in a grid
+search over possible translations and rotations to find optimal attack parameters.</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1712.02779">https://arxiv.org/abs/1712.02779</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>max_translation (float): (optional) The maximum translation in any direction
+as percentage of image size. The value is expected to be in the range
+[0, 100].</li>
+<li>num_translations (int): (optional) The number of translations to search on
+grid spacing per direction.</li>
+<li>max_rotation (float): (optional) The maximum rotation in either direction in
+degrees. The value is expected to be in the range [0, 180].</li>
+<li>num_rotations (int): (optional) The number of rotations to search on grid
+spacing.</li>
+<li>verbose (bool): (optional) Show progress bars.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.SquareAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">SquareAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.SquareAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.SquareAttack wrapper class.</p>
+<p>Attack description:
+This class implements the SquareAttack attack.</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1912.00049">https://arxiv.org/abs/1912.00049</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>norm: (optional) The norm of the adversarial perturbation. Possible values:
+“inf”, np.inf, 1 or 2.</li>
+<li>max_iter (int): (optional) Maximum number of iterations.</li>
+<li>eps (float): (optional) Maximum perturbation that the attacker can introduce.</li>
+<li>p_init (float): (optional) Initial fraction of elements.</li>
+<li>nb_restarts (int): (optional) Number of restarts.</li>
+<li>batch_size (int): (optional) Batch size for estimator evaluations.</li>
+<li>verbose (bool): (optional) Show progress bars.</li>
+<li>use_labels (bool): (optional) If true, the true labels are passed to the
+attack as target labels.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.TargetedUniversalPerturbation">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">TargetedUniversalPerturbation</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.TargetedUniversalPerturbation" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.TargetedUniversalPerturbation wrapper class.</p>
+<p>Attack description:
+Implementation of the attack from Hirano and Takemoto (2019). Computes a fixed
+perturbation to be applied to all future inputs. To this end, it can use any
+adversarial attack method.</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1911.06502">https://arxiv.org/abs/1911.06502</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>attacker (str): (optional) Adversarial attack name. Default is ‘deepfool’.
+Supported names: ‘fgsm’.</li>
+<li>attacker_params: (optional) Parameters specific to the adversarial attack. If
+this parameter is not specified, the default parameters of the chosen attack
+will be used.</li>
+<li>delta (float): (optional) desired accuracy</li>
+<li>max_iter (int): (optional) The maximum number of iterations for computing
+universal perturbation.</li>
+<li>eps (float): (optional) Attack step size (input variation)</li>
+<li>norm: (optional) The norm of the adversarial perturbation. Possible values:
+“inf”, np.inf, 2</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.UniversalPerturbation">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">UniversalPerturbation</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.UniversalPerturbation" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.UniversalPerturbation wrapper class.</p>
+<p>Attack description:
+Implementation of the attack from Moosavi-Dezfooli et al. (2016). Computes a fixed
+perturbation to be applied to all future inputs. To this end, it can use any
+adversarial attack method.</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1610.08401">https://arxiv.org/abs/1610.08401</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>attacker (str): (optional) Adversarial attack name. Adversarial attack name.
+Default is ‘deepfool’. Supported names: ‘carlini’, ‘carlini_inf’, ‘deepfool’,
+‘fgsm’, ‘bim’, ‘pgd’, ‘margin’, ‘ead’, ‘newtonfool’, ‘jsma’, ‘vat’, ‘simba’.</li>
+<li>attacker_params: (optional) Parameters specific to the adversarial attack. If
+this parameter is not specified, the default parameters of the chosen attack
+will be used.</li>
+<li>delta (float): (optional) desired accuracy</li>
+<li>max_iter (int): (optional) The maximum number of iterations for computing
+universal perturbation.</li>
+<li>eps (float): (optional) Attack step size (input variation)</li>
+<li>norm: (optional) The norm of the adversarial perturbation. Possible values:
+“inf”, np.inf, 2</li>
+<li>batch_size (int): (optional) Batch size for model evaluations in
+UniversalPerturbation.</li>
+<li>verbose (bool): (optional) Show progress bars.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.VirtualAdversarialMethod">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">VirtualAdversarialMethod</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.VirtualAdversarialMethod" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.VirtualAdversarialMethod wrapper class.</p>
+<p>Attack description:
+This attack was originally proposed by Miyato et al. (2016) and was used for virtual
+adversarial training.</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1507.00677">https://arxiv.org/abs/1507.00677</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>eps (float): (optional) Attack step (max input variation).</li>
+<li>finite_diff (float): (optional) The finite difference parameter.</li>
+<li>max_iter (int): (optional) The maximum number of iterations.</li>
+<li>batch_size (int): (optional) Size of the batch on which adversarial samples
+are generated.</li>
+<li>verbose (bool): (optional) Show progress bars.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.art_wrapper.ZooAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.art_wrapper.</code><code class="descname">ZooAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.art_wrapper.ZooAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.evasion.ZooAttack wrapper class.</p>
+<p>Attack description:
+The black-box zeroth-order optimization attack from Pin-Yu Chen et al. (2018). This
+attack is a variant of the C&amp;W attack which uses ADAM coordinate descent to perform
+numerical estimation of gradients.</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1708.03999">https://arxiv.org/abs/1708.03999</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>confidence (float): (optional) Confidence of adversarial examples: a higher
+value produces examples that are farther away, from the original input, but
+classified with higher confidence as the target class.</li>
+<li>targeted (bool): (optional) Should the attack target one specific class.</li>
+<li>learning_rate (float): (optional) The initial learning rate for the attack
+algorithm. Smaller values produce better results but are slower to converge.</li>
+<li>max_iter (int): (optional) The maximum number of iterations.</li>
+<li>binary_search_steps (int): (optional) Number of times to adjust constant with
+binary search (positive value).</li>
+<li>initial_const (float): (optional) The initial trade-off constant c to use to
+tune the relative importance of distance and confidence. If
+binary_search_steps is large, the initial constant is not important, as
+discussed in Carlini and Wagner (2016).</li>
+<li>abort_early (bool): (optional) True if gradient descent should be abandoned
+when it gets stuck.</li>
+<li>use_resize (bool): (optional) True if to use the resizing strategy from the
+paper: first, compute attack on inputs resized to 32x32, then increase size if
+needed to 64x64, followed by 128x128.</li>
+<li>use_importance (bool): (optional) True if to use importance sampling when
+choosing coordinates to update.</li>
+<li>nb_parallel (int): (optional) Number of coordinate updates to run in parallel.
+A higher value for nb_parallel should be preferred over a large batch size.</li>
+<li>batch_size (int): (optional) Internal size of batches on which adversarial
+samples are generated. Small batch sizes are encouraged for ZOO, as the
+algorithm already runs nb_parallel coordinate updates in parallel for each
+sample. The batch size is a multiplier of nb_parallel in terms of memory
+consumption.</li>
+<li>variable_h (float): (optional) Step size for numerical estimation of
+derivatives.</li>
+<li>verbose (bool): (optional) Show progress bars.</li>
+<li>use_labels (bool): (optional) If true, the true labels are passed to the
+attack as target labels.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="attack_runner.html" class="btn btn-neutral float-right" title="Attack Runner" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="foolbox_wrapper.html" class="btn btn-neutral" title="Foolbox Attacks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Institute for IT-Security (University of Luebeck).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'alpha',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

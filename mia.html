@@ -1,0 +1,463 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Membership Inference Attack &mdash; ML-PePR alpha documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="ML-PePR alpha documentation" href="index.html"/>
+        <link rel="up" title="Privacy Attacks" href="privacy_attacks.html"/>
+        <link rel="next" title="Generalized Membership Inference Attack (Direct)" href="gmia.html"/>
+        <link rel="prev" title="Privacy Attacks" href="privacy_attacks.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> ML-PePR
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quick_start_guide.html">Quick-Start Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="privacy_attacks.html">Privacy Attacks</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Membership Inference Attack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gmia.html">Generalized Membership Inference Attack (Direct)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="art_extraction_wrapper.html">ART Extraction Attacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="art_inference_wrapper.html">ART Inference Attacks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="robustness_attacks.html">Robustness Attacks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="attack_runner.html">Attack Runner</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utilities.html">Utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ML-PePR</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="privacy_attacks.html">Privacy Attacks</a> &raquo;</li>
+        
+      <li>Membership Inference Attack</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/mia.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="membership-inference-attack">
+<h1>Membership Inference Attack<a class="headerlink" href="#membership-inference-attack" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pepr.privacy.mia.Mia">
+<em class="property">class </em><code class="descclassname">pepr.privacy.mia.</code><code class="descname">Mia</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.privacy.mia.Mia" title="Permalink to this definition">¶</a></dt>
+<dd><p>Membership Inference Attacks (MIA) Against Machine Learning Models.</p>
+<p>Attack-Steps:</p>
+<ol class="arabic simple">
+<li>Create dataset mapping for shadow models.</li>
+<li>Train shadow models.</li>
+<li>Generate attack model dataset.</li>
+<li>Train attack models.</li>
+<li>Evaluate attack models.</li>
+</ol>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the mia class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>number_classes (int): Number of different classes the target model predicts.</li>
+<li>number_shadow_models (int): Number of shadow models to be trained.</li>
+<li>shadow_training_set_size (int): Size of the trainings set for each
+shadow model. The corresponding evaluation sets will have the same size.</li>
+<li>create_compile_shadow_model (function): Function that returns a compiled
+TensorFlow model (typically identical to the target model) used in the
+training of the shadow models.</li>
+<li>create_compile_attack_model (function): Function that returns a compiled
+TensorFlow model used for the attack models. The model output is expected to
+be a single floating-point value per prediction.</li>
+<li>shadow_epochs (int): Number of training epochs of the shadow models.</li>
+<li>shadow_batch_size (int): Batch size used in the training of the
+shadow models.</li>
+<li>attack_epochs (int): Number of training epochs of the attack models.</li>
+<li>attack_batch_size (int): Batch size used in the training of the
+attack models.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all training samples used in the given pentesting setting.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used in the given pentesting setting.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing which record-indices are used to train the shadow
+models, the target model(s) and which are used for the evaluation of the
+attack.</p>
+<ul>
+<li>shadow_indices (list): List of indices describing which of the records
+from data are used to train the shadow models.</li>
+<li>target_indices (list): List of indices describing which of the records
+from data were used to train the target model(s).</li>
+<li>evaluation_indices (list): List of indices describing which of the records
+from data are used to evaluate the attack.</li>
+<li>record_indices_per_target (numpy.ndarray): n*m array describing for all n
+target models which m indices where used in the training.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="pepr.privacy.mia.Mia.attack_alias">
+<code class="descname">attack_alias</code><a class="headerlink" href="#pepr.privacy.mia.Mia.attack_alias" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Alias for a specific instantiation of the attack class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.mia.Mia.attack_pars">
+<code class="descname">attack_pars</code><a class="headerlink" href="#pepr.privacy.mia.Mia.attack_pars" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Dictionary containing all needed parameters fo the attack.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.mia.Mia.data">
+<code class="descname">data</code><a class="headerlink" href="#pepr.privacy.mia.Mia.data" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy.ndarray</em> – Dataset with all training samples used in the given pentesting setting.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.mia.Mia.labels">
+<code class="descname">labels</code><a class="headerlink" href="#pepr.privacy.mia.Mia.labels" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy.ndarray</em> – Array of all labels used in the given pentesting setting.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.mia.Mia.data_conf">
+<code class="descname">data_conf</code><a class="headerlink" href="#pepr.privacy.mia.Mia.data_conf" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Dictionary describing the data configuration of the given pentesting
+setting by specifying which record-indices are used to train the shadow
+models, the target model(s) and which are used for the evaluation of the
+attack.</p>
+<ul class="simple">
+<li>shadow_indices (list): List of indices describing which of the records
+from data are used to train the shadow models.</li>
+<li>target_indices (list): List of indices describing which of the records
+from data were used to train the target model(s).</li>
+<li>evaluation_indices (list): List of indices describing which of the records
+from data are used to evaluate the attack.</li>
+<li>record_indices_per_target (numpy.ndarray): n*m array describing for all n
+target models which m indices where used in the training.</li>
+</ul>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.mia.Mia.target_models">
+<code class="descname">target_models</code><a class="headerlink" href="#pepr.privacy.mia.Mia.target_models" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>iterable</em> – List of target models which should be tested.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.mia.Mia.attack_results">
+<code class="descname">attack_results</code><a class="headerlink" href="#pepr.privacy.mia.Mia.attack_results" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Dictionary storing the attack model results. A list “per attack model and
+target model” has the shape (attack model, target model) -&gt; First index
+specifies the attack model, the second index the target model.</p>
+<ul class="simple">
+<li>tp_list (numpy.ndarray): True positives per attack model and target model.</li>
+<li>fp_list (numpy.ndarray): False positives per attack model and target model.</li>
+<li>fn_list (numpy.ndarray): False negatives per attack model and target model.</li>
+<li>tn_list (numpy.ndarray): True negatives per attack model and target model.</li>
+<li>eval_accuracy_list (numpy.ndarray): Evaluation accuracy on evaluation records
+per attack model and target model.</li>
+<li>precision_list (numpy.ndarray): Attack precision per attack model and target
+model.</li>
+<li>recall_list (numpy.ndarray): Attack recall per attack model and target model.</li>
+<li>eval_accuracy (numpy.ndarray): Evaluation accuracy averaged over all attack
+models per target model.</li>
+<li>precision (numpy.ndarray): Attack precision averaged over all attack models
+per target model.</li>
+<li>recall (numpy.ndarray): Attack recall averaged over all attack models per
+target model.</li>
+<li>overall_eval_accuracy (float): Evaluation accuracy averaged over all target
+models.</li>
+<li>overall_precision (float): Attack precision averaged over all target models.</li>
+<li>overall_recall (float): Attack recall averaged over all target models.</li>
+<li>shadow_train_accuracy_list (list): Accuracy on training records per shadow
+model and target model.</li>
+<li>shadow_test_accuracy_list (list): Accuracy on test records per shadow model
+and target model.</li>
+<li>shadow_train_accuracy (float): Accuracy on train records averaged over all
+shadow models per target model.</li>
+<li>shadow_test_accuracy (float): Accuracy on test records averaged over all
+shadow models per target model.</li>
+</ul>
+</dd></dl>
+
+<p class="rubric">References</p>
+<p>Implementation of the basic membership inference attack by Reza Shokri, Marco
+Stronati, Congzheng Song and Vitaly Shmatikov. Membership inference attacks
+against machine learning models 2017 IEEE Symposium on Security and Privacy (SP).
+IEEE, 2017.</p>
+<dl class="method">
+<dt id="pepr.privacy.mia.Mia.create_attack_report">
+<code class="descname">create_attack_report</code><span class="sig-paren">(</span><em>save_path='mia_report'</em>, <em>pdf=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.privacy.mia.Mia.create_attack_report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an attack report just for the given attack instantiation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>save_path</strong> (<em>str</em>) – Path to save the tex, pdf and asset files of the attack report.</li>
+<li><strong>pdf</strong> (<em>bool</em>) – If set, generate pdf out of latex file.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pepr.privacy.mia.Mia.create_attack_section">
+<code class="descname">create_attack_section</code><span class="sig-paren">(</span><em>save_path</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.privacy.mia.Mia.create_attack_section" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an attack section for the given attack instantiation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>save_path</strong> – Path to save the tex, pdf and asset files of the attack report.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pepr.privacy.mia.Mia.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>save_path=None</em>, <em>load_pars=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.privacy.mia.Mia.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run membership inference attack.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>save_path</strong> (<em>str</em>) – <p>If path is given, the following (partly computational expensive)
+intermediate results are saved to disk:</p>
+<ul>
+<li>The mapping of training-records to shadow models.</li>
+<li>The trained shadow models.</li>
+<li>The attack datasets for training the attack model.</li>
+<li>The trained attack models.</li>
+</ul>
+</li>
+<li><strong>load_pars</strong> (<em>dict</em>) – <p>If this dictionary is given, the following computational intermediate
+results can be loaded from disk.</p>
+<ul>
+<li>shadow_data_indices (str) : Path to shadow data mapping.</li>
+<li>shadow_models (list) : List of paths to shadow models.</li>
+<li>attack_datasets (str) : Path to attack datasets.</li>
+<li>attack_models (list) : List of paths to attack models.</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="gmia.html" class="btn btn-neutral float-right" title="Generalized Membership Inference Attack (Direct)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="privacy_attacks.html" class="btn btn-neutral" title="Privacy Attacks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Institute for IT-Security (University of Luebeck).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'alpha',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

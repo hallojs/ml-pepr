@@ -1,0 +1,1991 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Foolbox Attacks &mdash; ML-PePR alpha documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="ML-PePR alpha documentation" href="index.html"/>
+        <link rel="up" title="Robustness Attacks" href="robustness_attacks.html"/>
+        <link rel="next" title="ART Evasion Attacks" href="art_wrapper.html"/>
+        <link rel="prev" title="Robustness Attacks" href="robustness_attacks.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> ML-PePR
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quick_start_guide.html">Quick-Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="privacy_attacks.html">Privacy Attacks</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="robustness_attacks.html">Robustness Attacks</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Foolbox Attacks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#base-wrapper-class">Base Wrapper Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#foolbox-attack-wrappers">Foolbox Attack Wrappers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="art_wrapper.html">ART Evasion Attacks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="attack_runner.html">Attack Runner</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utilities.html">Utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ML-PePR</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="robustness_attacks.html">Robustness Attacks</a> &raquo;</li>
+        
+      <li>Foolbox Attacks</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/foolbox_wrapper.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="foolbox-attacks">
+<h1>Foolbox Attacks<a class="headerlink" href="#foolbox-attacks" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You can find a basic example notebook <a class="reference external" href="https://colab.research.google.com/github/hallojs/ml-pepr/blob/master/notebooks/foolbox_tutorial.ipynb">here</a>.</p>
+</div>
+<div class="section" id="base-wrapper-class">
+<h2>Base Wrapper Class<a class="headerlink" href="#base-wrapper-class" title="Permalink to this headline">¶</a></h2>
+<p>The base class does not implement any attack. The <a class="reference internal" href="#foolbox-wrappers"><span class="std std-ref">Foolbox attack wrappers</span></a> inherit from the <cite>BaseAttack</cite> class and have the same
+attributes.</p>
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.BaseAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">BaseAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>epsilons</em>, <em>data</em>, <em>labels</em>, <em>attack_indices_per_target</em>, <em>target_models</em>, <em>foolbox_attack</em>, <em>pars_descriptors</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.BaseAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base foolbox attack class implementing the logic for running the attack and
+generating a report.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>epsilons</strong> (<em>iterable</em>) – List of one or more epsilons for the attack.</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>attack_indices_per_target</strong> (<em>numpy.ndarray</em>) – Array of indices to attack per target model.</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+<li><strong>foolbox_attack</strong> (<em>foolbox.attack.Attack</em>) – The foolbox attack object which is wrapped in this class.</li>
+<li><strong>pars_descriptors</strong> (<em>dict</em>) – Dictionary of attack parameters and their description shown in the attack
+report.
+Example: {“target”: “Contrast reduction target”} for the attribute named
+“target” of L2ContrastReductionAttack.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="pepr.robustness.foolbox_wrapper.BaseAttack.attack_alias">
+<code class="descname">attack_alias</code><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.BaseAttack.attack_alias" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Alias for a specific instantiation of the class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.foolbox_wrapper.BaseAttack.attack_pars">
+<code class="descname">attack_pars</code><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.BaseAttack.attack_pars" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Dictionary containing all needed parameters fo the attack.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.foolbox_wrapper.BaseAttack.data">
+<code class="descname">data</code><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.BaseAttack.data" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy.ndarray</em> – Dataset with all training samples used in the given pentesting setting.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.foolbox_wrapper.BaseAttack.labels">
+<code class="descname">labels</code><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.BaseAttack.labels" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy.ndarray</em> – Array of all labels used in the given pentesting setting.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.foolbox_wrapper.BaseAttack.target_models">
+<code class="descname">target_models</code><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.BaseAttack.target_models" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>iterable</em> – List of target models which should be tested.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.foolbox_wrapper.BaseAttack.fmodels">
+<code class="descname">fmodels</code><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.BaseAttack.fmodels" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>iterable</em> – List of foolbox models converted from target models.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.foolbox_wrapper.BaseAttack.foolbox_attack">
+<code class="descname">foolbox_attack</code><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.BaseAttack.foolbox_attack" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>foolbox.attack.Attack</em> – The foolbox attack object which is wrapped in this class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.foolbox_wrapper.BaseAttack.attack_results">
+<code class="descname">attack_results</code><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.BaseAttack.attack_results" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Dictionary storing the attack model results.</p>
+<ul class="simple">
+<li>raw (list): List of raw adversarial examples per target model.</li>
+<li>clipped (list):  The clipped adversarial examples. These are guaranteed to not
+be perturbed more than epsilon and thus are the actual adversarial examples
+you want to visualize. Note that some of them might not actually switch the
+class.</li>
+<li>is_adv (list): Contains a boolean for each sample, indicating
+which samples are true adversarial that are both misclassified and within the
+epsilon balls around the clean samples. For every target model a
+tensorflow.Tensor with an array of shape (epsilons, data).</li>
+<li>success_rate (list): Percentage of misclassified adversarial examples
+per target model and epsilon.</li>
+<li>l2_distance (list): Euclidean distance (L2 norm) between original and
+perturbed images for every single image per target model, epsilon and class
+(shape: (target_models, epsilons, classes, nb_records))</li>
+<li>avg_l2_distance (list): Average euclidean distance (L2 norm) between original
+and perturbed images (epsilon is upper bound) per target model and epsilon.</li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="foolbox-attack-wrappers">
+<span id="foolbox-wrappers"></span><h2>Foolbox Attack Wrappers<a class="headerlink" href="#foolbox-attack-wrappers" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2ContrastReductionAttack" title="pepr.robustness.foolbox_wrapper.L2ContrastReductionAttack"><code class="xref py py-obj docutils literal"><span class="pre">L2ContrastReductionAttack</span></code></a></td>
+<td>foolbox.attacks.L2ContrastReductionAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.VirtualAdversarialAttack" title="pepr.robustness.foolbox_wrapper.VirtualAdversarialAttack"><code class="xref py py-obj docutils literal"><span class="pre">VirtualAdversarialAttack</span></code></a></td>
+<td>foolbox.attacks.VirtualAdversarialAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.DDNAttack" title="pepr.robustness.foolbox_wrapper.DDNAttack"><code class="xref py py-obj docutils literal"><span class="pre">DDNAttack</span></code></a></td>
+<td>foolbox.attacks.DDNAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2ProjectedGradientDescentAttack" title="pepr.robustness.foolbox_wrapper.L2ProjectedGradientDescentAttack"><code class="xref py py-obj docutils literal"><span class="pre">L2ProjectedGradientDescentAttack</span></code></a></td>
+<td>foolbox.attacks.L2ProjectedGradientDescentAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.LinfProjectedGradientDescentAttack" title="pepr.robustness.foolbox_wrapper.LinfProjectedGradientDescentAttack"><code class="xref py py-obj docutils literal"><span class="pre">LinfProjectedGradientDescentAttack</span></code></a></td>
+<td>foolbox.attacks.LinfProjectedGradientDescentAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2BasicIterativeAttack" title="pepr.robustness.foolbox_wrapper.L2BasicIterativeAttack"><code class="xref py py-obj docutils literal"><span class="pre">L2BasicIterativeAttack</span></code></a></td>
+<td>foolbox.attacks.L2BasicIterativeAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.LinfBasicIterativeAttack" title="pepr.robustness.foolbox_wrapper.LinfBasicIterativeAttack"><code class="xref py py-obj docutils literal"><span class="pre">LinfBasicIterativeAttack</span></code></a></td>
+<td>foolbox.attacks.LinfBasicIterativeAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2FastGradientAttack" title="pepr.robustness.foolbox_wrapper.L2FastGradientAttack"><code class="xref py py-obj docutils literal"><span class="pre">L2FastGradientAttack</span></code></a></td>
+<td>foolbox.attacks.L2FastGradientAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.LinfFastGradientAttack" title="pepr.robustness.foolbox_wrapper.LinfFastGradientAttack"><code class="xref py py-obj docutils literal"><span class="pre">LinfFastGradientAttack</span></code></a></td>
+<td>foolbox.attacks.LinfFastGradientAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2AdditiveGaussianNoiseAttack" title="pepr.robustness.foolbox_wrapper.L2AdditiveGaussianNoiseAttack"><code class="xref py py-obj docutils literal"><span class="pre">L2AdditiveGaussianNoiseAttack</span></code></a></td>
+<td>foolbox.attacks.L2AdditiveGaussianNoiseAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2AdditiveUniformNoiseAttack" title="pepr.robustness.foolbox_wrapper.L2AdditiveUniformNoiseAttack"><code class="xref py py-obj docutils literal"><span class="pre">L2AdditiveUniformNoiseAttack</span></code></a></td>
+<td>foolbox.attacks.L2AdditiveUniformNoiseAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2ClippingAwareAdditiveGaussianNoiseAttack" title="pepr.robustness.foolbox_wrapper.L2ClippingAwareAdditiveGaussianNoiseAttack"><code class="xref py py-obj docutils literal"><span class="pre">L2ClippingAwareAdditiveGaussianNoiseAttack</span></code></a></td>
+<td>foolbox.attacks.L2ClippingAwareAdditiveGaussianNoiseAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2ClippingAwareAdditiveUniformNoiseAttack" title="pepr.robustness.foolbox_wrapper.L2ClippingAwareAdditiveUniformNoiseAttack"><code class="xref py py-obj docutils literal"><span class="pre">L2ClippingAwareAdditiveUniformNoiseAttack</span></code></a></td>
+<td>foolbox.attacks.L2ClippingAwareAdditiveUniformNoiseAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.LinfAdditiveUniformNoiseAttack" title="pepr.robustness.foolbox_wrapper.LinfAdditiveUniformNoiseAttack"><code class="xref py py-obj docutils literal"><span class="pre">LinfAdditiveUniformNoiseAttack</span></code></a></td>
+<td>foolbox.attacks.LinfAdditiveUniformNoiseAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2RepeatedAdditiveGaussianNoiseAttack" title="pepr.robustness.foolbox_wrapper.L2RepeatedAdditiveGaussianNoiseAttack"><code class="xref py py-obj docutils literal"><span class="pre">L2RepeatedAdditiveGaussianNoiseAttack</span></code></a></td>
+<td>foolbox.attacks.L2RepeatedAdditiveGaussianNoiseAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2RepeatedAdditiveUniformNoiseAttack" title="pepr.robustness.foolbox_wrapper.L2RepeatedAdditiveUniformNoiseAttack"><code class="xref py py-obj docutils literal"><span class="pre">L2RepeatedAdditiveUniformNoiseAttack</span></code></a></td>
+<td>foolbox.attacks.L2RepeatedAdditiveUniformNoiseAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2ClippingAwareRepeatedAdditiveGaussianNoiseAttack" title="pepr.robustness.foolbox_wrapper.L2ClippingAwareRepeatedAdditiveGaussianNoiseAttack"><code class="xref py py-obj docutils literal"><span class="pre">L2ClippingAwareRepeatedAdditiveGaussianNoiseAttack</span></code></a></td>
+<td>foolbox.attacks.L2ClippingAwareRepeatedAdditiveGaussianNoiseAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2ClippingAwareRepeatedAdditiveUniformNoiseAttack" title="pepr.robustness.foolbox_wrapper.L2ClippingAwareRepeatedAdditiveUniformNoiseAttack"><code class="xref py py-obj docutils literal"><span class="pre">L2ClippingAwareRepeatedAdditiveUniformNoiseAttack</span></code></a></td>
+<td>foolbox.attacks.L2ClippingAwareRepeatedAdditiveUniformNoiseAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.LinfRepeatedAdditiveUniformNoiseAttack" title="pepr.robustness.foolbox_wrapper.LinfRepeatedAdditiveUniformNoiseAttack"><code class="xref py py-obj docutils literal"><span class="pre">LinfRepeatedAdditiveUniformNoiseAttack</span></code></a></td>
+<td>foolbox.attacks.LinfRepeatedAdditiveUniformNoiseAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.InversionAttack" title="pepr.robustness.foolbox_wrapper.InversionAttack"><code class="xref py py-obj docutils literal"><span class="pre">InversionAttack</span></code></a></td>
+<td>foolbox.attacks.InversionAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.BinarySearchContrastReductionAttack" title="pepr.robustness.foolbox_wrapper.BinarySearchContrastReductionAttack"><code class="xref py py-obj docutils literal"><span class="pre">BinarySearchContrastReductionAttack</span></code></a></td>
+<td>foolbox.attacks.BinarySearchContrastReductionAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.LinearSearchContrastReductionAttack" title="pepr.robustness.foolbox_wrapper.LinearSearchContrastReductionAttack"><code class="xref py py-obj docutils literal"><span class="pre">LinearSearchContrastReductionAttack</span></code></a></td>
+<td>foolbox.attacks.LinearSearchContrastReductionAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2CarliniWagnerAttack" title="pepr.robustness.foolbox_wrapper.L2CarliniWagnerAttack"><code class="xref py py-obj docutils literal"><span class="pre">L2CarliniWagnerAttack</span></code></a></td>
+<td>foolbox.attacks.L2CarliniWagnerAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.NewtonFoolAttack" title="pepr.robustness.foolbox_wrapper.NewtonFoolAttack"><code class="xref py py-obj docutils literal"><span class="pre">NewtonFoolAttack</span></code></a></td>
+<td>foolbox.attacks.NewtonFoolAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.EADAttack" title="pepr.robustness.foolbox_wrapper.EADAttack"><code class="xref py py-obj docutils literal"><span class="pre">EADAttack</span></code></a></td>
+<td>foolbox.attacks.EADAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.GaussianBlurAttack" title="pepr.robustness.foolbox_wrapper.GaussianBlurAttack"><code class="xref py py-obj docutils literal"><span class="pre">GaussianBlurAttack</span></code></a></td>
+<td>foolbox.attacks.GaussianBlurAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2DeepFoolAttack" title="pepr.robustness.foolbox_wrapper.L2DeepFoolAttack"><code class="xref py py-obj docutils literal"><span class="pre">L2DeepFoolAttack</span></code></a></td>
+<td>foolbox.attacks.L2DeepFoolAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.LinfDeepFoolAttack" title="pepr.robustness.foolbox_wrapper.LinfDeepFoolAttack"><code class="xref py py-obj docutils literal"><span class="pre">LinfDeepFoolAttack</span></code></a></td>
+<td>foolbox.attacks.LinfDeepFoolAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.SaltAndPepperNoiseAttack" title="pepr.robustness.foolbox_wrapper.SaltAndPepperNoiseAttack"><code class="xref py py-obj docutils literal"><span class="pre">SaltAndPepperNoiseAttack</span></code></a></td>
+<td>foolbox.attacks.SaltAndPepperNoiseAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.LinearSearchBlendedUniformNoiseAttack" title="pepr.robustness.foolbox_wrapper.LinearSearchBlendedUniformNoiseAttack"><code class="xref py py-obj docutils literal"><span class="pre">LinearSearchBlendedUniformNoiseAttack</span></code></a></td>
+<td>foolbox.attacks.LinearSearchBlendedUniformNoiseAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.BinarizationRefinementAttack" title="pepr.robustness.foolbox_wrapper.BinarizationRefinementAttack"><code class="xref py py-obj docutils literal"><span class="pre">BinarizationRefinementAttack</span></code></a></td>
+<td>foolbox.attacks.BinarizationRefinementAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.BoundaryAttack" title="pepr.robustness.foolbox_wrapper.BoundaryAttack"><code class="xref py py-obj docutils literal"><span class="pre">BoundaryAttack</span></code></a></td>
+<td>foolbox.attacks.BoundaryAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L0BrendelBethgeAttack" title="pepr.robustness.foolbox_wrapper.L0BrendelBethgeAttack"><code class="xref py py-obj docutils literal"><span class="pre">L0BrendelBethgeAttack</span></code></a></td>
+<td>foolbox.attacks.L0BrendelBethgeAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L1BrendelBethgeAttack" title="pepr.robustness.foolbox_wrapper.L1BrendelBethgeAttack"><code class="xref py py-obj docutils literal"><span class="pre">L1BrendelBethgeAttack</span></code></a></td>
+<td>foolbox.attacks.L1BrendelBethgeAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2BrendelBethgeAttack" title="pepr.robustness.foolbox_wrapper.L2BrendelBethgeAttack"><code class="xref py py-obj docutils literal"><span class="pre">L2BrendelBethgeAttack</span></code></a></td>
+<td>foolbox.attacks.L2BrendelBethgeAttack wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.LinfinityBrendelBethgeAttack" title="pepr.robustness.foolbox_wrapper.LinfinityBrendelBethgeAttack"><code class="xref py py-obj docutils literal"><span class="pre">LinfinityBrendelBethgeAttack</span></code></a></td>
+<td>foolbox.attacks.LinfinityBrendelBethgeAttack wrapper class.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.FGM" title="pepr.robustness.foolbox_wrapper.FGM"><code class="xref py py-obj docutils literal"><span class="pre">FGM</span></code></a></td>
+<td>alias of <a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2FastGradientAttack" title="pepr.robustness.foolbox_wrapper.L2FastGradientAttack"><code class="xref py py-class docutils literal"><span class="pre">pepr.robustness.foolbox_wrapper.L2FastGradientAttack</span></code></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.FGSM" title="pepr.robustness.foolbox_wrapper.FGSM"><code class="xref py py-obj docutils literal"><span class="pre">FGSM</span></code></a></td>
+<td>alias of <a class="reference internal" href="#pepr.robustness.foolbox_wrapper.LinfFastGradientAttack" title="pepr.robustness.foolbox_wrapper.LinfFastGradientAttack"><code class="xref py py-class docutils literal"><span class="pre">pepr.robustness.foolbox_wrapper.LinfFastGradientAttack</span></code></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2PGD" title="pepr.robustness.foolbox_wrapper.L2PGD"><code class="xref py py-obj docutils literal"><span class="pre">L2PGD</span></code></a></td>
+<td>alias of <a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2ProjectedGradientDescentAttack" title="pepr.robustness.foolbox_wrapper.L2ProjectedGradientDescentAttack"><code class="xref py py-class docutils literal"><span class="pre">pepr.robustness.foolbox_wrapper.L2ProjectedGradientDescentAttack</span></code></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.LinfPGD" title="pepr.robustness.foolbox_wrapper.LinfPGD"><code class="xref py py-obj docutils literal"><span class="pre">LinfPGD</span></code></a></td>
+<td>alias of <a class="reference internal" href="#pepr.robustness.foolbox_wrapper.LinfProjectedGradientDescentAttack" title="pepr.robustness.foolbox_wrapper.LinfProjectedGradientDescentAttack"><code class="xref py py-class docutils literal"><span class="pre">pepr.robustness.foolbox_wrapper.LinfProjectedGradientDescentAttack</span></code></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.robustness.foolbox_wrapper.PGD" title="pepr.robustness.foolbox_wrapper.PGD"><code class="xref py py-obj docutils literal"><span class="pre">PGD</span></code></a></td>
+<td>alias of <a class="reference internal" href="#pepr.robustness.foolbox_wrapper.LinfProjectedGradientDescentAttack" title="pepr.robustness.foolbox_wrapper.LinfProjectedGradientDescentAttack"><code class="xref py py-class docutils literal"><span class="pre">pepr.robustness.foolbox_wrapper.LinfProjectedGradientDescentAttack</span></code></a></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The <code class="docutils literal"><span class="pre">DatasetAttack</span></code> is currently not supported by PePR.</p>
+</div>
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.L2ContrastReductionAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">L2ContrastReductionAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.L2ContrastReductionAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.L2ContrastReductionAttack wrapper class.</p>
+<p>Attack description:
+Reduces the contrast of the input using a perturbation of the given size.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>target (float): (optional) Target relative to the bounds from 0 (min) to 1
+(max) towards which the contrast is reduced.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.VirtualAdversarialAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">VirtualAdversarialAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.VirtualAdversarialAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.VirtualAdversarialAttack wrapper class.</p>
+<p>Attack description:
+Second-order gradient-based attack on the logits. The attack calculate an untargeted
+adversarial perturbation by performing a approximated second order optimization step
+on the KL divergence between the unperturbed predictions and the predictions for the
+adversarial perturbation. This attack was originally introduced as the Virtual
+Adversarial Training method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>steps (int): Number of update steps.</li>
+<li>xi (float): (optional) L2 distance between original image and first
+adversarial proposal.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.DDNAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">DDNAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.DDNAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.DDNAttack wrapper class.</p>
+<p>Attack description:
+The Decoupled Direction and Norm L2 adversarial attack.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>init_epsilon (float): (optional) Initial value for the norm/epsilon ball.</li>
+<li>steps (int): (optional) Number of steps for the optimization.</li>
+<li>gamma (float): (optional) Factor by which the norm will be modified:
+new_norm = norm * (1 + or - gamma).</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.L2ProjectedGradientDescentAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">L2ProjectedGradientDescentAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.L2ProjectedGradientDescentAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.L2ProjectedGradientDescentAttack wrapper class.</p>
+<p>Attack description:
+L2 Projected Gradient Descent.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>rel_stepsize (float): (optional) Stepsize relative to epsilon.</li>
+<li>abs_stepsize (float): (optional) If given, it takes precedence over
+rel_stepsize.</li>
+<li>steps (int): (optional) Number of update steps to perform.</li>
+<li>random_start (bool): (optional) Whether the perturbation is initialized
+randomly or starts at zero.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.LinfProjectedGradientDescentAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">LinfProjectedGradientDescentAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.LinfProjectedGradientDescentAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.LinfProjectedGradientDescentAttack wrapper class.</p>
+<p>Attack description:
+Linf Projected Gradient Descent.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>rel_stepsize (float): (optional) Stepsize relative to epsilon.</li>
+<li>abs_stepsize (float): (optional) If given, it takes precedence over
+rel_stepsize.</li>
+<li>steps (int): (optional) Number of update steps to perform.</li>
+<li>random_start (bool): (optional) Whether the perturbation is initialized
+randomly or starts at zero.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.L2BasicIterativeAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">L2BasicIterativeAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.L2BasicIterativeAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.L2BasicIterativeAttack wrapper class.</p>
+<p>Attack description:
+L2 Basic Iterative Method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>rel_stepsize (float): (optional) Stepsize relative to epsilon.</li>
+<li>abs_stepsize (float): (optional) If given, it takes precedence over
+rel_stepsize.</li>
+<li>steps (int): (optional) Number of update steps.</li>
+<li>random_start (bool): (optional) Controls whether to randomly start within
+allowed epsilon ball.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.LinfBasicIterativeAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">LinfBasicIterativeAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.LinfBasicIterativeAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.LinfBasicIterativeAttack wrapper class.</p>
+<p>Attack description:
+L-infinity Basic Iterative Method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>rel_stepsize (float): (optional) Stepsize relative to epsilon.</li>
+<li>abs_stepsize (float): (optional) If given, it takes precedence over
+rel_stepsize.</li>
+<li>steps (int): (optional) Number of update steps.</li>
+<li>random_start (bool): (optional) Controls whether to randomly start within
+allowed epsilon ball.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.L2FastGradientAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">L2FastGradientAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.L2FastGradientAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.L2FastGradientAttack wrapper class.</p>
+<p>Attack description:
+Fast Gradient Method (FGM).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>random_start (bool): (optional) Controls whether to randomly start within
+allowed epsilon ball.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.LinfFastGradientAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">LinfFastGradientAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.LinfFastGradientAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.LinfFastGradientAttack wrapper class.</p>
+<p>Attack description:
+Fast Gradient Sign Method (FGSM).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>random_start (bool): (optional) Controls whether to randomly start within
+allowed epsilon ball.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.L2AdditiveGaussianNoiseAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">L2AdditiveGaussianNoiseAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.L2AdditiveGaussianNoiseAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.L2AdditiveGaussianNoiseAttack wrapper class.</p>
+<p>Attack description:
+Samples Gaussian noise with a fixed L2 size.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.L2AdditiveUniformNoiseAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">L2AdditiveUniformNoiseAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.L2AdditiveUniformNoiseAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.L2AdditiveUniformNoiseAttack wrapper class.</p>
+<p>Attack description:
+Samples uniform noise with a fixed L2 size.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.L2ClippingAwareAdditiveGaussianNoiseAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">L2ClippingAwareAdditiveGaussianNoiseAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.L2ClippingAwareAdditiveGaussianNoiseAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.L2ClippingAwareAdditiveGaussianNoiseAttack wrapper class.</p>
+<p>Attack description:
+Samples Gaussian noise with a fixed L2 size after clipping.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.L2ClippingAwareAdditiveUniformNoiseAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">L2ClippingAwareAdditiveUniformNoiseAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.L2ClippingAwareAdditiveUniformNoiseAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.L2ClippingAwareAdditiveUniformNoiseAttack wrapper class.</p>
+<p>Attack description:
+Samples uniform noise with a fixed L2 size after clipping.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.LinfAdditiveUniformNoiseAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">LinfAdditiveUniformNoiseAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.LinfAdditiveUniformNoiseAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.LinfAdditiveUniformNoiseAttack wrapper class.</p>
+<p>Attack description:
+Samples uniform noise with a fixed L-infinity size.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.L2RepeatedAdditiveGaussianNoiseAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">L2RepeatedAdditiveGaussianNoiseAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.L2RepeatedAdditiveGaussianNoiseAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.L2RepeatedAdditiveGaussianNoiseAttack wrapper class.</p>
+<p>Attack description:
+Repeatedly samples Gaussian noise with a fixed L2 size.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>repeats (int): (optional) How often to sample random noise.</li>
+<li>check_trivial (bool): (optional) Check whether original sample is already
+adversarial.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.L2RepeatedAdditiveUniformNoiseAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">L2RepeatedAdditiveUniformNoiseAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.L2RepeatedAdditiveUniformNoiseAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.L2RepeatedAdditiveUniformNoiseAttack wrapper class.</p>
+<p>Attack description:
+Repeatedly samples uniform noise with a fixed L2 size.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>repeats (int): (optional) How often to sample random noise.</li>
+<li>check_trivial (bool): (optional) Check whether original sample is already
+adversarial.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.L2ClippingAwareRepeatedAdditiveGaussianNoiseAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">L2ClippingAwareRepeatedAdditiveGaussianNoiseAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.L2ClippingAwareRepeatedAdditiveGaussianNoiseAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.L2ClippingAwareRepeatedAdditiveGaussianNoiseAttack wrapper class.</p>
+<p>Attack description:
+Repeatedly samples Gaussian noise with a fixed L2 size after clipping.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>repeats (int): (optional) How often to sample random noise.</li>
+<li>check_trivial (bool): (optional) Check whether original sample is already
+adversarial.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.L2ClippingAwareRepeatedAdditiveUniformNoiseAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">L2ClippingAwareRepeatedAdditiveUniformNoiseAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.L2ClippingAwareRepeatedAdditiveUniformNoiseAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.L2ClippingAwareRepeatedAdditiveUniformNoiseAttack wrapper class.</p>
+<p>Attack description:
+Repeatedly samples uniform noise with a fixed L2 size after clipping.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>repeats (int): (optional) How often to sample random noise.</li>
+<li>check_trivial (bool): (optional) Check whether original sample is already
+adversarial.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.LinfRepeatedAdditiveUniformNoiseAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">LinfRepeatedAdditiveUniformNoiseAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.LinfRepeatedAdditiveUniformNoiseAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.LinfRepeatedAdditiveUniformNoiseAttack wrapper class.</p>
+<p>Attack description:
+Repeatedly samples uniform noise with a fixed L-infinity size.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>repeats (int): (optional) How often to sample random noise.</li>
+<li>check_trivial (bool): (optional) Check whether original sample is already
+adversarial.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.InversionAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">InversionAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.InversionAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.InversionAttack wrapper class.</p>
+<p>Attack description:
+Creates “negative images” by inverting the pixel values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>distance (foolbox.distances.Distance): Distance measure for which minimal
+adversarial examples are searched.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.BinarySearchContrastReductionAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">BinarySearchContrastReductionAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.BinarySearchContrastReductionAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.BinarySearchContrastReductionAttack wrapper class.</p>
+<p>Attack description:
+Reduces the contrast of the input using a binary search to find the smallest
+adversarial perturbation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>distance (foolbox.distances.Distance): Distance measure for which minimal
+adversarial examples are searched.</li>
+<li>binary_search_steps (int): (optional) Number of iterations in the binary
+search. This controls the precision of the results.</li>
+<li>target (float): (optional) Target relative to the bounds from 0 (min) to 1
+(max) towards which the contrast is reduced.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.LinearSearchContrastReductionAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">LinearSearchContrastReductionAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.LinearSearchContrastReductionAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.LinearSearchContrastReductionAttack wrapper class.</p>
+<p>Attack description:
+Reduces the contrast of the input using a linear search to find the smallest
+adversarial perturbation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>distance (foolbox.distances.Distance): Distance measure for which minimal
+adversarial examples are searched.</li>
+<li>steps (int): (optional) Number of iterations in the linear search. This
+controls the precision of the results.</li>
+<li>target (float): (optional) Target relative to the bounds from 0 (min) to 1
+(max) towards which the contrast is reduced.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.L2CarliniWagnerAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">L2CarliniWagnerAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.L2CarliniWagnerAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.L2CarliniWagnerAttack wrapper class.</p>
+<p>Attack description:
+Implementation of the Carlini &amp; Wagner L2 Attack.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>binary_search_steps (int): (optional) Number of steps to perform in the binary
+search over the const c.</li>
+<li>steps (int): (optional) Number of optimization steps within each binary search
+step.</li>
+<li>stepsize (float): (optional) Stepsize to update the examples.</li>
+<li>confidence (float): (optional) Confidence required for an example to be marked
+as adversarial. Controls the gap between example and decision boundary.</li>
+<li>initial_const (float): (optional) Initial value of the const c with which the
+binary search starts.</li>
+<li>abort_early (bool): (optional) Stop inner search as soon as an adversarial
+example has been found. Does not affect the binary search over the const c.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.NewtonFoolAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">NewtonFoolAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.NewtonFoolAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.NewtonFoolAttack wrapper class.</p>
+<p>Attack description:
+Implementation of the NewtonFool Attack.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>steps (int): (optional) Number of update steps to perform..</li>
+<li>stepsize (float): (optional) Size of each update step..</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.EADAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">EADAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.EADAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.EADAttack wrapper class.</p>
+<p>Attack description:
+Implementation of the EAD Attack with EN Decision Rule.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>binary_search_steps (int): (optional) Number of steps to perform in the binary
+search over the const c.</li>
+<li>steps (int): (optional) Number of optimization steps within each binary search
+step.</li>
+<li>initial_stepsize (float): (optional) Initial stepsize to update the examples.</li>
+<li>confidence (float): (optional) Confidence required for an example to be marked
+as adversarial. Controls the gap between example and decision boundary.</li>
+<li>initial_const (float): (optional) Initial value of the const c with which the
+binary search starts.</li>
+<li>regularization (float): (optional) Controls the L1 regularization.</li>
+<li>decision_rule (“EN” ir “L1”): (optional) Rule according to which the best
+adversarial examples are selected. They either minimize the L1 or ElasticNet
+distance.</li>
+<li>abort_early (bool): (optional) Stop inner search as soon as an adversarial
+example has been found. Does not affect the binary search over the const c.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.GaussianBlurAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">GaussianBlurAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.GaussianBlurAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.GaussianBlurAttack wrapper class.</p>
+<p>Attack description:
+Blurs the inputs using a Gaussian filter with linearly increasing standard
+deviation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>steps (int): (optional) Number of sigma values tested between 0 and max_sigma.</li>
+<li>channel_axis (int): (optional) Index of the channel axis in the input data.</li>
+<li>max_sigma (float): (optional) Maximally allowed sigma value of the Gaussian
+blur.</li>
+<li>distance (foolbox.distances.Distance): Distance measure for which minimal
+adversarial examples are searched.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.L2DeepFoolAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">L2DeepFoolAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.L2DeepFoolAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.L2DeepFoolAttack wrapper class.</p>
+<p>Attack description:
+A simple and fast gradient-based adversarial attack. Implements the DeepFool L2
+attack.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>steps (int): (optional) Maximum number of steps to perform.</li>
+<li>candidates (int): (optional) Limit on the number of the most likely classes
+that should be considered. A small value is usually sufficient and much
+faster.</li>
+<li>overshoot (float): (optional) How much to overshoot the boundary.</li>
+<li>loss (“crossentropy” or “logits”): (optional) Loss function to use inside the
+update function.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.LinfDeepFoolAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">LinfDeepFoolAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.LinfDeepFoolAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.LinfDeepFoolAttack wrapper class.</p>
+<p>Attack description:
+A simple and fast gradient-based adversarial attack. Implements the DeepFool
+L-Infinity attack.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>steps (int): (optional) Maximum number of steps to perform.</li>
+<li>candidates (int): (optional) Limit on the number of the most likely classes
+that should be considered. A small value is usually sufficient and much
+faster.</li>
+<li>overshoot (float): (optional) How much to overshoot the boundary.</li>
+<li>loss (“crossentropy” or “logits”): (optional) Loss function to use inside the
+update function.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.SaltAndPepperNoiseAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">SaltAndPepperNoiseAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.SaltAndPepperNoiseAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.SaltAndPepperNoiseAttack wrapper class.</p>
+<p>Attack description:
+Increases the amount of salt and pepper noise until the input is misclassified.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>steps (int): (optional) The number of steps to run.</li>
+<li>across_channels (bool): Whether the noise should be the same across all
+channels.</li>
+<li>channel_axis (int): (optional) The axis across which the noise should be the
+same (if across_channels is True). If None, will be automatically inferred
+from the model if possible.</li>
+<li>epsilons (list): (optional) List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.LinearSearchBlendedUniformNoiseAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">LinearSearchBlendedUniformNoiseAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.LinearSearchBlendedUniformNoiseAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.LinearSearchBlendedUniformNoiseAttack wrapper class.</p>
+<p>Attack description:
+Blends the input with a uniform noise input until it is misclassified.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>distance (foolbox.distances.Distance): Distance measure for which minimal
+adversarial examples are searched.</li>
+<li>directions (int): (optional) Number of random directions in which the
+perturbation is searched.</li>
+<li>steps (int): (optional) Number of blending steps between the original image
+and the random directions.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.BinarizationRefinementAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">BinarizationRefinementAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.BinarizationRefinementAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.BinarizationRefinementAttack wrapper class.</p>
+<p>Attack description:
+For models that preprocess their inputs by binarizing the inputs, this attack can
+improve adversarials found by other attacks. It does this by utilizing information
+about the binarization and mapping values to the corresponding value in the clean
+input or to the right side of the threshold.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>starting_points (list): Adversarial examples to improve.</li>
+<li>threshold (float): (optional) The threshold used by the models binarization.
+If none, defaults to (model.bounds()[1] - model.bounds()[0]) / 2.</li>
+<li>included_in (“lower” or “upper”): (optional) Whether the threshold value
+itself belongs to the lower or upper interval.</li>
+<li>distance (foolbox.distances.Distance): Distance measure for which minimal
+adversarial examples are searched.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.BoundaryAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">BoundaryAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.BoundaryAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.BoundaryAttack wrapper class.</p>
+<p>Attack description:
+A powerful adversarial attack that requires neither gradients nor probabilities.
+This is the reference implementation for the attack.</p>
+<p><strong>Notes</strong>
+Differences to the original reference implementation:</p>
+<ul class="simple">
+<li>We do not perform internal operations with float64</li>
+<li>The samples within a batch can currently influence each other a bit</li>
+<li>We don’t perform the additional convergence confirmation</li>
+<li>The success rate tracking changed a bit</li>
+<li>Some other changes due to batching and merged loops</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>init_attack (Optional[foolbox.attacks.base.MinimizationAttack]): (optional)
+Attack to use to find a starting points. Defaults to
+LinearSearchBlendedUniformNoiseAttack. Only used if starting_points is None.</li>
+<li>steps (int): Maximum number of steps to run. Might converge and stop before
+that.</li>
+<li>spherical_step (float): (optional) Initial step size for the orthogonal
+(spherical) step.</li>
+<li>source_step (float): (optional) Initial step size for the step towards the
+target.</li>
+<li>source_step_convergence (float): (optional) Sets the threshold of the stop
+criterion: if source_step becomes smaller than this value during the attack,
+the attack has converged and will stop.</li>
+<li>step_adaptation (float): (optional) Factor by which the step sizes are
+multiplied or divided.</li>
+<li>tensorboard (Union[typing_extensions.Literal[False], None, str]): (optional)
+The log directory for TensorBoard summaries. If False, TensorBoard summaries
+will be disabled (default). If None, the logdir will be
+runs/CURRENT_DATETIME_HOSTNAME.</li>
+<li>update_stats_every_k (int): (optional)</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.L0BrendelBethgeAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">L0BrendelBethgeAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.L0BrendelBethgeAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.L0BrendelBethgeAttack wrapper class.</p>
+<p>Attack description:
+L0 variant of the Brendel &amp; Bethge adversarial attack. This is a powerful
+gradient-based adversarial attack that follows the adversarial boundary (the
+boundary between the space of adversarial and non-adversarial images as defined by
+the adversarial criterion) to find the minimum distance to the clean image.</p>
+<p>This is the reference implementation of the Brendel &amp; Bethge attack.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>init_attack (Optional[foolbox.attacks.base.MinimizationAttack]): (optional)
+Attack to use to find a starting points. Defaults to
+LinearSearchBlendedUniformNoiseAttack. Only used if starting_points is None.</li>
+<li>overshoot (float): (optional)</li>
+<li>steps (int): (optional) Maximum number of steps to run.</li>
+<li>lr (float): (optional)</li>
+<li>lr_decay (float): (optional)</li>
+<li>lr_num_decay (int): (optional)</li>
+<li>momentum (float): (optional)</li>
+<li>tensorboard (Union[typing_extensions.Literal[False], None, str]): (optional)
+The log directory for TensorBoard summaries. If False, TensorBoard summaries
+will be disabled (default). If None, the logdir will be
+runs/CURRENT_DATETIME_HOSTNAME.</li>
+<li>binary_search_steps (int): (optional) Number of iterations in the binary
+search. This controls the precision of the results.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.L1BrendelBethgeAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">L1BrendelBethgeAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.L1BrendelBethgeAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.L1BrendelBethgeAttack wrapper class.</p>
+<p>Attack description:
+L1 variant of the Brendel &amp; Bethge adversarial attack. This is a powerful
+gradient-based adversarial attack that follows the adversarial boundary (the
+boundary between the space of adversarial and non-adversarial images as defined by
+the adversarial criterion) to find the minimum distance to the clean image.</p>
+<p>This is the reference implementation of the Brendel &amp; Bethge attack.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>init_attack (Optional[foolbox.attacks.base.MinimizationAttack]): (optional)
+Attack to use to find a starting points. Defaults to
+LinearSearchBlendedUniformNoiseAttack. Only used if starting_points is None.</li>
+<li>overshoot (float): (optional)</li>
+<li>steps (int): (optional) Maximum number of steps to run.</li>
+<li>lr (float): (optional)</li>
+<li>lr_decay (float): (optional)</li>
+<li>lr_num_decay (int): (optional)</li>
+<li>momentum (float): (optional)</li>
+<li>tensorboard (Union[typing_extensions.Literal[False], None, str]): (optional)
+The log directory for TensorBoard summaries. If False, TensorBoard summaries
+will be disabled (default). If None, the logdir will be
+runs/CURRENT_DATETIME_HOSTNAME.</li>
+<li>binary_search_steps (int): (optional) Number of iterations in the binary
+search. This controls the precision of the results.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.L2BrendelBethgeAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">L2BrendelBethgeAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.L2BrendelBethgeAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.L2BrendelBethgeAttack wrapper class.</p>
+<p>Attack description:
+L2 variant of the Brendel &amp; Bethge adversarial attack. This is a powerful
+gradient-based adversarial attack that follows the adversarial boundary (the
+boundary between the space of adversarial and non-adversarial images as defined by
+the adversarial criterion) to find the minimum distance to the clean image.</p>
+<p>This is the reference implementation of the Brendel &amp; Bethge attack.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>init_attack (Optional[foolbox.attacks.base.MinimizationAttack]): (optional)
+Attack to use to find a starting points. Defaults to
+LinearSearchBlendedUniformNoiseAttack. Only used if starting_points is None.</li>
+<li>overshoot (float): (optional)</li>
+<li>steps (int): (optional) Maximum number of steps to run.</li>
+<li>lr (float): (optional)</li>
+<li>lr_decay (float): (optional)</li>
+<li>lr_num_decay (int): (optional)</li>
+<li>momentum (float): (optional)</li>
+<li>tensorboard (Union[typing_extensions.Literal[False], None, str]): (optional)
+The log directory for TensorBoard summaries. If False, TensorBoard summaries
+will be disabled (default). If None, the logdir will be
+runs/CURRENT_DATETIME_HOSTNAME.</li>
+<li>binary_search_steps (int): (optional) Number of iterations in the binary
+search. This controls the precision of the results.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.robustness.foolbox_wrapper.LinfinityBrendelBethgeAttack">
+<em class="property">class </em><code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">LinfinityBrendelBethgeAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.LinfinityBrendelBethgeAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>foolbox.attacks.LinfinityBrendelBethgeAttack wrapper class.</p>
+<p>Attack description:
+L-infinity variant of the Brendel &amp; Bethge adversarial attack. This is a powerful
+gradient-based adversarial attack that follows the adversarial boundary (the
+boundary between the space of adversarial and non-adversarial images as defined by
+the adversarial criterion) to find the minimum distance to the clean image.</p>
+<p>This is the reference implementation of the Brendel &amp; Bethge attack.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>init_attack (Optional[foolbox.attacks.base.MinimizationAttack]): (optional)
+Attack to use to find a starting points. Defaults to
+LinearSearchBlendedUniformNoiseAttack. Only used if starting_points is None.</li>
+<li>overshoot (float): (optional)</li>
+<li>steps (int): (optional) Maximum number of steps to run.</li>
+<li>lr (float): (optional)</li>
+<li>lr_decay (float): (optional)</li>
+<li>lr_num_decay (int): (optional)</li>
+<li>momentum (float): (optional)</li>
+<li>tensorboard (Union[typing_extensions.Literal[False], None, str]): (optional)
+The log directory for TensorBoard summaries. If False, TensorBoard summaries
+will be disabled (default). If None, the logdir will be
+runs/CURRENT_DATETIME_HOSTNAME.</li>
+<li>binary_search_steps (int): (optional) Number of iterations in the binary
+search. This controls the precision of the results.</li>
+<li>epsilons (list): List of one or more epsilons for the attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_indices_per_target (numpy.ndarray): Array of indices of images to
+attack per target model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.foolbox_wrapper.FGM">
+<code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">FGM</code><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.FGM" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2FastGradientAttack" title="pepr.robustness.foolbox_wrapper.L2FastGradientAttack"><code class="xref py py-class docutils literal"><span class="pre">pepr.robustness.foolbox_wrapper.L2FastGradientAttack</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.foolbox_wrapper.FGSM">
+<code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">FGSM</code><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.FGSM" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#pepr.robustness.foolbox_wrapper.LinfFastGradientAttack" title="pepr.robustness.foolbox_wrapper.LinfFastGradientAttack"><code class="xref py py-class docutils literal"><span class="pre">pepr.robustness.foolbox_wrapper.LinfFastGradientAttack</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.foolbox_wrapper.L2PGD">
+<code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">L2PGD</code><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.L2PGD" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#pepr.robustness.foolbox_wrapper.L2ProjectedGradientDescentAttack" title="pepr.robustness.foolbox_wrapper.L2ProjectedGradientDescentAttack"><code class="xref py py-class docutils literal"><span class="pre">pepr.robustness.foolbox_wrapper.L2ProjectedGradientDescentAttack</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.foolbox_wrapper.LinfPGD">
+<code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">LinfPGD</code><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.LinfPGD" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#pepr.robustness.foolbox_wrapper.LinfProjectedGradientDescentAttack" title="pepr.robustness.foolbox_wrapper.LinfProjectedGradientDescentAttack"><code class="xref py py-class docutils literal"><span class="pre">pepr.robustness.foolbox_wrapper.LinfProjectedGradientDescentAttack</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.robustness.foolbox_wrapper.PGD">
+<code class="descclassname">pepr.robustness.foolbox_wrapper.</code><code class="descname">PGD</code><a class="headerlink" href="#pepr.robustness.foolbox_wrapper.PGD" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#pepr.robustness.foolbox_wrapper.LinfProjectedGradientDescentAttack" title="pepr.robustness.foolbox_wrapper.LinfProjectedGradientDescentAttack"><code class="xref py py-class docutils literal"><span class="pre">pepr.robustness.foolbox_wrapper.LinfProjectedGradientDescentAttack</span></code></a></p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="art_wrapper.html" class="btn btn-neutral float-right" title="ART Evasion Attacks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="robustness_attacks.html" class="btn btn-neutral" title="Robustness Attacks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Institute for IT-Security (University of Luebeck).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'alpha',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

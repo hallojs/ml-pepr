@@ -1,0 +1,470 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ART Extraction Attacks &mdash; ML-PePR alpha documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="ML-PePR alpha documentation" href="index.html"/>
+        <link rel="up" title="Privacy Attacks" href="privacy_attacks.html"/>
+        <link rel="next" title="ART Inference Attacks" href="art_inference_wrapper.html"/>
+        <link rel="prev" title="Generalized Membership Inference Attack (Direct)" href="gmia.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> ML-PePR
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quick_start_guide.html">Quick-Start Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="privacy_attacks.html">Privacy Attacks</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="mia.html">Membership Inference Attack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gmia.html">Generalized Membership Inference Attack (Direct)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ART Extraction Attacks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#base-wrapper-class">Base Wrapper Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#art-extraction-attack-wrappers">ART Extraction Attack Wrappers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="art_inference_wrapper.html">ART Inference Attacks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="robustness_attacks.html">Robustness Attacks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="attack_runner.html">Attack Runner</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utilities.html">Utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ML-PePR</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="privacy_attacks.html">Privacy Attacks</a> &raquo;</li>
+        
+      <li>ART Extraction Attacks</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/art_extraction_wrapper.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="art-extraction-attacks">
+<h1>ART Extraction Attacks<a class="headerlink" href="#art-extraction-attacks" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="base-wrapper-class">
+<h2>Base Wrapper Class<a class="headerlink" href="#base-wrapper-class" title="Permalink to this headline">¶</a></h2>
+<p>The base class does not implement any attack. The <a class="reference internal" href="#art-extraction-wrappers"><span class="std std-ref">ART extraction attack wrappers</span></a> inherit from the <cite>BaseExtractionAttack</cite> class
+and have the same attributes.</p>
+<dl class="class">
+<dt id="pepr.privacy.art_extraction_wrapper.BaseExtractionAttack">
+<em class="property">class </em><code class="descclassname">pepr.privacy.art_extraction_wrapper.</code><code class="descname">BaseExtractionAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em>, <em>extraction_attacks</em>, <em>pars_descriptors</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.privacy.art_extraction_wrapper.BaseExtractionAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base ART extraction attack class implementing the logic for running an extraction
+attack and generating a report.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Extraction attack specific attack parameters:</p>
+<ul>
+<li>stolen_models (list): List of untrained input models for every target model to
+store the stolen training data in.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Record-indices for extraction and evaluation:</p>
+<ul>
+<li>stolen_record_indices (np.ndarray): Indices of records to use for the
+extraction attack.</li>
+<li>eval_record_indices (np.ndarray): Indices of records for measuring the
+accuracy of the extracted model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+<li><strong>extraction_attacks</strong> (<em>list</em><em>(</em><em>art.attacks.Attack</em><em>)</em>) – List of ART extraction attack objects per target model which are wrapped in
+this class.</li>
+<li><strong>pars_descriptors</strong> (<em>dict</em>) – Dictionary of attack parameters and their description shown in the attack
+report.
+Example: {“classifier”: “A victim classifier”} for the attribute named
+“classifier” of CopycatCNN.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="pepr.privacy.art_extraction_wrapper.BaseExtractionAttack.attack_alias">
+<code class="descname">attack_alias</code><a class="headerlink" href="#pepr.privacy.art_extraction_wrapper.BaseExtractionAttack.attack_alias" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Alias for a specific instantiation of the class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_extraction_wrapper.BaseExtractionAttack.attack_pars">
+<code class="descname">attack_pars</code><a class="headerlink" href="#pepr.privacy.art_extraction_wrapper.BaseExtractionAttack.attack_pars" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Extraction attack specific attack parameters:</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_extraction_wrapper.BaseExtractionAttack.data">
+<code class="descname">data</code><a class="headerlink" href="#pepr.privacy.art_extraction_wrapper.BaseExtractionAttack.data" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy.ndarray</em> – Dataset with all training samples used in the given pentesting setting.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_extraction_wrapper.BaseExtractionAttack.labels">
+<code class="descname">labels</code><a class="headerlink" href="#pepr.privacy.art_extraction_wrapper.BaseExtractionAttack.labels" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy.ndarray</em> – Array of all labels used in the given pentesting setting.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_extraction_wrapper.BaseExtractionAttack.target_models">
+<code class="descname">target_models</code><a class="headerlink" href="#pepr.privacy.art_extraction_wrapper.BaseExtractionAttack.target_models" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>iterable</em> – List of target models which should be tested.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_extraction_wrapper.BaseExtractionAttack.data_conf">
+<code class="descname">data_conf</code><a class="headerlink" href="#pepr.privacy.art_extraction_wrapper.BaseExtractionAttack.data_conf" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Record-indices for extraction and evaluation:</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_extraction_wrapper.BaseExtractionAttack.extraction_attacks">
+<code class="descname">extraction_attacks</code><a class="headerlink" href="#pepr.privacy.art_extraction_wrapper.BaseExtractionAttack.extraction_attacks" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>list(art.attacks.Attack)</em> – List of ART attack objects per target model which are wrapped in this class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_extraction_wrapper.BaseExtractionAttack.pars_descriptors">
+<code class="descname">pars_descriptors</code><a class="headerlink" href="#pepr.privacy.art_extraction_wrapper.BaseExtractionAttack.pars_descriptors" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Dictionary of attack parameters and their description shown in the attack
+report.
+Example: {“classifier”: “A victim classifier”} for the attribute named
+“classifier” of CopycatCNN.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_extraction_wrapper.BaseExtractionAttack.attack_results">
+<code class="descname">attack_results</code><a class="headerlink" href="#pepr.privacy.art_extraction_wrapper.BaseExtractionAttack.attack_results" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Dictionary storing the attack model results.</p>
+<ul class="simple">
+<li>extracted_classifiers (list): List of extracted classifiers per target model.</li>
+<li>ec_accuracy (list): List of the accuracy of the extracted classifiers per
+target model.</li>
+<li>ec_accuracy_list (list): List of the accuracy of the extracted classifiers per
+target model and class. Shape: (target_model, class)</li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="art-extraction-attack-wrappers">
+<span id="art-extraction-wrappers"></span><h2>ART Extraction Attack Wrappers<a class="headerlink" href="#art-extraction-attack-wrappers" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.privacy.art_extraction_wrapper.CopycatCNN" title="pepr.privacy.art_extraction_wrapper.CopycatCNN"><code class="xref py py-obj docutils literal"><span class="pre">CopycatCNN</span></code></a></td>
+<td>art.attacks.extraction.CopycatCNN wrapper class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.privacy.art_extraction_wrapper.KnockoffNets" title="pepr.privacy.art_extraction_wrapper.KnockoffNets"><code class="xref py py-obj docutils literal"><span class="pre">KnockoffNets</span></code></a></td>
+<td>art.attacks.extraction.KnockoffNets wrapper class.</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="pepr.privacy.art_extraction_wrapper.CopycatCNN">
+<em class="property">class </em><code class="descclassname">pepr.privacy.art_extraction_wrapper.</code><code class="descname">CopycatCNN</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.privacy.art_extraction_wrapper.CopycatCNN" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.extraction.CopycatCNN wrapper class.</p>
+<p>Attack description:
+Implementation of the Copycat CNN attack from Rodrigues Correia-Silva et al. (2018).</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1806.05476">https://arxiv.org/abs/1806.05476</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>batch_size_fit (int): (optional) Size of batches for fitting the thieved
+classifier.</li>
+<li>batch_size_query (int): (optional) Size of batches for querying the victim
+classifier.</li>
+<li>nb_epochs (int): (optional) Number of epochs to use for training.</li>
+<li>nb_stolen (int): (optional) Number of queries submitted to the victim
+classifier to steal it.</li>
+<li>use_probability (bool): (optional) Use probability.</li>
+<li>stolen_record_indices (np.ndarray): Indices of records to use for the
+extraction attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>stolen_record_indices (np.ndarray): Indices of records to use for the
+extraction attack.</li>
+<li>eval_record_indices (np.ndarray): Indices of records for measuring the
+accuracy of the extracted model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.privacy.art_extraction_wrapper.KnockoffNets">
+<em class="property">class </em><code class="descclassname">pepr.privacy.art_extraction_wrapper.</code><code class="descname">KnockoffNets</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.privacy.art_extraction_wrapper.KnockoffNets" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.extraction.KnockoffNets wrapper class.</p>
+<p>Attack description:
+Implementation of the Knockoff Nets attack from Orekondy et al. (2018).</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/1812.02766">https://arxiv.org/abs/1812.02766</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>batch_size_fit (int): (optional) Size of batches for fitting the thieved
+classifier.</li>
+<li>batch_size_query (int): (optional) Size of batches for querying the victim
+classifier.</li>
+<li>nb_epochs (int): (optional) Number of epochs to use for training.</li>
+<li>nb_stolen (int): (optional) Number of queries submitted to the victim
+classifier to steal it.</li>
+<li>use_probability (bool): (optional) Use probability.</li>
+<li>sampling_strategy (str): Sampling strategy, either <cite>random</cite> or <cite>adaptive</cite>.</li>
+<li>reward (str): Reward type, in [‘cert’, ‘div’, ‘loss’, ‘all’].</li>
+<li>verbose (bool): Show progress bars.</li>
+<li>stolen_record_indices (np.ndarray): Indices of records to use for the
+extraction attack.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>stolen_record_indices (np.ndarray): Indices of records to use for the
+extraction attack.</li>
+<li>eval_record_indices (np.ndarray): Indices of records for measuring the
+accuracy of the extracted model.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="art_inference_wrapper.html" class="btn btn-neutral float-right" title="ART Inference Attacks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="gmia.html" class="btn btn-neutral" title="Generalized Membership Inference Attack (Direct)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Institute for IT-Security (University of Luebeck).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'alpha',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

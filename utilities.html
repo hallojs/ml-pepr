@@ -1,0 +1,354 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Utilities &mdash; ML-PePR alpha documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="ML-PePR alpha documentation" href="index.html"/>
+        <link rel="prev" title="Attack Runner" href="attack_runner.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> ML-PePR
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quick_start_guide.html">Quick-Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="privacy_attacks.html">Privacy Attacks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="robustness_attacks.html">Robustness Attacks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="attack_runner.html">Attack Runner</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ML-PePR</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Utilities</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/utilities.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pepr.utilities">
+<span id="utilities"></span><h1>Utilities<a class="headerlink" href="#module-pepr.utilities" title="Permalink to this headline">¶</a></h1>
+<p>Utility module containing utilities to speed up pentesting.</p>
+<dl class="function">
+<dt id="pepr.utilities.assign_record_ids_to_target_models">
+<code class="descclassname">pepr.utilities.</code><code class="descname">assign_record_ids_to_target_models</code><span class="sig-paren">(</span><em>target_knowledge_size</em>, <em>number_target_models</em>, <em>target_training_set_size</em>, <em>offset=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.utilities.assign_record_ids_to_target_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create training datasets (index sets) for the target models.</p>
+<p>Each target training dataset contains exactly 50 percent of the given data. Each
+record is in the half of the data sets.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>target_knowledge_size</strong> (<em>int</em>) – Number of data samples to be distributed to the target data sets.</li>
+<li><strong>number_target_models</strong> (<em>int</em>) – Number of target models for which datasets should be created.</li>
+<li><strong>target_training_set_size</strong> (<em>int</em>) – Number of records each target training set should be contain.</li>
+<li><strong>offset</strong> (<em>int</em>) – If offset is zero, the lowest index in the resulting datasets is zero. If the
+offset is o, all indices i are shifted by o: i + o.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Index array that describes which record is used to train which model.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">numpy.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pepr.utilities.filter_outlier">
+<code class="descclassname">pepr.utilities.</code><code class="descname">filter_outlier</code><span class="sig-paren">(</span><em>data</em>, <em>labels</em>, <em>filter_pars</em>, <em>save_path=None</em>, <em>load_pars=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.utilities.filter_outlier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter out potentially vulnerable samples.</p>
+<p>The general idea is similar to (<a class="reference internal" href="gmia.html#pepr.privacy.gmia.DirectGmia" title="pepr.privacy.gmia.DirectGmia"><code class="xref py py-meth docutils literal"><span class="pre">pepr.privacy.gmia.DirectGmia()</span></code></a>) to find
+potential vulnerable records.</p>
+<p>Steps:</p>
+<ol class="arabic simple">
+<li>Create mapping of records to reference models.</li>
+<li>Train the reference models.</li>
+<li>Generate intermediate models.</li>
+<li>Extract high-level features.</li>
+<li>Compute pairwise distances between high-level features.</li>
+<li>Determine outlier records.</li>
+<li>Remove outlier records from the dataset.</li>
+</ol>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all training samples used in the given pentesting setting.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – <p>Array of all labels used in the given pentesting setting.    filter_pars : dict
+Dictionary containing needed filter parameters:</p>
+<ul>
+<li>number_classes (int): Number of different classes the dataset.</li>
+<li>number_reference_models (int): Number of reference models to be trained.</li>
+<li>reference_training_set_size (int): Size of the trainings set for each
+reference model.</li>
+<li>create_compile_model (function): Function that returns a compiled
+TensorFlow model (in gmia this is typically identical to the target model)
+used in the training of the reference models.</li>
+<li>reference_epochs (int): Number of training epochs of the reference models.</li>
+<li>reference_batch_size (int): Batch size used in the training of the
+reference models.</li>
+<li>hlf_metric (str): Metric (typically ‘cosine’) used for the distance
+calculations in the high-level feature space. For valid metrics see
+documentation of sklearn.metrics.pairwise_distances.</li>
+<li>hlf_layer_number (int): If value is n, the n-th layer of the model
+returned by create_compile_model is used to extract the high-level feature
+vectors.</li>
+<li>distance_neighbor_threshold (float): If distance is smaller than the neighbor
+threshold the record is selected as target record.</li>
+<li>number_neighbor_threshold (float): If number of neighbors of a record is
+smaller than this, it is considered a vulnerable example.</li>
+<li>number_outlier (int): If set, the selection algorithm performs
+<cite>max_search_rounds</cite>, to find a <cite>distance_neighbor_threshold</cite>, that leads to a
+finding of <cite>n_targets</cite> target records. These target records are most
+vulnerable with respect to our selection criterion.</li>
+<li>max_search_rounds (int): If <cite>number_target_records</cite> is given, maximal
+<cite>max_search_rounds</cite> are performed to find <cite>number_target_records</cite> of potential
+vulnerable target records.</li>
+</ul>
+</li>
+<li><strong>save_path</strong> (<em>str</em>) – <p>If path is given, the following (partly computational expensive)
+intermediate results are saved to disk:</p>
+<ul>
+<li>The mapping of training-records to reference models</li>
+<li>The trained reference models</li>
+<li>The high-level features</li>
+<li>The matrix containing all pairwise distances between the high-level features.</li>
+</ul>
+</li>
+<li><strong>load_pars</strong> (<em>dict</em>) – <p>If this dictionary is given, the following computational intermediate
+results can be loaded from disk.</p>
+<ul>
+<li>records_per_reference_model (str) : Path to the mapping.</li>
+<li>reference_models (list) : List of paths to the reference models.</li>
+<li>pairwise_distance_hlf_&lt;hlf_metric&gt; (str) :  Path to the pairwise distance
+matrix between the high-level features using a hlf_metric (e.g. cosine).</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><em>numpy.ndarray</em> – Dataset indices without outliers.</li>
+<li><em>float</em> – Calculated neighbor distance threshold of the result.</li>
+<li><em>float</em> – Calculated neighbor count threshold of the result.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<p>Partial implementation of the direct gmia from Long, Yunhui and Bindschaedler,
+Vincent and Wang, Lei and Bu, Diyue and Wang, Xiaofeng and Tang, Haixu and Gunter,
+Carl A and Chen, Kai (2018). Understanding membership inferences on well-generalized
+learning models. arXiv preprint arXiv:1802.04889.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="attack_runner.html" class="btn btn-neutral" title="Attack Runner" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Institute for IT-Security (University of Luebeck).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'alpha',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

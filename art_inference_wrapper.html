@@ -1,0 +1,633 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ART Inference Attacks &mdash; ML-PePR alpha documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="ML-PePR alpha documentation" href="index.html"/>
+        <link rel="up" title="Privacy Attacks" href="privacy_attacks.html"/>
+        <link rel="next" title="Robustness Attacks" href="robustness_attacks.html"/>
+        <link rel="prev" title="ART Extraction Attacks" href="art_extraction_wrapper.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> ML-PePR
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quick_start_guide.html">Quick-Start Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="privacy_attacks.html">Privacy Attacks</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="mia.html">Membership Inference Attack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gmia.html">Generalized Membership Inference Attack (Direct)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="art_extraction_wrapper.html">ART Extraction Attacks</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ART Inference Attacks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#base-wrapper-class">Base Wrapper Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#art-inference-attack-wrappers">ART Inference Attack Wrappers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="robustness_attacks.html">Robustness Attacks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="attack_runner.html">Attack Runner</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utilities.html">Utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ML-PePR</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="privacy_attacks.html">Privacy Attacks</a> &raquo;</li>
+        
+      <li>ART Inference Attacks</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/art_inference_wrapper.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="art-inference-attacks">
+<h1>ART Inference Attacks<a class="headerlink" href="#art-inference-attacks" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="base-wrapper-class">
+<h2>Base Wrapper Class<a class="headerlink" href="#base-wrapper-class" title="Permalink to this headline">¶</a></h2>
+<p>The base class does not implement any attack. The <a class="reference internal" href="#art-inference-wrappers"><span class="std std-ref">ART inference attack wrappers</span></a> inherit from the <cite>BaseMembershipInferenceAttack</cite> class
+and have the same attributes.</p>
+<dl class="class">
+<dt id="pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack">
+<em class="property">class </em><code class="descclassname">pepr.privacy.art_inference_wrapper.</code><code class="descname">BaseMembershipInferenceAttack</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em>, <em>inference_attacks</em>, <em>pars_descriptors</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base ART membership inference attack class implementing the logic for running an
+membership inference attack and generating a report.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Record-indices for inference and evaluation:</p>
+<ul>
+<li>train_record_indices (np.ndarray): (optional) Input to training process.
+Includes all features used to train the original model.</li>
+<li>test_record_indices (np.ndarray): (optional) Test records that are not used in
+the training of the target model.</li>
+<li>attack_record_indices (np.ndarray): Input to attack. Includes all features
+except the attacked feature.</li>
+<li>attack_membership_status (np.ndarray): True membership status of the
+attack_records 1 indicates a member and 0 indicates non-member. This is used
+to compare the attacks results with the true membership status.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+<li><strong>inference_attacks</strong> (<em>list</em><em>(</em><em>art.attacks.Attack</em><em>)</em>) – List of ART inference attack objects per target model which are wrapped in
+this class.</li>
+<li><strong>pars_descriptors</strong> (<em>dict</em>) – Dictionary of attack parameters and their description shown in the attack
+report.
+Example: {“attack_model_type”: “Attack model type”} for the attribute named
+“attack_model_type” of MembershipInferenceBlackBox.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack.attack_alias">
+<code class="descname">attack_alias</code><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack.attack_alias" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Alias for a specific instantiation of the class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack.attack_pars">
+<code class="descname">attack_pars</code><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack.attack_pars" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Inference attack specific attack parameters:</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack.data">
+<code class="descname">data</code><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack.data" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy.ndarray</em> – Dataset with all training samples used in the given pentesting setting.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack.labels">
+<code class="descname">labels</code><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack.labels" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy.ndarray</em> – Array of all labels used in the given pentesting setting.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack.target_models">
+<code class="descname">target_models</code><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack.target_models" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>iterable</em> – List of target models which should be tested.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack.data_conf">
+<code class="descname">data_conf</code><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack.data_conf" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Record-indices for inference and evaluation:</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack.inference_attacks">
+<code class="descname">inference_attacks</code><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack.inference_attacks" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>list(art.attacks.Attack)</em> – List of ART attack objects per target model which are wrapped in this class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack.pars_descriptors">
+<code class="descname">pars_descriptors</code><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack.pars_descriptors" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Dictionary of attack parameters and their description shown in the attack
+report.
+Example: {“attack_model_type”: “Attack model type”} for the attribute named
+“attack_model_type” of MembershipInferenceBlackBox.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack.attack_results">
+<code class="descname">attack_results</code><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.BaseMembershipInferenceAttack.attack_results" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Dictionary storing the attack model results.</p>
+<ul class="simple">
+<li>membership (list): List holding the inferred membership status, 1 indicates a
+member and 0 indicates non-member per target model.</li>
+<li>tn (list): Number of true negatives per target model.</li>
+<li>tp (list): Number of true positives per target model.</li>
+<li>fn (list): Number of false negatives per target model.</li>
+<li>fp (list): Number of false positives per target model.</li>
+<li>precision (list): Attack precision per target model.</li>
+<li>recall (list): Attack recall per target model.</li>
+<li>accuracy (list): Attack accuracy per target model.</li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="art-inference-attack-wrappers">
+<span id="art-inference-wrappers"></span><h2>ART Inference Attack Wrappers<a class="headerlink" href="#art-inference-attack-wrappers" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.privacy.art_inference_wrapper.MembershipInferenceBlackBox" title="pepr.privacy.art_inference_wrapper.MembershipInferenceBlackBox"><code class="xref py py-obj docutils literal"><span class="pre">MembershipInferenceBlackBox</span></code></a></td>
+<td>art.attacks.inference.membership_inference.MembershipInferenceBlackBox wrapper</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.privacy.art_inference_wrapper.MembershipInferenceBlackBoxRuleBased" title="pepr.privacy.art_inference_wrapper.MembershipInferenceBlackBoxRuleBased"><code class="xref py py-obj docutils literal"><span class="pre">MembershipInferenceBlackBoxRuleBased</span></code></a></td>
+<td>art.attacks.inference.membership_inference.MembershipInferenceBlackBoxRuleBased wrapper</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pepr.privacy.art_inference_wrapper.LabelOnlyDecisionBoundary" title="pepr.privacy.art_inference_wrapper.LabelOnlyDecisionBoundary"><code class="xref py py-obj docutils literal"><span class="pre">LabelOnlyDecisionBoundary</span></code></a></td>
+<td>art.attacks.inference.membership_inference.LabelOnlyDecisionBoundary wrapper</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pepr.privacy.art_inference_wrapper.MIFace" title="pepr.privacy.art_inference_wrapper.MIFace"><code class="xref py py-obj docutils literal"><span class="pre">MIFace</span></code></a></td>
+<td>art.attacks.inference.membership_inference.MIFace wrapper class.</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="pepr.privacy.art_inference_wrapper.MembershipInferenceBlackBox">
+<em class="property">class </em><code class="descclassname">pepr.privacy.art_inference_wrapper.</code><code class="descname">MembershipInferenceBlackBox</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.MembershipInferenceBlackBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.inference.membership_inference.MembershipInferenceBlackBox wrapper
+class.</p>
+<p>Attack description:
+Implementation of a learned black-box membership inference attack.</p>
+<p>This implementation can use as input to the learning process probabilities/logits or
+losses, depending on the type of model and provided configuration.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>attack_model_type (str): (optional) the type of default attack model to train,
+optional. Should be one of nn (for neural network, default), rf (for random
+forest) or gb (gradient boosting). If attack_model is supplied, this option
+will be ignored.</li>
+<li>input_type (str): (optional) the type of input to train the attack on. Can be
+one of: ‘prediction’ or ‘loss’. Default is prediction. Predictions can be
+either probabilities or logits, depending on the return type of the model.</li>
+<li>attack_model: The attack model to train. Due to stability issues only
+TensorFlow Keras models are currently allowed. (Use PyTorch at your own risk,
+your runtime may crash.)</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>train_record_indices (np.ndarray): Input to training process. Includes all
+features used to train the original model.</li>
+<li>test_record_indices (np.ndarray): Test records that are not used in the
+training of the target model.</li>
+<li>attack_record_indices (np.ndarray): Input to attack. Includes all features
+except the attacked feature.</li>
+<li>attack_membership_status (np.ndarray): True membership status of the
+attack_records 1 indicates a member and 0 indicates non-member. This is used
+to compare the attacks results with the true membership status.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.privacy.art_inference_wrapper.MembershipInferenceBlackBoxRuleBased">
+<em class="property">class </em><code class="descclassname">pepr.privacy.art_inference_wrapper.</code><code class="descname">MembershipInferenceBlackBoxRuleBased</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.MembershipInferenceBlackBoxRuleBased" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.inference.membership_inference.MembershipInferenceBlackBoxRuleBased wrapper
+class.</p>
+<p>Attack description:
+Implementation of a simple, rule-based black-box membership inference attack.</p>
+<p>This implementation uses the simple rule: if the model’s prediction for a sample is
+correct, then it is a member. Otherwise, it is not a member.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – Dictionary containing all needed attack parameters: (no parameters)</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>attack_record_indices (np.ndarray): Input to attack. Includes all features
+except the attacked feature.</li>
+<li>attack_membership_status (np.ndarray): True membership status of the
+attack_records 1 indicates a member and 0 indicates non-member. This is used
+to compare the attacks results with the true membership status.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.privacy.art_inference_wrapper.LabelOnlyDecisionBoundary">
+<em class="property">class </em><code class="descclassname">pepr.privacy.art_inference_wrapper.</code><code class="descname">LabelOnlyDecisionBoundary</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.LabelOnlyDecisionBoundary" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.inference.membership_inference.LabelOnlyDecisionBoundary wrapper
+class.</p>
+<p>Attack description:
+Implementation of Label-Only Inference Attack based on Decision Boundary.</p>
+<p>Paper link: <a class="reference external" href="https://arxiv.org/abs/2007.14321">https://arxiv.org/abs/2007.14321</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>distance_threshold_tau (float): Threshold distance for decision boundary.
+Samples with boundary distances larger than threshold are considered members
+of the training dataset.</li>
+<li>norm: (optional) Order of the norm. Possible values: “inf”, np.inf or 2.</li>
+<li>max_iter (int): (optional) Maximum number of iterations.</li>
+<li>max_eval (int): (optional) Maximum number of evaluations for estimating
+gradient.</li>
+<li>init_eval (int): (optional) Initial number of evaluations for estimating
+gradient.</li>
+<li>init_size (int): (optional) Maximum number of trials for initial generation of
+adversarial examples.</li>
+<li>verbose (bool): (optional) Show progress bars.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>train_record_indices (np.ndarray): Input to training process. Includes all
+features used to train the original model.</li>
+<li>test_record_indices (np.ndarray): Test records that are not used in the
+training of the target model.</li>
+<li>attack_record_indices (np.ndarray): Input to attack. Includes all features
+except the attacked feature.</li>
+<li>attack_membership_status (np.ndarray): True membership status of the
+attack_records 1 indicates a member and 0 indicates non-member. This is used
+to compare the attacks results with the true membership status.</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pepr.privacy.art_inference_wrapper.MIFace">
+<em class="property">class </em><code class="descclassname">pepr.privacy.art_inference_wrapper.</code><code class="descname">MIFace</code><span class="sig-paren">(</span><em>attack_alias</em>, <em>attack_pars</em>, <em>data</em>, <em>labels</em>, <em>data_conf</em>, <em>target_models</em><span class="sig-paren">)</span><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.MIFace" title="Permalink to this definition">¶</a></dt>
+<dd><p>art.attacks.inference.membership_inference.MIFace wrapper class.</p>
+<p>Attack description:
+Implementation of the MIFace algorithm from Fredrikson et al. (2015). While in that
+paper the attack is demonstrated specifically against face recognition models, it is
+applicable more broadly to classifiers with continuous features which expose class
+gradients.</p>
+<p>Paper link: <a class="reference external" href="https://dl.acm.org/doi/10.1145/2810103.2813677">https://dl.acm.org/doi/10.1145/2810103.2813677</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attack_alias</strong> (<em>str</em>) – Alias for a specific instantiation of the class.</li>
+<li><strong>attack_pars</strong> (<em>dict</em>) – <p>Dictionary containing all needed attack parameters:</p>
+<ul>
+<li>max_iter (int): (optional) Maximum number of gradient descent iterations for
+the model inversion.</li>
+<li>window_length (int): (optional) Length of window for checking whether descent
+should be aborted.</li>
+<li>threshold (float): (optional) Threshold for descent stopping criterion.</li>
+<li>batch_size (int): (optional) Size of internal batches.</li>
+<li>verbose (bool): (optional) Show progress bars.</li>
+</ul>
+</li>
+<li><strong>data</strong> (<em>numpy.ndarray</em>) – Dataset with all input images used to attack the target models.</li>
+<li><strong>labels</strong> (<em>numpy.ndarray</em>) – Array of all labels used to attack the target models.</li>
+<li><strong>data_conf</strong> (<em>dict</em>) – <p>Dictionary describing for every target model which record-indices should be used
+for the attack.</p>
+<ul>
+<li>initial_input_data (np.ndarray): An array with the initial input to the victim
+classifier. If None, then initial input will be initialized as zero array.</li>
+<li>initial_input_targets (np.ndarray): Target values of shape (nb_samples,).</li>
+</ul>
+</li>
+<li><strong>target_models</strong> (<em>iterable</em>) – List of target models which should be tested.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="pepr.privacy.art_inference_wrapper.MIFace.attack_alias">
+<code class="descname">attack_alias</code><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.MIFace.attack_alias" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Alias for a specific instantiation of the class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_inference_wrapper.MIFace.attack_pars">
+<code class="descname">attack_pars</code><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.MIFace.attack_pars" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Inference attack specific attack parameters:</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_inference_wrapper.MIFace.data">
+<code class="descname">data</code><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.MIFace.data" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy.ndarray</em> – Dataset with all training samples used in the given pentesting setting.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_inference_wrapper.MIFace.labels">
+<code class="descname">labels</code><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.MIFace.labels" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy.ndarray</em> – Array of all labels used in the given pentesting setting.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_inference_wrapper.MIFace.target_models">
+<code class="descname">target_models</code><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.MIFace.target_models" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>iterable</em> – List of target models which should be tested.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_inference_wrapper.MIFace.data_conf">
+<code class="descname">data_conf</code><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.MIFace.data_conf" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Record-indices for inference and evaluation:</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_inference_wrapper.MIFace.inference_attacks">
+<code class="descname">inference_attacks</code><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.MIFace.inference_attacks" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>list(art.attacks.Attack)</em> – List of ART attack objects per target model which are wrapped in this class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_inference_wrapper.MIFace.pars_descriptors">
+<code class="descname">pars_descriptors</code><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.MIFace.pars_descriptors" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Dictionary of attack parameters and their description shown in the attack
+report.
+Example: {“max_iter”: “Max. iterations”} for the attribute named
+“max_iter” of MIFace.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pepr.privacy.art_inference_wrapper.MIFace.attack_results">
+<code class="descname">attack_results</code><a class="headerlink" href="#pepr.privacy.art_inference_wrapper.MIFace.attack_results" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – Dictionary storing the attack model results.</p>
+<ul class="simple">
+<li>inferred_training_samples (list): The inferred training samples per target
+model.</li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="robustness_attacks.html" class="btn btn-neutral float-right" title="Robustness Attacks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="art_extraction_wrapper.html" class="btn btn-neutral" title="ART Extraction Attacks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Institute for IT-Security (University of Luebeck).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'alpha',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
