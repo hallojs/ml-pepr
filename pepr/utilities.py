@@ -57,7 +57,7 @@ def assign_record_ids_to_target_models(
     return records_per_target_model + offset
 
 
-def filter_out_outlier(data, labels, filter_pars, save_path=None, load_pars=None):
+def filter_outlier(data, labels, filter_pars, save_path=None, load_pars=None):
     """
     Filter out potentially vulnerable samples.
 
@@ -71,8 +71,8 @@ def filter_out_outlier(data, labels, filter_pars, save_path=None, load_pars=None
     3. Generate intermediate models.
     4. Extract high-level features.
     5. Compute pairwise distances between high-level features.
-    6. Determine potential vulnerable records.
-    7. Remove potential vulnerable records.
+    6. Determine outlier records.
+    7. Remove outlier records from the dataset.
 
     Parameters
     ----------
@@ -83,14 +83,13 @@ def filter_out_outlier(data, labels, filter_pars, save_path=None, load_pars=None
     filter_pars : dict
         Dictionary containing needed filter parameters:
 
-        * number_classes (int): Number of different classes the target model
-          predict.
+        * number_classes (int): Number of different classes the dataset.
         * number_reference_models (int): Number of reference models to be trained.
         * reference_training_set_size (int): Size of the trainings set for each
           reference model.
         * create_compile_model (function): Function that returns a compiled
-          TensorFlow model (typically identical to the target model) used in the
-          training of the reference models.
+          TensorFlow model (in gmia this is typically identical to the target model)
+          used in the training of the reference models.
         * reference_epochs (int): Number of training epochs of the reference models.
         * reference_batch_size (int): Batch size used in the training of the
           reference models.
